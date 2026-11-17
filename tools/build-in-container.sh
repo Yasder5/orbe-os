@@ -23,7 +23,8 @@ grep -q '^\[multilib\]' /etc/pacman.conf || printf '\n[multilib]\nInclude = /etc
 sed -i 's/^#\?ParallelDownloads.*/ParallelDownloads = 5/' /etc/pacman.conf
 pacman-key --init >/dev/null 2>&1
 pacman-key --populate archlinux >/dev/null 2>&1
-pacman -Syu --noconfirm --needed archiso grub base-devel git sudo
+# freetype2, python-fonttools et ttf-jetbrains-mono : polices du thème GRUB.
+pacman -Syu --noconfirm --needed archiso grub freetype2 python-fonttools ttf-jetbrains-mono base-devel git sudo
 
 log "Dépôt [orbe]"
 mkdir -p "$repo"
@@ -74,6 +75,8 @@ cp -a /orbe/archiso "$profile"
 for cfg in "$profile"/syslinux/*.cfg; do
   iconv -f UTF-8 -t CP437 "$cfg" -o "$cfg.cp437" && mv "$cfg.cp437" "$cfg"
 done
+# Polices du thème GRUB, générées depuis les sources plutôt que versionnées.
+bash /orbe/tools/make-grub-fonts.sh "$profile/grub/themes/orbe"
 mkdir -p "$isodir"
 rm -f "$isodir"/orbe-os-*.iso "$isodir"/orbe-os-*.iso.sha256
 mkarchiso -v -r -w /work/iso -o "$isodir" "$profile"

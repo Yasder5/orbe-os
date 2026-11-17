@@ -1,0 +1,77 @@
+# Thème GRUB Orbe, menu de l'ISO en UEFI.
+# Pensé pour 1920x1080 (grub.cfg le demande en premier), positions en pourcentages pour les autres définitions.
+# Visuels générés par themes/boot/generate.py, polices par tools/make-grub-fonts.sh.
+
+title-text: ""
+desktop-image: "background.png"
+desktop-image-scale-method: "crop"
+desktop-color: "#0a0a0a"
+
+terminal-font: "JetBrains Mono Regular 16"
+terminal-box: "terminal_*.png"
+terminal-left: "8%"
+terminal-top: "10%"
+terminal-width: "84%"
+terminal-height: "80%"
+terminal-border: "0"
+
++ label {
+    left = 9%
+    top = 22%
+    width = 40%
+    height = 64
+    text = "Orbe OS"
+    font = "ArchivoSemiBold Regular 48"
+    color = "#f5f5f0"
+}
+
++ label {
+    left = 9%
+    top = 22%+70
+    width = 40%
+    height = 30
+    text = "Session live et installation"
+    font = "Archivo Regular 22"
+    color = "#8f8f8a"
+}
+
++ boot_menu {
+    left = 9%-14
+    top = 22%+132
+    width = 700
+    height = 460
+    item_font = "Archivo Regular 22"
+    selected_item_font = "ArchivoSemiBold Regular 22"
+    item_color = "#f5f5f0"
+    selected_item_color = "#f5f5f0"
+    item_height = 44
+    item_padding = 14
+    item_spacing = 8
+    icon_width = 24
+    icon_height = 24
+    item_icon_space = 16
+    menu_pixmap_style = "menu_*.png"
+    selected_item_pixmap_style = "select_*.png"
+    scrollbar = false
+}
+
++ label {
+    id = "__timeout__"
+    left = 9%
+    top = 22%+618
+    width = 40%
+    height = 24
+    text = "Démarrage automatique dans %d s"
+    font = "JetBrains Mono Regular 16"
+    color = "#8f8f8a"
+}
+
++ label {
+    left = 9%
+    top = 100%-72
+    width = 82%
+    height = 24
+    text = "↑ ↓ choisir  ·  Entrée démarrer  ·  E modifier  ·  C console"
+    font = "JetBrains Mono Regular 16"
+    color = "#8f8f8a"
+}

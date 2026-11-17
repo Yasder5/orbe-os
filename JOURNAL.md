@@ -27,6 +27,9 @@ Tenu à jour à chaque étape : ce qui est fait, ce qui reste, les décisions et
 - **Image de construction** : `archlinux:latest`. Si Docker Hub refuse (limite de 429 rencontrée ici), `build.sh` importe l'archive bootstrap officielle d'Arch après vérification de sa somme SHA-256.
 - **Menus syslinux** : écrits en UTF-8 dans le dépôt, convertis en CP437 au moment du build (syslinux n'affiche que ce jeu de caractères).
 - **Langue et clavier du live** : `fr_FR.UTF-8` (avec `en_US.UTF-8` généré), clavier console `fr`.
+- **Thème des menus de démarrage avancé** (demande de Yass) : GRUB et syslinux de l'ISO habillés Orbe dès maintenant, au lieu de l'étape 5. L'orbe reprend le style de `orb.webp` d'Orbe Launcher (points blanc cassé translucides, environ 10 % de points citron plus gros), redessiné par `themes/boot/generate.py`, sans image externe.
+- **GRUB en 1920x1080** (`gfxmode=1920x1080,1280x720,auto`) : la mise en page est faite pour cette définition, que presque tous les écrans de PC de jeu proposent en UEFI. Les polices GRUB ne s'adaptent pas à la définition, d'où ce choix plutôt que la définition native (texte minuscule en 4K).
+- **Polices GRUB générées au build** (`tools/make-grub-fonts.sh`) depuis Archivo (graisses 400 et 600 figées avec fontTools) et JetBrains Mono, plutôt que versionnées.
 
 ## Vérifié le 2026-11-17 (dépôts Arch)
 quickshell 0.3.2, hyprland 0.57.2, hyprlock 0.9.7, hypridle 0.1.8, greetd 0.10.3, archiso 92, grub 2.16, grub-btrfs 4.14, qt6-base 6.12.0, linux 7.3.4, linux-zen 7.3.4, linux-lts 6.18.63, mesa 26.2.7, nvidia-open 620.70.06, gamemode 1.8.2, gamescope 3.17.0, mangohud 0.8.4, steam (multilib). Toujours absents des dépôts officiels : calamares, ttf-archivo, hyprland-qtutils (remplacé par hyprland-guiutils, présent), nvidia-580xx-dkms.
@@ -41,9 +44,11 @@ quickshell 0.3.2, hyprland 0.57.2, hyprlock 0.9.7, hypridle 0.1.8, greetd 0.10.3
 - Profil archiso `archiso/` dérivé de releng 92 : nom, menus GRUB et syslinux en français, `[orbe]` puis `core`, `extra`, `multilib`.
 - `build.sh` : une commande, conteneur Arch privilégié, cache pacman en volume, dépôt `[orbe]` (vide pour l'instant) construit puis branché, ISO `orbe-os-AAAA.MM.JJ-x86_64.iso` et sa somme SHA-256.
 - `test.sh` : QEMU en UEFI ou BIOS, disque virtuel, rendu 3D optionnel, captures et touches programmées.
-
 - **Étape 1 validée en VM** : `build.sh --fast` produit `orbe-os-2026.11.17-x86_64.iso` (1,3 Go) en 5 min environ, `[orbe]` vide synchronisé par mkarchiso. L'ISO démarre jusqu'au shell root en UEFI (GRUB) et en BIOS (syslinux), clavier `fr`, accents corrects dans les deux menus. Captures vérifiées : `out/captures/uefi-280s.png`, `bios-menu.png`, `bios-280s.png`. Démarrage jusqu'au shell en environ 4 min, en émulation TCG sans KVM.
 
+- **Menus de démarrage thémés (VM)** : GRUB (UEFI) avec fond orbe, titre Archivo, panneau `surface` à rayon 8, élément choisi en `surface-2` avec anneau citron, icônes monolignes (Éteindre en `danger`), compte à rebours et aide clavier en JetBrains Mono. Syslinux (BIOS) : fond orbe 640x480, élément choisi sur fond citron, textes en français. Navigation au clavier vérifiée, démarrage jusqu'au shell revérifié en UEFI. Captures : `out/captures/uefi-menu.png`, `uefi-menu-fin.png`, `bios-menu.png`.
+
 ## À faire
-- Thème Orbe des menus GRUB et syslinux (demandé par Yass, avancé depuis l'étape 5).
+- `loopback.cfg` (démarrage de l'ISO depuis un autre GRUB, Ventoy en mode GRUB par exemple) garde le menu texte.
+- Le thème GRUB du système installé viendra avec `orbe-themes` (étape 5), à partir des mêmes fichiers.
 - `/etc/os-release` et l'invite de connexion affichent encore « Arch Linux » : branding prévu dans `orbe-branding`.
