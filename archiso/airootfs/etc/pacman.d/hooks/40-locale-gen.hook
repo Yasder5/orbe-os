@@ -1,0 +1,13 @@
+# remove from airootfs!
+# Génère les locales FR et EN de /etc/locale.gen pendant la construction de l'ISO.
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Type = Package
+Target = glibc
+
+[Action]
+Description = Génération des locales Orbe OS...
+When = PostTransaction
+Depends = glibc
+Exec = /usr/bin/locale-gen
