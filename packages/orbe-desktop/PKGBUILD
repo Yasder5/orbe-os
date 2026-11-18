@@ -9,7 +9,7 @@ pkgdesc="Bureau Orbe OS : session Hyprland et Orbe Shell, réglages par défaut"
 arch=('any')
 options=('!debug')
 url="https://github.com/Yasder5/orbe-os"
-license=('LicenseRef-Orbe')
+license=('MIT')
 depends=(
   'orbe-shell' 'orbe-themes'
   'hyprland' 'quickshell' 'hyprpolkitagent' 'hyprland-guiutils'

@@ -22,7 +22,7 @@ Tenu à jour à chaque étape : ce qui est fait, ce qui reste, les décisions et
 - **Machine de construction : session Claude dans le cloud** (conteneur Ubuntu 24.04, 4 cœurs Xeon, 16 Go, sans `/dev/kvm` ni GPU), à la place du PC Windows/WSL2 prévu. Yass a demandé d'avancer. Conséquences : QEMU tourne en émulation logicielle (TCG), lente, et sans accélération 3D réelle. Le rendu final se vérifiera sur le PC de Yass.
 - **Orientation donnée par Yass** : un OS polyvalent qui démarre sur le plus de machines possible, bien optimisé une fois installé sur son PC, puis distribuable pour équiper plusieurs PC orientés jeu. D'où, dès l'étape 1 : dépôt `multilib` activé (Steam, Proton, pilotes 32 bits).
 - **Choix appliqués par défaut** (propositions de `docs/ETAT.md`, Yass a dit de continuer) : GRUB (BIOS + UEFI, instantanés btrfs), greetd + greeter Quickshell, foot, Nautilus, verrouillage Quickshell, shell réécrit sans code de Caelestia. Chacun reste modifiable.
-- **Licence du code Orbe : pas encore tranchée.** MIT proposée. Aucun fichier `LICENSE` tant que Yass n'a pas choisi.
+- **Licence du code Orbe : MIT** (choix de Yass le 2026-11-18), comme Orbe Launcher. Fichier `LICENSE` à la racine, paquets `[orbe]` en `MIT`.
 - **ISO** : `uefi.grub` (x64 et IA32 mixte) + `bios.syslinux`, squashfs en zstd (niveau 19, niveau 3 avec `--fast`) : décompression plus rapide que xz, donc session live plus réactive.
 - **Image de construction** : `archlinux:latest`. Si Docker Hub refuse (limite de 429 rencontrée ici), `build.sh` importe l'archive bootstrap officielle d'Arch après vérification de sa somme SHA-256.
 - **Menus syslinux** : écrits en UTF-8 dans le dépôt, convertis en CP437 au moment du build (syslinux n'affiche que ce jeu de caractères).
@@ -65,4 +65,5 @@ quickshell 0.3.2, hyprland 0.57.2, hyprlock 0.9.7, hypridle 0.1.8, greetd 0.10.3
 - `/etc/os-release` et l'invite de connexion affichent encore « Arch Linux » : branding prévu dans `orbe-branding`.
 - Détection NVIDIA du live (`orbe-gpu-setup`) à tester sur le PC de Yass (RTX 3050).
 - Taille de l'ISO : 2,1 Go en compression rapide, à mesurer en compression finale (limite de 2 Go par fichier sur les Releases GitHub).
-- Mode jeu : en attente des choix de Yass (`docs/mode-jeu.md`). Rapport sur Orbe Launcher sous Linux : `docs/orbe-launcher-linux.md`.
+- Mode jeu : choix validés le 2026-11-18 (voir `docs/mode-jeu.md`). Rapport sur Orbe Launcher sous Linux : `docs/orbe-launcher-linux.md`.
+- Sauvegarde : Yass crée un dépôt GitHub privé, puis premier `git push` (accord donné le 2026-11-18).

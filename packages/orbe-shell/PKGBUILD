@@ -9,7 +9,7 @@ pkgdesc="Orbe Shell : bureau Quickshell aux couleurs d'Orbe"
 arch=('any')
 options=('!debug')
 url="https://github.com/Yasder5/orbe-os"
-license=('LicenseRef-Orbe')
+license=('MIT')
 depends=('quickshell' 'qt6-declarative' 'qt6-svg' 'qt6-5compat' 'orbe-themes')
 
 package() {

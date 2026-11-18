@@ -9,7 +9,7 @@ pkgdesc="Thèmes Orbe : police Archivo, palette du terminal"
 arch=('any')
 options=('!debug')
 url="https://github.com/Yasder5/orbe-os"
-license=('LicenseRef-Orbe' 'OFL-1.1')
+license=('MIT' 'OFL-1.1')
 depends=('fontconfig' 'ttf-jetbrains-mono')
 
 package() {

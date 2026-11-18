@@ -41,8 +41,9 @@ Prévues dans le système installé, mesurées avant d'être gardées :
 - Bouton Guide : retour à l'accueil depuis n'importe quel jeu, avec un menu rapide (volume, luminosité, profil d'énergie, quitter le jeu).
 - Assistant de bienvenue : propose d'installer Steam, Heroic, Discord, OBS et les outils de jeu, et de choisir le démarrage en mode jeu.
 
-## Choix à valider par Yass
+## Choix validés par Yass (2026-11-18)
 
-1. Accueil du mode jeu : 1, 2 ou 3 (recommandé : 3).
-2. Démarrage par défaut sur le système installé : bureau ou mode jeu.
-3. Paquets à reconstruire depuis l'AUR dans `[orbe]` : `gamescope-session-steam` (sessions façon SteamOS), `xpadneo-dkms`, `game-devices-udev`. Les autres sont dans les dépôts officiels.
+1. Accueil du mode jeu : **Steam Big Picture d'abord, Orbe Launcher ensuite** (possibilité 3), quand son portage Linux sera prêt.
+2. Démarrage du système installé : **dernière session utilisée** (bureau ou mode jeu), modifiable dans les réglages.
+
+Paquets à reconstruire depuis l'AUR dans `[orbe]` : `gamescope-session-steam` (sessions façon SteamOS), `xpadneo-dkms`, `game-devices-udev`. Les autres sont dans les dépôts officiels.

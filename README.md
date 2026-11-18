@@ -38,4 +38,4 @@ UEFI par défaut, `--bios` pour l'autre mode, `--disk orbe.qcow2` pour installer
 
 ## Licences
 
-Licence du code Orbe : à choisir. Les polices et autres ressources tierces gardent leur licence, listée dans `LICENSES/`. Orbe Shell est une réécriture inspirée de [Caelestia Shell](https://github.com/caelestia-dots/shell) (GPL-3.0), sans reprise de son code.
+Code d'Orbe OS sous licence MIT (`LICENSE`). Les polices et autres ressources tierces gardent leur licence, listée dans `LICENSES/`. Orbe Shell est une réécriture inspirée de [Caelestia Shell](https://github.com/caelestia-dots/shell) (GPL-3.0), sans reprise de son code.
