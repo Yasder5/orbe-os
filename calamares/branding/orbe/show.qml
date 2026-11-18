@@ -12,6 +12,13 @@ Presentation {
         { title: "Mises à jour sereines", text: "Sur btrfs, un instantané est pris avant et après chaque mise à jour. En cas de souci, il se choisit au démarrage." }
     ]
 
+    // Fond de toute la zone du diaporama (les diapositives n'en couvrent que le centre).
+    Rectangle {
+        anchors.fill: parent
+        z: -1
+        color: "#0a0a0a"
+    }
+
     Timer {
         interval: 9000
         running: presentation.activatedInCalamares

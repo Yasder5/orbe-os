@@ -121,6 +121,20 @@ Scope {
 
             onOpenChanged: if (open) content.forceActiveFocus()
 
+            // Le focus clavier suit l'étape : champ de la ville à l'étape Météo, l'assistant sinon
+            // (un champ caché perd le focus sans le rendre à personne).
+            Connections {
+                target: root
+                function onStepChanged() {
+                    if (!win.open)
+                        return;
+                    if (root.step === 2)
+                        city.forceActiveFocus();
+                    else
+                        content.forceActiveFocus();
+                }
+            }
+
             Behavior on progress {
                 NumberAnimation {
                     duration: Theme.durSlow
@@ -391,16 +405,26 @@ Scope {
                                     anchors.leftMargin: Theme.space4
                                     anchors.rightMargin: Theme.space4
                                     verticalAlignment: TextInput.AlignVCenter
-                                    focus: root.step === 2 && win.open
                                     color: Theme.text
                                     font.family: Theme.fontSans
                                     font.pixelSize: Theme.textL
                                     text: Config.weatherCity
                                     onEditingFinished: Config.weatherCity = text.trim()
-                                    onAccepted: {
+                                    // Entrée : enregistre et passe à l'étape suivante, sans que la
+                                    // touche aille ensuite à la liste des applications.
+                                    Keys.onReturnPressed: event => {
                                         Config.weatherCity = text.trim();
+                                        event.accepted = true;
                                         root.next();
-                                        content.forceActiveFocus();
+                                    }
+                                    Keys.onEnterPressed: event => {
+                                        Config.weatherCity = text.trim();
+                                        event.accepted = true;
+                                        root.next();
+                                    }
+                                    Keys.onEscapePressed: event => {
+                                        event.accepted = true;
+                                        root.back();
                                     }
                                 }
                             }

@@ -10,11 +10,12 @@ Tenu à jour à chaque étape : ce qui est fait, ce qui reste, les décisions et
 | 2. Session live graphique | validée en VM, 2026-11-18 |
 | 3. Orbe Shell, premier jet | validée (banc d'essai + VM), 2026-11-18 |
 | 4. Tableau de bord, réglages rapides, verrouillage, fonds | validée (banc d'essai + VM), 2026-11-18 |
-| 5. Thème global | en partie : menus de démarrage et terminal faits |
-| 6. Installateur Calamares | à faire |
-| 7. Réglages Orbe et mises à jour | à faire |
-| 8. Finitions | à faire |
-| 9. Test sur vrai matériel | à faire (par Yass) |
+| Mode jeu (demande de Yass) | fait ; bascule bureau ↔ jeu validée en VM, Steam et gamescope à tester sur matériel |
+| 5. Thème global | validée en VM et sur le banc d'essai, 2026-11-18 (Plymouth pas encore capturé en VM) |
+| 6. Installateur Calamares | écrit, test d'installation en VM en cours |
+| 7. Réglages Orbe et mises à jour | écrit, vérifié sur le banc d'essai |
+| 8. Finitions | en partie : contraste, mesure du processeur, aide des raccourcis, presse-papiers, licences, README |
+| 9. Test sur vrai matériel | guide prêt (`docs/test-materiel.md`), test par Yass |
 
 ## Décisions
 
@@ -55,6 +56,25 @@ Tenu à jour à chaque étape : ce qui est fait, ce qui reste, les décisions et
 - **Heroic Games Launcher** (Epic, GOG, Amazon) : paquet officiel `-bin` reconstruit dans `[orbe]`, thème CSS Orbe (`themes/heroic/orbe.css`) et français écrits au premier lancement (`orbe-first-login`, chemins absolus du compte). Les paquets venant de l'AUR sont optionnels : si leur source est injoignable, le build continue sans eux (`archiso/packages.optional`).
 - **Steam Big Picture aux couleurs d'Orbe** : le skin de Yass passe par CSS Loader (Decky Loader). Prévu avec le mode jeu, qui en a besoin de toute façon.
 
+### 2026-11-18 (mode jeu, étapes 5 à 8)
+- **Mode jeu** (`packages/orbe-gaming`, `docs/mode-jeu.md`) : `orbe-session` lancé par greetd ouvre la dernière session (bureau ou jeu), `orbe-switch-session` bascule (hyprshutdown ferme d'abord les applications proprement), Steam appelle `steamos-session-select` pour revenir au bureau. Si Steam se ferme seul, retour au bureau : jamais d'écran noir.
+- **Thème Steam** : Decky Loader et CSS Loader empaquetés depuis leurs **binaires officiels** (les archives de sources GitHub de ces dépôts sont bloquées ici ; seules les pièces jointes des versions passent). Thème d'Orbe Launcher activé au premier lancement du mode jeu.
+- **`lib32-nvidia-utils` hors de l'ISO** (576 Mo installé) : installé par l'installateur si une carte NVIDIA est là et qu'Internet répond. `scx-scheds` (154 Mo) en option, pas dans l'ISO.
+- **GTK** : adw-gtk3-dark + couleurs libadwaita Orbe (`@define-color` et variables CSS de libadwaita 1.6+), incluses par `@import` depuis `~/.config/gtk-*/gtk.css`, donc mises à jour avec le paquet. **Qt** : qt6ct, style Fusion, palette Orbe et retouches QSS (Kvantum pas retenu : Fusion suffit et reste léger).
+- **Icônes** : Papirus-Dark, dossiers recolorés en citron par script au build (paquet `orbe-icon-theme`, GPL-3.0 comme Papirus). **Curseur Orbe** dessiné par script (14 formes, 93 alias), en xcursor et hyprcursor, dans le même thème « Orbe » que les icônes.
+- **Plymouth** : thème script, l'orbe se forme (36 images) puis tourne (90 images), champ de mot de passe pour le disque chiffré.
+- **Identité** : `/usr/lib/os-release`, `/etc/lsb-release` et `/etc/issue` réécrits par un hook pacman après chaque mise à jour de `filesystem` (ces fichiers appartiennent aux paquets d'Arch).
+- **Sons** : ceux d'Orbe Launcher (MIT) en thème freedesktop `orbe` ; Orbe Shell joue la notification et le réglage du volume (réglage `sounds`).
+- **Installateur** : Calamares 3.4.2 reconstruit depuis la recette AUR. Copie du live (pas de téléchargement), module Python `orbe` pour nettoyer la copie. Partition EFI sur `/boot` pour que GRUB n'ait jamais à lire le disque chiffré (LUKS2/argon2). btrfs + snapper + snap-pac + grub-btrfs par défaut.
+- **Greeter, assistant, Réglages et aide intégrés à Orbe Shell** (mêmes `Theme.qml` et composants) plutôt qu'en applications séparées : `greeter.qml` (lancé dans cage par greetd), `welcome/`, `settings/`, `help/`.
+- **Réglages de Hyprland faits dans l'application** : écrits en Lua dans `~/.config/orbe/hyprland.lua`, chargé à la fin de la configuration Orbe, puis `hyprctl reload`. Le clavier choisi à l'installation est lu dans `/etc/X11/xorg.conf.d/00-keyboard.conf`.
+- **Pas de navigateur dans l'ISO** (taille) : Firefox est coché par défaut dans l'assistant de bienvenue.
+
+## Mesures
+- **Orbe Shell au repos** (banc d'essai, fond fixe, rendu logiciel) : **0,2 % d'un cœur**, objectif de 2 % tenu. Mémoire 330 Mo, gonflée par le rendu logiciel (llvmpipe). Un orbe animé plein écran rendu par le processeur (VM sans GPU) prend un cœur entier : c'est pourquoi le fond par défaut est fixe ; sur une vraie carte graphique, le shader ne coûte presque rien au processeur (à confirmer sur le PC de Yass).
+- **Contraste** (WCAG) : texte `#f5f5f0` sur fond 18:1, texte secondaire `#8f8f8a` sur fond 6,1:1 et sur `surface-2` 5,4:1, noir sur citron 16,9:1, `danger` sur fond 7,1:1 : tout dépasse AA (4,5:1).
+- **ISO** : 2,7 Go en compression rapide (`--fast`, zstd 3). Compression finale à mesurer.
+
 ## Vérifié le 2026-11-17 (dépôts Arch)
 quickshell 0.3.2, hyprland 0.57.2, hyprlock 0.9.7, hypridle 0.1.8, greetd 0.10.3, archiso 92, grub 2.16, grub-btrfs 4.14, qt6-base 6.12.0, linux 7.3.4, linux-zen 7.3.4, linux-lts 6.18.63, mesa 26.2.7, nvidia-open 620.70.06, gamemode 1.8.2, gamescope 3.17.0, mangohud 0.8.4, steam (multilib). Toujours absents des dépôts officiels : calamares, ttf-archivo, hyprland-qtutils (remplacé par hyprland-guiutils, présent), nvidia-580xx-dkms.
 
@@ -81,14 +101,18 @@ quickshell 0.3.2, hyprland 0.57.2, hyprlock 0.9.7, hypridle 0.1.8, greetd 0.10.3
 - **Étape 4 validée** : sur le banc d'essai, chaque panneau (tableau de bord et ses trois onglets, réglages rapides, sélecteur de fonds, verrouillage) ; dans l'ISO en VM : fond Orbe et barre (indicateur réseau), Super + D ouvre le tableau de bord, Super + L verrouille (orbe en shader, heure, champ avec anneau de focus), Entrée déverrouille le compte live, Heroic s'ouvre avec le thème Orbe (Archivo, accent citron, interface en français). Captures : `out/captures/uefi-e4-*.png`, `shell-e4-*.png`.
 - Super + A n'a pas été vérifié en VM : la commande de test envoie des positions de touches QWERTY, et la touche A de l'AZERTY est le Q du QWERTY (Super + Q ferme la fenêtre). Vérifié sur le banc d'essai.
 
+- **Mode jeu en VM** : Super + G ferme la session Hyprland, `orbe-session` tente le mode jeu (gamescope ne démarre pas sans carte graphique Vulkan), puis revient au bureau. zram actif, Decky Loader démarré. Captures `out/captures/uefi-jeu-*.png`.
+- **Étape 5 en VM** : fastfetch affiche « Orbe OS », Nautilus (GTK 4) et foot assortis (fond, police, bordure citron), curseur Orbe. Sur le banc d'essai : greeter, assistant de bienvenue, Réglages Orbe, aide des raccourcis.
+- En VM, Orbe Shell met parfois plus de 5 min à apparaître : il attend des réponses D-Bus (UPower, power-profiles-daemon, BlueZ) qui expirent au bout de 25 s en émulation lente. Pas d'erreur dans son journal ; à surveiller sur matériel réel.
+
 ## À faire
 - Météo : non vérifiée ici (Open-Meteo n'est pas joignable depuis ce conteneur). Affiche « Météo indisponible » hors ligne.
 - Consommation du shell et de l'orbe animé à mesurer sur le PC de Yass (objectif : 2 % au repos).
 - Heroic affiche au premier lancement sa question sur les statistiques anonymes : laissée à l'utilisateur.
-- Steam Big Picture aux couleurs d'Orbe : avec le mode jeu (Decky Loader et CSS Loader).
-- `loopback.cfg` (démarrage de l'ISO depuis un autre GRUB, Ventoy en mode GRUB par exemple) garde le menu texte.
-- Le thème GRUB du système installé viendra avec `orbe-themes` (étape 5), à partir des mêmes fichiers.
-- `/etc/os-release` et l'invite de connexion affichent encore « Arch Linux » : branding prévu dans `orbe-branding`.
+- `loopback.cfg` (démarrage de l'ISO depuis un autre GRUB, Ventoy en mode GRUB par exemple) garde le menu texte, avec l'écran Plymouth.
+- **Dépôt `[orbe]` hébergé** : décision de Yass (voir `docs/installation.md`). Sans lui, les paquets Orbe d'un système installé ne se mettent pas à jour.
+- Instantanés btrfs : le noyau est sur la partition EFI, hors des instantanés. Démarrer un instantané pris avant une mise à jour du noyau peut échouer (modules d'une autre version) : à documenter ou corriger (copie du noyau dans l'instantané).
+- `xpadneo` (manettes Xbox en Bluetooth) et `game-devices-udev` pas encore empaquetés.
 - Détection NVIDIA du live (`orbe-gpu-setup`) à tester sur le PC de Yass (RTX 3050).
 - Taille de l'ISO : 2,1 Go en compression rapide, à mesurer en compression finale (limite de 2 Go par fichier sur les Releases GitHub).
 - Mode jeu : choix validés le 2026-11-18 (voir `docs/mode-jeu.md`). Rapport sur Orbe Launcher sous Linux : `docs/orbe-launcher-linux.md`.

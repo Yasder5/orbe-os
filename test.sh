@@ -153,7 +153,7 @@ type_keys() {
     if [[ "${ORBE_QEMU_LAYOUT:-fr}" == fr ]]; then
       case "$ch" in
         a) k=q ;; q) k=a ;; z) k=w ;; w) k=z ;; m) k=semicolon ;;
-        [0-9]) k=shift-$ch ;; ' ') k=spc ;; '.') k=shift-comma ;; '-') k=6 ;; '/') k=shift-dot ;; '*') k=backslash ;;
+        [0-9]) k=shift-$ch ;; ' ') k=spc ;; '.') k=shift-comma ;; '-') k=6 ;; '/') k=shift-dot ;; '*') k=backslash ;; ';') k=comma ;; ':') k=dot ;;
         *) k=$ch ;;
       esac
     else
