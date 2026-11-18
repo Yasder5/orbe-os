@@ -1,0 +1,98 @@
+# Invite Starship d'Orbe OS : dossier, branche git, état, durée des commandes longues,
+# puis la flèche citron (rouge si la commande précédente a échoué).
+# Remplacée par ~/.config/starship.toml s'il existe.
+
+add_newline = true
+format = """$username$hostname$directory$git_branch$git_state$git_status$python$nodejs$rust$golang$cmd_duration$jobs
+$character"""
+right_format = "$status"
+
+palette = "orbe"
+
+[palettes.orbe]
+text = "#f5f5f0"
+muted = "#8f8f8a"
+line = "#3a3a37"
+accent = "#d3fd50"
+danger = "#ff6b5a"
+
+[character]
+success_symbol = "[›](bold accent)"
+error_symbol = "[›](bold danger)"
+vimcmd_symbol = "[‹](bold accent)"
+
+# Utilisateur et machine seulement à distance (SSH).
+[username]
+format = "[$user]($style)[@](muted)"
+style_user = "text"
+show_always = false
+
+[hostname]
+format = "[$hostname]($style) "
+style = "text"
+ssh_only = true
+
+[directory]
+format = "[$path]($style)[$read_only]($read_only_style) "
+style = "bold text"
+read_only = " 󰌾"
+read_only_style = "danger"
+truncation_length = 3
+truncation_symbol = "…/"
+home_symbol = "~"
+
+[git_branch]
+format = "[$symbol$branch]($style) "
+symbol = " "
+style = "muted"
+
+[git_status]
+format = "([$all_status$ahead_behind]($style) )"
+style = "accent"
+modified = "~"
+staged = "+"
+untracked = "?"
+deleted = "−"
+ahead = "↑"
+behind = "↓"
+diverged = "↕"
+conflicted = "[!](danger)"
+
+[git_state]
+format = "[$state( $progress_current/$progress_total)]($style) "
+style = "danger"
+
+[cmd_duration]
+format = "[$duration]($style) "
+style = "muted"
+min_time = 2000
+
+[jobs]
+format = "[$symbol$number]($style) "
+symbol = "⚙ "
+style = "muted"
+
+[status]
+disabled = false
+format = "[$status]($style)"
+style = "danger"
+
+[python]
+format = "[$symbol$version]($style) "
+symbol = " "
+style = "muted"
+
+[nodejs]
+format = "[$symbol$version]($style) "
+symbol = " "
+style = "muted"
+
+[rust]
+format = "[$symbol$version]($style) "
+symbol = " "
+style = "muted"
+
+[golang]
+format = "[$symbol$version]($style) "
+symbol = " "
+style = "muted"

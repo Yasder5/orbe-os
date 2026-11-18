@@ -16,13 +16,15 @@ depends=(
   'xdg-desktop-portal-hyprland' 'xdg-desktop-portal-gtk'
   'qt6-wayland' 'qt5-wayland' 'qt6-svg' 'qt6-5compat'
   'pipewire' 'pipewire-pulse' 'pipewire-alsa' 'wireplumber'
-  'foot' 'wl-clipboard' 'grim' 'slurp' 'brightnessctl' 'playerctl' 'xdg-utils' 'polkit'
-  'noto-fonts' 'noto-fonts-emoji' 'ttf-jetbrains-mono'
+  'foot' 'wl-clipboard' 'grim' 'slurp' 'brightnessctl' 'playerctl' 'xdg-utils' 'polkit' 'libnotify'
+  'noto-fonts' 'noto-fonts-emoji' 'ttf-jetbrains-mono' 'ttf-nerd-fonts-symbols-mono'
+  # Terminal : shell fish, invite Starship, fastfetch, ls, cat et moniteur en couleurs
+  'fish' 'starship' 'fastfetch' 'eza' 'bat' 'btop'
 )
 # Modules Hyprland (orbe.lua charge les autres) et fichiers personnels copiés dans /etc/skel.
 source=(orbe.lua environment.lua look.lua input.lua binds.lua rules.lua autostart.lua
-        hyprland.lua foot.ini)
-sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+        hyprland.lua foot.ini btop.conf)
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
 
 package() {
   local f
@@ -32,4 +34,5 @@ package() {
   # Fichier personnel copié dans le dossier des nouveaux comptes.
   install -Dm644 "$srcdir/hyprland.lua" "$pkgdir/etc/skel/.config/hypr/hyprland.lua"
   install -Dm644 "$srcdir/foot.ini" "$pkgdir/etc/skel/.config/foot/foot.ini"
+  install -Dm644 "$srcdir/btop.conf" "$pkgdir/etc/skel/.config/btop/btop.conf"
 }

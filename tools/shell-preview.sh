@@ -6,6 +6,8 @@
 # Usage : tools/shell-preview.sh [options]
 #   --wait N         secondes avant la capture (défaut : 6)
 #   --ipc "CIBLE FONCTION [ARGS]"  appel IPC Quickshell avant la capture, option répétable
+#   --run "COMMANDE" commande lancée avant la capture (ex. notify-send), option répétable
+#   --type "TEXTE"   texte tapé au clavier (wtype) avant la capture, option répétable
 #   --name NOM       nom de la capture : out/captures/shell-NOM.png (défaut : apercu)
 #   --res 1920x1080  définition de l'écran virtuel
 # Journal de Quickshell : out/captures/shell-NOM.log
@@ -13,20 +15,22 @@ set -euo pipefail
 
 ROOT=$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)
 wait_s=6 name=apercu res=1920x1080
-ipc=()
+steps=""
 while (( $# )); do
   case "$1" in
     --wait) wait_s=$2; shift ;;
-    --ipc) ipc+=("$2"); shift ;;
+    --ipc) read -ra words <<< "$2"; steps+="qs -c orbe ipc call $(printf '%q ' "${words[@]}"); sleep 0.8; "; shift ;;
+    --run) steps+="$2; sleep 1.5; "; shift ;;
+    --type) steps+="wtype -d 60 $(printf '%q' "$2"); sleep 1; "; shift ;;
     --name) name=$2; shift ;;
     --res) res=$2; shift ;;
-    -h|--help) sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help) sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "Option inconnue : $1" >&2; exit 2 ;;
   esac
   shift
 done
 
-preview_image=orbe-shell-preview:latest
+preview_image=orbe-shell-preview:3
 docker_args=(--privileged -v orbe-pacman-cache:/var/cache/pacman/pkg)
 if [[ -n "${HTTPS_PROXY:-}${https_proxy:-}" ]]; then
   docker_args+=(--network host -e HTTPS_PROXY="${HTTPS_PROXY:-$https_proxy}" -e https_proxy="${https_proxy:-$HTTPS_PROXY}")
@@ -48,22 +52,32 @@ if ! docker image inspect "$preview_image" >/dev/null 2>&1; then
     fi
     echo "Server = https://geo.mirror.pkgbuild.com/\$repo/os/\$arch" > /etc/pacman.d/mirrorlist
     pacman-key --init >/dev/null 2>&1; pacman-key --populate archlinux >/dev/null 2>&1
-    pacman -Syu --noconfirm --needed sway quickshell grim qt6-svg qt6-5compat ttf-jetbrains-mono noto-fonts >/dev/null')
+    pacman -Syu --noconfirm --needed sway quickshell grim wtype qt6-svg qt6-5compat mesa ttf-jetbrains-mono noto-fonts noto-fonts-emoji libnotify foot htop hicolor-icon-theme adwaita-icon-theme fish starship fastfetch eza bat btop ttf-nerd-fonts-symbols-mono git >/dev/null')
   docker start -a "$cid"
   docker commit "$cid" "$preview_image" >/dev/null
   docker rm "$cid" >/dev/null
 fi
 
 mkdir -p "$ROOT/out/captures"
-ipc_script=""
-for call in "${ipc[@]}"; do ipc_script+="qs -c orbe ipc call $call; sleep 2; "; done
 
 docker run --rm "${docker_args[@]}" \
   -v "$ROOT/shell:/etc/xdg/quickshell/orbe:ro" \
-  -v "$ROOT/themes/fonts:/usr/share/fonts/orbe:ro" \
+  -v "$ROOT/themes:/orbe/themes:ro" \
+  -v "$ROOT/packages:/orbe/packages:ro" \
   -v "$ROOT/out/captures:/out" \
-  -e RES="$res" -e WAIT="$wait_s" -e NAME="$name" -e IPC_SCRIPT="$ipc_script" -e HOST_UID="$(id -u)" \
-  "$preview_image" bash -c '
+  -e RES="$res" -e WAIT="$wait_s" -e NAME="$name" -e STEPS="$steps" -e HOST_UID="$(id -u)" \
+  "$preview_image" dbus-run-session -- bash -c '
+    # Fichiers des paquets orbe-themes et orbe-desktop, pris directement dans le dépôt.
+    install -Dm644 -t /usr/share/fonts/orbe /orbe/themes/fonts/*.ttf
+    install -Dm644 /orbe/themes/terminal/foot-orbe.ini /usr/share/orbe/foot/orbe.ini
+    install -Dm644 /orbe/themes/terminal/orbe.fish /usr/share/fish/vendor_conf.d/orbe.fish
+    install -Dm644 /orbe/themes/terminal/starship.toml /usr/share/orbe/starship.toml
+    install -Dm644 /orbe/themes/terminal/fastfetch.jsonc /usr/share/orbe/fastfetch/config.jsonc
+    install -Dm644 /orbe/themes/terminal/orbe-logo.txt /usr/share/orbe/fastfetch/orbe-logo.txt
+    install -Dm644 /orbe/themes/terminal/btop-orbe.theme /usr/share/btop/themes/orbe.theme
+    install -Dm644 /orbe/packages/orbe-desktop/foot.ini /root/.config/foot/foot.ini
+    install -Dm644 /orbe/packages/orbe-desktop/btop.conf /root/.config/btop/btop.conf
+    export SHELL=/usr/bin/fish
     fc-cache -f >/dev/null 2>&1
     export XDG_RUNTIME_DIR=/tmp/xdg LANG=C.UTF-8
     mkdir -p -m700 "$XDG_RUNTIME_DIR"
@@ -71,9 +85,10 @@ docker run --rm "${docker_args[@]}" \
     WLR_BACKENDS=headless WLR_RENDERER=pixman WLR_LIBINPUT_NO_DEVICES=1 sway -c /tmp/sway.conf >/tmp/sway.log 2>&1 &
     for _ in $(seq 50); do ls "$XDG_RUNTIME_DIR" | grep -q "^wayland-[0-9]*$" && break; sleep 0.1; done
     export WAYLAND_DISPLAY=$(ls "$XDG_RUNTIME_DIR" | grep -m1 "^wayland-[0-9]*$")
-    QT_QUICK_BACKEND=software qs -c orbe > "/out/shell-$NAME.log" 2>&1 &
+    # Rendu OpenGL sur le processeur (llvmpipe), comme dans une VM sans accélération.
+    LIBGL_ALWAYS_SOFTWARE=1 qs -c orbe > "/out/shell-$NAME.log" 2>&1 &
     sleep "$WAIT"
-    eval "$IPC_SCRIPT"
+    eval "$STEPS"
     grim "/out/shell-$NAME.png"
     chown "$HOST_UID" "/out/shell-$NAME.png" "/out/shell-$NAME.log"
     sed "s/\x1b\[[0-9;]*m//g" "/out/shell-$NAME.log" | grep -E "ERROR|WARN|caused by" | grep -v "locale" | head -20 || true'

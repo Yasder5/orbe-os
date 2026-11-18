@@ -5,7 +5,7 @@
 pkgname=orbe-themes
 pkgver=${ORBE_VERSION:-0.1.0}
 pkgrel=1
-pkgdesc="Thèmes Orbe : police Archivo, palette du terminal"
+pkgdesc="Thèmes Orbe : police Archivo, terminal (foot, fish, Starship, fastfetch, btop)"
 arch=('any')
 options=('!debug')
 url="https://github.com/Yasder5/orbe-os"
@@ -21,4 +21,11 @@ package() {
 
   # Palette du terminal foot, incluse par ~/.config/foot/foot.ini (fichier fourni par orbe-desktop).
   install -Dm644 "$ORBE_SRC/themes/terminal/foot-orbe.ini" "$pkgdir/usr/share/orbe/foot/orbe.ini"
+
+  # Terminal : couleurs de fish, invite Starship, fastfetch au logo Orbe, thème btop.
+  install -Dm644 "$ORBE_SRC/themes/terminal/orbe.fish" "$pkgdir/usr/share/fish/vendor_conf.d/orbe.fish"
+  install -Dm644 "$ORBE_SRC/themes/terminal/starship.toml" "$pkgdir/usr/share/orbe/starship.toml"
+  install -Dm644 "$ORBE_SRC/themes/terminal/fastfetch.jsonc" "$pkgdir/usr/share/orbe/fastfetch/config.jsonc"
+  install -Dm644 "$ORBE_SRC/themes/terminal/orbe-logo.txt" "$pkgdir/usr/share/orbe/fastfetch/orbe-logo.txt"
+  install -Dm644 "$ORBE_SRC/themes/terminal/btop-orbe.theme" "$pkgdir/usr/share/btop/themes/orbe.theme"
 }

@@ -10,7 +10,7 @@ Source : `packages/orbe-desktop/binds.lua`. Tout ce qui est marqué « à venir 
 |---|---|
 | Super + Entrée | Terminal |
 | Super + E | Fichiers |
-| Super | Lanceur d'applications (à venir) |
+| Super (seul) | Lanceur d'applications : `>` commande, `=` calcul, `:` émoji, `/` actions, `~` fichiers |
 | Super + V | Historique du presse-papiers (à venir) |
 | Super + D | Tableau de bord (à venir) |
 | Super + Maj + : | Aide des raccourcis (à venir ; Super + / sur un clavier QWERTY) |
@@ -42,5 +42,8 @@ Source : `packages/orbe-desktop/binds.lua`. Tout ce qui est marqué « à venir 
 |---|---|
 | Super + Maj + S | Capturer une zone (presse-papiers et ~/Images/Captures) |
 | Super + L | Verrouiller (à venir) |
-| Super + Maj + M | Quitter la session (en attendant le menu de session) |
-| Touches multimédia | Volume, micro, luminosité, lecture (aussi écran verrouillé) |
+| Super + Échap | Menu de session (verrouiller, veille, redémarrer, éteindre) |
+| Super + N | Centre de notifications |
+| Super + Maj + M | Quitter la session immédiatement (secours) |
+| Touches multimédia | Volume, micro, luminosité, lecture (aussi écran verrouillé), avec jauge à l'écran |
+| Verr. Maj | Indicateur à l'écran |
