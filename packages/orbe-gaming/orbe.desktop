@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=Orbe OS
+Comment=Bureau Orbe ou mode jeu, selon la dernière session utilisée
+Exec=orbe-session
+Type=Application
+DesktopNames=Hyprland

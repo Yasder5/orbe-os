@@ -1,0 +1,8 @@
+# Compile les réglages dconf par défaut d'Orbe OS (/etc/dconf/db/local.d).
+post_install() {
+  dconf update 2>/dev/null || true
+}
+
+post_upgrade() {
+  post_install
+}

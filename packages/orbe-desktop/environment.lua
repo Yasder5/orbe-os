@@ -1,7 +1,13 @@
 -- Variables d'environnement de la session Orbe.
 
+-- Curseur Orbe (xcursor pour les applications, hyprcursor pour Hyprland).
+hl.env("XCURSOR_THEME", "Orbe")
 hl.env("XCURSOR_SIZE", "24")
+hl.env("HYPRCURSOR_THEME", "Orbe")
 hl.env("HYPRCURSOR_SIZE", "24")
+
+-- Applications Qt aux couleurs d'Orbe (qt6ct, style Fusion, palette et police Orbe).
+hl.env("QT_QPA_PLATFORMTHEME", "qt6ct")
 
 -- Applications Qt et Electron en Wayland natif, avec repli X11 si besoin.
 hl.env("QT_QPA_PLATFORM", "wayland;xcb")

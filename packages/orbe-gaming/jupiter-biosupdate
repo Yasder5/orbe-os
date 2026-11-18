@@ -1,0 +1,3 @@
+#!/bin/sh
+# Mise à jour du BIOS du Steam Deck, demandée par Steam : sans objet sur un PC.
+exit 0

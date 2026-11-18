@@ -5,7 +5,7 @@
 set -euo pipefail
 
 dest=$1
-archivo="/orbe/themes/fonts/Archivo[wdth,wght].ttf"
+archivo="${ORBE_SRC:-/orbe}/themes/fonts/Archivo[wdth,wght].ttf"
 mono=/usr/share/fonts/TTF/JetBrainsMono-Regular.ttf
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT

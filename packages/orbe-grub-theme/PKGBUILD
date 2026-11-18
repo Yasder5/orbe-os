@@ -1,0 +1,31 @@
+# Maintainer: yasder5
+# Thème GRUB Orbe pour le système installé : les visuels du menu de l'ISO (themes/boot/generate.py),
+# polices Archivo et JetBrains Mono converties au format de GRUB à la construction.
+
+pkgname=orbe-grub-theme
+pkgver=${ORBE_VERSION:-0.1.0}
+pkgrel=1
+pkgdesc="Thème GRUB Orbe (menu de démarrage du système installé)"
+arch=('any')
+options=('!debug')
+url="https://github.com/Yasder5/orbe-os"
+license=('MIT' 'OFL-1.1')
+depends=('grub')
+makedepends=('grub' 'freetype2' 'python-fonttools' 'ttf-jetbrains-mono')
+
+build() {
+  : "${ORBE_SRC:?ORBE_SRC doit pointer vers la racine du dépôt}"
+  rm -rf "$srcdir/orbe"
+  cp -r "$ORBE_SRC/archiso/grub/themes/orbe" "$srcdir/orbe"
+  rm -f "$srcdir"/orbe/*.pf2
+  ORBE_SRC="$ORBE_SRC" bash "$ORBE_SRC/tools/make-grub-fonts.sh" "$srcdir/orbe"
+  # Sous-titre propre au système installé (celui de l'ISO parle de session live).
+  sed -i 's/^\( *text = \)"Session live et installation"/\1"Choisis le système à démarrer"/; s/^# Thème GRUB Orbe, menu de l.ISO en UEFI\./# Thème GRUB Orbe, système installé./' "$srcdir/orbe/theme.txt"
+}
+
+package() {
+  install -d "$pkgdir/usr/share/grub/themes"
+  cp -r "$srcdir/orbe" "$pkgdir/usr/share/grub/themes/orbe"
+  find "$pkgdir/usr/share/grub/themes/orbe" -type f -exec chmod 644 {} +
+  install -Dm644 "$ORBE_SRC/LICENSES/OFL-Archivo.txt" "$pkgdir/usr/share/licenses/$pkgname/OFL-Archivo.txt"
+}

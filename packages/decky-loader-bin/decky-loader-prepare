@@ -1,0 +1,15 @@
+#!/bin/sh
+# Prépare le dossier de Decky pour un compte : il doit appartenir au compte, pas à root,
+# car Decky en déduit l'utilisateur sous lequel lancer les greffons.
+set -e
+user=$1
+home=$(getent passwd "$user" | cut -d: -f6)
+group=$(id -gn "$user")
+[ -n "$home" ] && [ -d "$home" ] || exit 0
+for d in "$home/homebrew" "$home/homebrew/plugins" "$home/homebrew/themes" "$home/homebrew/settings" "$home/homebrew/data" "$home/homebrew/logs"; do
+  install -d -o "$user" -g "$group" "$d"
+done
+# Steam n'accepte Decky que si le débogage distant de son interface est autorisé.
+steam="$home/.local/share/Steam"
+install -d -o "$user" -g "$group" "$home/.local" "$home/.local/share" "$steam"
+[ -e "$steam/.cef-enable-remote-debugging" ] || install -m644 -o "$user" -g "$group" /dev/null "$steam/.cef-enable-remote-debugging"

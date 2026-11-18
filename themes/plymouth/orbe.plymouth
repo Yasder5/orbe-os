@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Orbe
+Description=L'orbe de particules d'Orbe OS se forme pendant le démarrage
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/orbe
+ScriptFile=/usr/share/plymouth/themes/orbe/orbe.script

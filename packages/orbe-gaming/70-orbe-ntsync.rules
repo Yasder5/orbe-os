@@ -1,0 +1,2 @@
+# /dev/ntsync accessible aux jeux lancés par l'utilisateur (Proton, Wine).
+KERNEL=="ntsync", MODE="0666"

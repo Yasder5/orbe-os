@@ -1,0 +1,7 @@
+#!/bin/sh
+# Appelé par Steam quand on choisit « Revenir au bureau » (argument « plasma ») ou le mode jeu
+# (« gamescope »). Orbe OS bascule entre son bureau Hyprland et son mode jeu.
+case "$1" in
+  gamescope) exec orbe-switch-session jeu ;;
+  *) exec orbe-switch-session bureau ;;
+esac

@@ -1,0 +1,91 @@
+# Démarrage Orbe : fond noir, l'orbe se forme puis tourne ; texte et mot de passe en dessous.
+Window.SetBackgroundTopColor(0.039, 0.039, 0.039);
+Window.SetBackgroundBottomColor(0.039, 0.039, 0.039);
+
+FORM = 36;
+LOOP = 90;
+for (i = 0; i < FORM; i++)
+  forme[i] = Image("forme-" + (i < 10 ? "0" : "") + i + ".png");
+for (i = 0; i < LOOP; i++)
+  orbe[i] = Image("orbe-" + (i < 10 ? "0" : "") + i + ".png");
+
+cx = Window.GetX() + Window.GetWidth() / 2;
+cy = Window.GetY() + Window.GetHeight() * 0.44;
+
+sprite = Sprite(forme[0]);
+sprite.SetX(cx - forme[0].GetWidth() / 2);
+sprite.SetY(cy - forme[0].GetHeight() / 2);
+sprite.SetZ(10);
+
+tick = 0;
+fun refresh_callback() {
+  # 50 appels par seconde : une image toutes les deux fois, soit 25 images par seconde.
+  frame = Math.Int(tick / 2);
+  if (frame < FORM)
+    sprite.SetImage(forme[frame]);
+  else
+    sprite.SetImage(orbe[(frame - FORM) % LOOP]);
+  tick++;
+}
+Plymouth.SetRefreshFunction(refresh_callback);
+
+# Messages (ex. vérification du disque) : Archivo, gris discret.
+message_sprite = Sprite();
+message_sprite.SetZ(20);
+fun message_callback(text) {
+  img = Image.Text(text, 0.56, 0.56, 0.54, 1, "Archivo 12");
+  message_sprite.SetImage(img);
+  message_sprite.SetX(cx - img.GetWidth() / 2);
+  message_sprite.SetY(Window.GetY() + Window.GetHeight() * 0.86);
+}
+Plymouth.SetMessageFunction(message_callback);
+
+# Mot de passe du disque chiffré.
+box_img = Image("champ.png");
+dot_img = Image("point.png");
+box = Sprite();
+box.SetZ(30);
+prompt = Sprite();
+prompt.SetZ(30);
+dots = [];
+fun display_password(text, bullets) {
+  box.SetImage(box_img);
+  bx = cx - box_img.GetWidth() / 2;
+  by = cy + 200;
+  box.SetX(bx);
+  box.SetY(by);
+  label = Image.Text(text, 0.96, 0.96, 0.94, 1, "Archivo 13");
+  prompt.SetImage(label);
+  prompt.SetX(cx - label.GetWidth() / 2);
+  prompt.SetY(by - label.GetHeight() - 14);
+  for (i = 0; dots[i]; i++)
+    dots[i].SetOpacity(0);
+  shown = bullets;
+  if (shown > 24)
+    shown = 24;
+  for (i = 0; i < shown; i++) {
+    if (!dots[i]) {
+      dots[i] = Sprite(dot_img);
+      dots[i].SetZ(31);
+    }
+    dots[i].SetX(bx + 18 + i * 13);
+    dots[i].SetY(by + (box_img.GetHeight() - dot_img.GetHeight()) / 2);
+    dots[i].SetOpacity(1);
+  }
+}
+Plymouth.SetDisplayPasswordFunction(display_password);
+
+fun display_normal() {
+  box.SetOpacity(0);
+  prompt.SetOpacity(0);
+  for (i = 0; dots[i]; i++)
+    dots[i].SetOpacity(0);
+}
+Plymouth.SetDisplayNormalFunction(display_normal);
+
+fun display_password_shown(text, bullets) {
+  box.SetOpacity(1);
+  prompt.SetOpacity(1);
+  display_password(text, bullets);
+}
+Plymouth.SetDisplayPasswordFunction(display_password_shown);

@@ -128,9 +128,13 @@ xl2tpd
 zsh
 # Orbe OS : bureau (dépôt [orbe]) et connexion
 orbe-desktop
+orbe-gaming
 orbe-shell
 orbe-themes
 orbe-wallpapers
+orbe-icon-theme
+orbe-branding
+plymouth
 greetd
 greetd-agreety
 # Pilotes graphiques libres (AMD, Intel, NVIDIA nouveau), Vulkan et décodage vidéo
@@ -139,6 +143,10 @@ vulkan-radeon
 vulkan-intel
 vulkan-nouveau
 vulkan-icd-loader
+# Pilotes 32 bits pour Steam et Proton (lib32-nvidia-utils, 580 Mo, est installé par l'installateur)
+lib32-mesa
+lib32-vulkan-radeon
+lib32-vulkan-intel
 intel-media-driver
 # NVIDIA (GTX 16xx, RTX 20xx et plus récentes) : choisi au démarrage par orbe-gpu-setup
 nvidia-open

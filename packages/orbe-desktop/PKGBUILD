@@ -22,11 +22,16 @@ depends=(
   'fish' 'starship' 'fastfetch' 'eza' 'bat' 'btop'
   # Réglages rapides, verrouillage, mode nuit, visualiseur audio
   'networkmanager' 'bluez' 'bluez-utils' 'power-profiles-daemon' 'hypridle' 'hyprsunset' 'cava'
+  # Fermeture propre des applications avant de quitter Hyprland (déconnexion, mode jeu)
+  'hyprshutdown'
+  # Thème global : fichiers (GTK 4), GTK 3, Qt, icônes, démarrage, identité, réglages dconf
+  'nautilus' 'adw-gtk-theme' 'qt6ct' 'orbe-icon-theme' 'orbe-branding' 'plymouth' 'dconf'
 )
+install=orbe-desktop.install
 # Modules Hyprland (orbe.lua charge les autres) et fichiers personnels copiés dans /etc/skel.
 source=(orbe.lua environment.lua look.lua input.lua binds.lua workspaces.lua rules.lua autostart.lua
-        hyprland.lua foot.ini btop.conf heroic-store.json orbe-first-login orbe-idle hypridle.conf)
-sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+        hyprland.lua foot.ini btop.conf heroic-store.json orbe-first-login orbe-idle hypridle.conf hyprtoolkit.conf)
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
 
 package() {
   local f
@@ -37,6 +42,24 @@ package() {
   install -Dm644 "$srcdir/hyprland.lua" "$pkgdir/etc/skel/.config/hypr/hyprland.lua"
   install -Dm644 "$srcdir/foot.ini" "$pkgdir/etc/skel/.config/foot/foot.ini"
   install -Dm644 "$srcdir/btop.conf" "$pkgdir/etc/skel/.config/btop/btop.conf"
+  # GTK 3 et 4 : thème adw-gtk3-dark, couleurs Orbe incluses depuis /usr/share/orbe/gtk.
+  local v
+  for v in 3 4; do
+    printf '/* Couleurs Orbe (paquet orbe-themes). Vos retouches vont sous cette ligne. */\n@import url("file:///usr/share/orbe/gtk/gtk%s.css");\n' "$v" \
+      | install -Dm644 /dev/stdin "$pkgdir/etc/skel/.config/gtk-$v.0/gtk.css"
+  done
+  install -Dm644 "$ORBE_SRC/themes/gtk/settings.ini" "$pkgdir/etc/skel/.config/gtk-3.0/settings.ini"
+  install -Dm644 "$ORBE_SRC/themes/gtk/gtk4-settings.ini" "$pkgdir/etc/skel/.config/gtk-4.0/settings.ini"
+  # Qt : qt6ct avec la palette Orbe.
+  install -Dm644 "$ORBE_SRC/themes/qt/qt6ct.conf" "$pkgdir/etc/skel/.config/qt6ct/qt6ct.conf"
+  # Curseur par défaut des applications X11 qui ignorent XCURSOR_THEME.
+  printf '[Icon Theme]\nInherits=Orbe\n' | install -Dm644 /dev/stdin "$pkgdir/etc/skel/.icons/default/index.theme"
+  # Réglages par défaut des applications GNOME (thème sombre, icônes, polices, sons).
+  install -Dm644 "$ORBE_SRC/themes/gtk/dconf-profile-user" "$pkgdir/etc/dconf/profile/user"
+  install -Dm644 "$ORBE_SRC/themes/gtk/dconf-orbe" "$pkgdir/etc/dconf/db/local.d/00-orbe"
+
+  # Couleurs d'Orbe pour les fenêtres hyprtoolkit (hyprshutdown, dialogues de Hyprland).
+  install -Dm644 "$srcdir/hyprtoolkit.conf" "$pkgdir/etc/skel/.config/hypr/hyprtoolkit.conf"
   # Heroic (jeux Epic et GOG) : thème Orbe choisi d'office ; le reste est écrit au premier
   # lancement par orbe-first-login, avec les chemins absolus du compte.
   install -Dm644 "$srcdir/heroic-store.json" "$pkgdir/etc/skel/.config/heroic/store/config.json"

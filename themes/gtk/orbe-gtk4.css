@@ -1,0 +1,86 @@
+/* Orbe pour GTK 4 et libadwaita : couleurs nommées et variables CSS de libadwaita.
+   Inclus par ~/.config/gtk-4.0/gtk.css (@import), donc mis à jour avec le paquet orbe-themes. */
+
+/* libadwaita jusqu'à 1.5 et GTK 4 sans libadwaita */
+@define-color accent_color #d3fd50;
+@define-color accent_bg_color #d3fd50;
+@define-color accent_fg_color #0a0a0a;
+@define-color destructive_color #ff6b5a;
+@define-color destructive_bg_color #ff6b5a;
+@define-color destructive_fg_color #0a0a0a;
+@define-color success_color #d3fd50;
+@define-color warning_color #f0c75e;
+@define-color error_color #ff6b5a;
+@define-color window_bg_color #0a0a0a;
+@define-color window_fg_color #f5f5f0;
+@define-color view_bg_color #0d0d0c;
+@define-color view_fg_color #f5f5f0;
+@define-color headerbar_bg_color #121212;
+@define-color headerbar_fg_color #f5f5f0;
+@define-color headerbar_border_color #262624;
+@define-color headerbar_backdrop_color #0a0a0a;
+@define-color headerbar_shade_color rgba(0, 0, 0, 0.6);
+@define-color sidebar_bg_color #121212;
+@define-color sidebar_fg_color #f5f5f0;
+@define-color sidebar_backdrop_color #0d0d0c;
+@define-color sidebar_shade_color rgba(0, 0, 0, 0.5);
+@define-color card_bg_color #121212;
+@define-color card_fg_color #f5f5f0;
+@define-color card_shade_color rgba(0, 0, 0, 0.55);
+@define-color dialog_bg_color #121212;
+@define-color dialog_fg_color #f5f5f0;
+@define-color popover_bg_color #121212;
+@define-color popover_fg_color #f5f5f0;
+@define-color thumbnail_bg_color #1a1a19;
+@define-color thumbnail_fg_color #f5f5f0;
+@define-color shade_color rgba(0, 0, 0, 0.5);
+@define-color scrollbar_outline_color rgba(0, 0, 0, 0.5);
+
+/* libadwaita 1.6 et plus récent : variables CSS */
+:root {
+  --accent-color: #d3fd50;
+  --accent-bg-color: #d3fd50;
+  --accent-fg-color: #0a0a0a;
+  --destructive-color: #ff6b5a;
+  --destructive-bg-color: #ff6b5a;
+  --destructive-fg-color: #0a0a0a;
+  --success-color: #d3fd50;
+  --warning-color: #f0c75e;
+  --error-color: #ff6b5a;
+  --window-bg-color: #0a0a0a;
+  --window-fg-color: #f5f5f0;
+  --view-bg-color: #0d0d0c;
+  --view-fg-color: #f5f5f0;
+  --headerbar-bg-color: #121212;
+  --headerbar-fg-color: #f5f5f0;
+  --headerbar-border-color: #262624;
+  --headerbar-backdrop-color: #0a0a0a;
+  --sidebar-bg-color: #121212;
+  --sidebar-fg-color: #f5f5f0;
+  --sidebar-backdrop-color: #0d0d0c;
+  --sidebar-border-color: #262624;
+  --secondary-sidebar-bg-color: #0d0d0c;
+  --card-bg-color: #121212;
+  --card-fg-color: #f5f5f0;
+  --dialog-bg-color: #121212;
+  --dialog-fg-color: #f5f5f0;
+  --popover-bg-color: #121212;
+  --popover-fg-color: #f5f5f0;
+  --thumbnail-bg-color: #1a1a19;
+  --thumbnail-fg-color: #f5f5f0;
+  --border-color: #262624;
+  --window-radius: 8px;
+  --document-font-family: "Archivo";
+  --monospace-font-family: "JetBrains Mono";
+}
+
+/* Angles presque droits (4, 6, 8 px) au lieu des arrondis de GNOME. */
+button, entry, spinbutton, dropdown > button, combobox > box > button { border-radius: 6px; }
+popover > contents, menu, .menu { border-radius: 8px; }
+.card, list.boxed-list, .boxed-list { border-radius: 8px; }
+window.csd, window.csd > .titlebar, dialog.csd { border-radius: 8px; }
+tooltip { border-radius: 4px; background-color: #1a1a19; color: #f5f5f0; }
+
+/* Sélection et focus : accent citron, texte noir posé dessus. */
+selection, *:selected, row:selected { background-color: alpha(#d3fd50, 0.22); color: #f5f5f0; }
+*:focus-visible { outline-color: alpha(#d3fd50, 0.8); }

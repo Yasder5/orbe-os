@@ -11,7 +11,7 @@ Orbe Shell est une configuration Quickshell (QML, Qt 6) nommée `orbe`, install�
 | `Config.qml` | réglages de l'utilisateur, `~/.config/orbe/shell.json`, rechargés à chaud |
 | `Panels.qml` | ce qui est ouvert à l'écran (lanceur, menu de session, centre) et ses points d'entrée IPC |
 | `Icons.qml` | icônes Orbe monolignes (tracés SVG sur une grille de 24 px) |
-| `services/` | données du système : son (PipeWire), luminosité, verrouillage majuscules, notifications, applications, actions de session |
+| `services/` | données du système : son (PipeWire), luminosité, verrouillage majuscules, notifications, applications, actions de session (dont le mode jeu), sons système |
 | `components/` | éléments réutilisables : icône, texte, anneau de focus, bouton de panneau, orbe animé, logo |
 | `bar/` | barre, verticale à gauche ou horizontale en haut |
 | `launcher/` | lanceur d'applications et ses préfixes, liste d'émojis générée par `tools/gen-emojis.py` |
@@ -27,7 +27,7 @@ Orbe Shell est une configuration Quickshell (QML, Qt 6) nommée `orbe`, install�
 
 ## Réglages (`~/.config/orbe/shell.json`)
 
-Créé au premier lancement. Toute modification est appliquée sans redémarrer le shell. `wallpaper` accepte un chemin d'image ou `orbe-vivant` (orbe animé).
+Créé au premier lancement. Toute modification est appliquée sans redémarrer le shell. `wallpaper` accepte un chemin d'image ou `orbe-vivant` (orbe animé). `sounds` coupe ou rétablit les sons système (notification, volume).
 
 ```json
 {
@@ -38,7 +38,8 @@ Créé au premier lancement. Toute modification est appliquée sans redémarrer 
   "wallpaper": "/usr/share/backgrounds/orbe/orbe.png",
   "weatherCity": "Paris",
   "nightLight": false,
-  "nightTemperature": 4500
+  "nightTemperature": 4500,
+  "sounds": true
 }
 ```
 

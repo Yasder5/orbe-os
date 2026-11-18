@@ -1,49 +1,48 @@
-# Mode jeu : proposition
+# Mode jeu
 
-Demande de Yass (2026-11-17) : un système pensé d'abord pour lancer les jeux, à la manière de SteamOS, avec une interface soignée. Ce document décrit ce qui est prévu et liste les choix à valider. Rien de ce qui suit n'est encore construit.
+Demande de Yass (2026-11-17) : un système pensé d'abord pour lancer les jeux, à la manière de SteamOS, avec une interface soignée.
 
-## Deux sessions, un seul système
+## Deux sessions, une seule commande
 
 | | Bureau Orbe | Mode jeu Orbe |
 |---|---|---|
 | Compositeur | Hyprland | gamescope (le compositeur de Valve, celui de SteamOS) |
-| Interface | Orbe Shell (barre, lanceur, réglages) | plein écran, pensée pour la manette |
-| Usage | travail, navigation, réglages | jeux, à la télé ou au bureau |
+| Interface | Orbe Shell | Steam en mode Big Picture, thème Orbe |
+| Usage | travail, navigation, réglages | jeux, à la télé ou au bureau, à la manette |
 
-- On passe de l'un à l'autre en une action : bouton « Mode jeu » dans la barre et le lanceur (Super + G), entrée « Revenir au bureau » dans le mode jeu.
-- Au démarrage, greetd ouvre la dernière session utilisée. Une option permet de démarrer directement en mode jeu, comme une console.
+- greetd lance `orbe-session`, qui ouvre la **dernière session utilisée** (`~/.local/state/orbe/session` : `bureau` ou `jeu`).
+- Du bureau au mode jeu : bouton manette de la barre, entrée « Mode jeu » du menu de session (Super + Échap) et du lanceur (taper « jeu »), ou **Super + G**. `orbe-switch-session jeu` ferme proprement les applications (hyprshutdown, qui laisse enregistrer), quitte Hyprland, puis `orbe-session` lance le mode jeu.
+- Du mode jeu au bureau : « Revenir au bureau » dans le menu d'alimentation de Steam. Steam, lancé avec `-steamos3`, appelle `steamos-session-select`, fourni par Orbe OS.
+- Si Steam se ferme sans demande (plantage, quitter), on revient au bureau, sans changer la session enregistrée : impossible de rester bloqué sur un écran noir.
 
-## Accueil du mode jeu
+## Ce que lance le mode jeu
 
-Trois possibilités, à choisir :
+`orbe-game-session` : `gamescope --steam --mangoapp --xwayland-count 2 --adaptive-sync -- steam -gamepadui -steamos3 -steampal`, avec les variables d'environnement d'une session SteamOS (VRR, déchirement autorisé, mise à l'échelle NIS, volume, clavier visuel de Steam, MangoHud piloté par le curseur « Performances » de Steam). Journal de la dernière partie : `~/.local/state/orbe/jeu.log`.
 
-1. **Steam en mode Big Picture** (`steam -gamepadui` dans gamescope). C'est ce que fait SteamOS : compatibilité maximale, mises à jour assurées par Valve, mais l'interface est celle de Steam, pas celle d'Orbe.
-2. **Orbe Launcher** comme accueil, qui réunit Steam, Epic et GOG (via Heroic), les émulateurs, etc. L'identité Orbe est complète, mais le launcher est pensé pour Windows : il faut d'abord un portage Linux (rapport à venir, aucune modification sans accord).
-3. **Les deux** : Steam Big Picture par défaut tout de suite, Orbe Launcher en option dès que le portage Linux est prêt. **Recommandé.**
+## Thème Steam Orbe
 
-## Optimisations pour le jeu
+Le skin d'Orbe Launcher (`themes/steam/Orbe`, MIT) est appliqué par **CSS Loader**, un greffon de **Decky Loader**. Les deux sont empaquetés dans `[orbe]` depuis leurs binaires officiels (`decky-loader-bin` 3.3.1, GPL-2.0 ; `decky-plugin-css-loader` 2.1.2, GPL-3.0). Le service `decky-loader@<compte>` tourne en root (comme sur le Steam Deck) avec ses greffons dans `~/homebrew`. Au lancement du mode jeu, `orbe-steam-setup` copie CSS Loader et le thème Orbe dans `~/homebrew`, active le thème (police Archivo et fond orbe) et autorise le débogage distant de Steam, dont Decky a besoin. Les choix faits ensuite dans CSS Loader sont gardés.
 
-Prévues dans le système installé, mesurées avant d'être gardées :
+## Optimisations pour le jeu (paquet `orbe-gaming`)
 
-- **Proton et Vulkan 32 bits** : pilotes `lib32` (Mesa, NVIDIA), dépôt multilib déjà actif.
-- **ntsync** : module du noyau chargé au démarrage, utilisé par Proton récent pour la synchronisation Windows (gain net sur certains jeux).
-- **Ordonnanceur `scx_lavd`** (sched-ext) : conçu pour réduire la latence en jeu, financé par Valve pour le Steam Deck. Optionnel, activé en mode jeu.
-- **GameMode** : performances maximales du processeur pendant une partie.
-- **MangoHud** : compteur d'images et températures, affiché ou masqué par raccourci.
-- **zram** à la place d'une partition d'échange, `split_lock_mitigate` désactivé comme sur SteamOS.
-- **VRR** (FreeSync, G-Sync compatible) et tearing autorisé pour les jeux qui le demandent : déjà dans la configuration Hyprland.
-- **Manettes** : règles udev de Steam, DualSense et DualShock pris en charge par le noyau, manettes Xbox en Bluetooth via `xpadneo`.
-- **Noyau** : `linux` par défaut, `linux-zen` proposé dans l'installateur (orienté réactivité), `linux-lts` en secours.
+- **Proton et Vulkan 32 bits** : `lib32-mesa`, `lib32-vulkan-radeon`, `lib32-vulkan-intel` dans l'ISO. `lib32-nvidia-utils` (580 Mo installé) est réservé à l'installateur, quand une carte NVIDIA est détectée.
+- **ntsync** : module chargé au démarrage, `/dev/ntsync` accessible (Proton et Wine récents).
+- **zram** : échange compressé en mémoire, la moitié de la RAM au plus (8 Go), réglages d'échange du wiki Arch.
+- **`vm.max_map_count`** à la valeur de SteamOS, **`split_lock_mitigate`** désactivé.
+- **GameMode** (compte dans le groupe `gamemode`) : option de lancement Steam `gamemoderun %command%`.
+- **MangoHud** aux couleurs d'Orbe sur le bureau (`mangohud %command%`, Maj droite + F12) ; en mode jeu, c'est Steam qui le règle.
+- **VRR** et déchirement autorisé : Hyprland (`vrr = 2`, règle `immediate` pour les jeux Steam) et gamescope.
+- **Manettes** : règles udev de Steam (paquet `steam-devices`), DualSense, DualShock et Switch Pro gérés par le noyau.
+- **`scx_lavd`** (sched-ext, 150 Mo avec les autres ordonnanceurs) : en option (`scx-scheds`), pas dans l'ISO.
 
-## Interface et expérience
+## Limites connues
 
-- Navigation complète à la manette dans tout le mode jeu, anneau de focus Orbe, sons de navigation d'Orbe Launcher (déplacer, valider, retour, lancer).
-- Bouton Guide : retour à l'accueil depuis n'importe quel jeu, avec un menu rapide (volume, luminosité, profil d'énergie, quitter le jeu).
-- Assistant de bienvenue : propose d'installer Steam, Heroic, Discord, OBS et les outils de jeu, et de choisir le démarrage en mode jeu.
+- Testé en machine virtuelle seulement pour la bascule entre les sessions. gamescope demande une carte graphique Vulkan avec un nœud DRM, absente de la VM, et Steam télécharge plus de 300 Mo au premier lancement : **le mode jeu lui-même et le thème Steam sont à valider sur le PC de Yass** (guide de l'étape 9).
+- Steam reste maître de son interface : une mise à jour de Steam peut casser des sélecteurs du thème (voir `themes/steam/README` d'Orbe Launcher et son `tools/check.py`).
+- Decky Loader peut se mettre à jour lui-même depuis Steam ; la version du paquet reprend la main à la mise à jour suivante d'Orbe OS.
+- `xpadneo` (manettes Xbox en Bluetooth, module DKMS) et `game-devices-udev` ne sont pas encore empaquetés.
 
 ## Choix validés par Yass (2026-11-18)
 
-1. Accueil du mode jeu : **Steam Big Picture d'abord, Orbe Launcher ensuite** (possibilité 3), quand son portage Linux sera prêt.
+1. Accueil du mode jeu : **Steam Big Picture d'abord, Orbe Launcher ensuite**, quand son portage Linux sera prêt.
 2. Démarrage du système installé : **dernière session utilisée** (bureau ou mode jeu), modifiable dans les réglages.
-
-Paquets à reconstruire depuis l'AUR dans `[orbe]` : `gamescope-session-steam` (sessions façon SteamOS), `xpadneo-dkms`, `game-devices-udev`. Les autres sont dans les dépôts officiels.

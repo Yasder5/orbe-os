@@ -2,7 +2,7 @@
 
 Super est la touche Windows. Sur un clavier AZERTY, les chiffres des espaces de travail sont les touches de la rangée du haut (& é " ' ( - è _ ç), sans Maj : Orbe les reconnaît par leur position.
 
-Source : `packages/orbe-desktop/binds.lua`. Tout ce qui est marqué « à venir » arrive avec Orbe Shell (étapes 3 et 4).
+Source : `packages/orbe-desktop/binds.lua`.
 
 ## Applications
 
@@ -15,6 +15,7 @@ Source : `packages/orbe-desktop/binds.lua`. Tout ce qui est marqué « à venir 
 | Super + D | Tableau de bord : heure, météo, calendrier, système, média |
 | Super + A | Réglages rapides : Wi-Fi, Bluetooth, son, mode nuit, énergie |
 | Super + W | Fond d'écran |
+| Super + G | Mode jeu : Steam Big Picture en plein écran (les fenêtres ouvertes sont d'abord fermées proprement) |
 | Super + Maj + : | Aide des raccourcis (à venir ; Super + / sur un clavier QWERTY) |
 
 ## Fenêtres

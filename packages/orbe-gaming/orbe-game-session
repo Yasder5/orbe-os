@@ -1,0 +1,46 @@
+#!/bin/bash
+# Mode jeu d'Orbe OS : Steam en mode Big Picture dans gamescope, le compositeur de SteamOS.
+# Lancé par orbe-session. « Revenir au bureau » dans Steam appelle steamos-session-select.
+state=${XDG_STATE_HOME:-$HOME/.local/state}/orbe
+mkdir -p "$state"
+
+# Decky Loader, CSS Loader et thème Orbe dans ~/homebrew.
+orbe-steam-setup || true
+
+# Clavier : même disposition que la console et le bureau.
+if [[ -z ${XKB_DEFAULT_LAYOUT:-} ]]; then
+  layout=$(sed -n 's/.*"XkbLayout" *"\([^",]*\).*/\1/p' /etc/X11/xorg.conf.d/00-keyboard.conf 2>/dev/null | head -n1)
+  [[ -n $layout ]] || layout=$(sed -n 's/^KEYMAP=\([a-z]*\).*/\1/p' /etc/vconsole.conf 2>/dev/null)
+  export XKB_DEFAULT_LAYOUT=${layout:-us}
+fi
+
+export XDG_CURRENT_DESKTOP=gamescope
+export XDG_SESSION_DESKTOP=gamescope
+# Fonctions de Steam réservées aux sessions gamescope, comme sur SteamOS : écran variable (VRR),
+# déchirement autorisé, mise à l'échelle NIS, volume, plusieurs serveurs X, compteur MangoHud.
+export STEAM_MULTIPLE_XWAYLANDS=1
+export STEAM_GAMESCOPE_VRR_SUPPORTED=1
+export STEAM_GAMESCOPE_TEARING_SUPPORTED=1
+export STEAM_GAMESCOPE_HAS_TEARING_SUPPORT=1
+export STEAM_GAMESCOPE_NIS_SUPPORTED=1
+export STEAM_ENABLE_VOLUME_HANDLER=1
+export STEAM_USE_MANGOAPP=1
+export STEAM_MANGOAPP_PRESETS_SUPPORTED=1
+export STEAM_DISABLE_MANGOAPP_ATOM_WORKAROUND=1
+export SRT_URLOPEN_PREFER_STEAM=1
+# Clavier visuel de Steam dans les applications Qt et GTK.
+export QT_IM_MODULE=steam
+export GTK_IM_MODULE=Steam
+export vk_xwayland_wait_ready=false
+
+# Le curseur de performances de Steam écrit ici la configuration de MangoHud.
+MANGOHUD_CONFIGFILE=$(mktemp "${XDG_RUNTIME_DIR:-/tmp}/mangohud.XXXXXX")
+export MANGOHUD_CONFIGFILE
+echo no_display > "$MANGOHUD_CONFIGFILE"
+trap 'rm -f "$MANGOHUD_CONFIGFILE"' EXIT
+
+gamescope_args=(--steam --mangoapp --xwayland-count 2 --adaptive-sync)
+steam_args=(-gamepadui -steamos3 -steampal)
+
+# Journal de la dernière partie, pour le dépannage.
+gamescope "${gamescope_args[@]}" -- steam "${steam_args[@]}" > "$state/jeu.log" 2>&1

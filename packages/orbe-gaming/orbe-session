@@ -1,0 +1,30 @@
+#!/bin/bash
+# Session Orbe OS, lancée par greetd : ouvre la dernière session utilisée (bureau ou mode jeu)
+# et passe de l'une à l'autre quand orbe-switch-session le demande.
+#   ~/.local/state/orbe/session : « bureau » ou « jeu », la session à ouvrir
+#   ~/.local/state/orbe/switch  : présent quand la session qui se termine a demandé une bascule
+state=${XDG_STATE_HOME:-$HOME/.local/state}/orbe
+mkdir -p "$state"
+export ORBE_SESSION=1
+
+next=$(cat "$state/session" 2>/dev/null)
+while :; do
+  rm -f "$state/switch"
+  if [[ $next == jeu ]] && command -v gamescope >/dev/null && command -v steam >/dev/null; then
+    orbe-game-session
+  else
+    next=bureau
+    start-hyprland
+  fi
+  if [[ -f $state/switch ]]; then
+    next=$(cat "$state/session" 2>/dev/null)
+    continue
+  fi
+  # Steam s'est fermé sans demander de bascule (plantage, quitter) : retour au bureau,
+  # sans changer la session enregistrée.
+  if [[ $next == jeu ]]; then
+    next=bureau
+    continue
+  fi
+  break
+done

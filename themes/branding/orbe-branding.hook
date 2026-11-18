@@ -1,0 +1,12 @@
+[Trigger]
+Type = Package
+Operation = Install
+Operation = Upgrade
+Target = filesystem
+Target = lsb-release
+Target = orbe-branding
+
+[Action]
+Description = Identité Orbe OS (os-release, lsb-release, issue)...
+When = PostTransaction
+Exec = /usr/share/orbe/branding/orbe-branding-apply

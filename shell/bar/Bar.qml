@@ -169,6 +169,13 @@ Scope {
                     }
                 }
 
+                // Mode jeu : Steam Big Picture dans gamescope.
+                BarButton {
+                    Layout.alignment: Qt.AlignCenter
+                    icon: "gamepad"
+                    onClicked: Session.run("game")
+                }
+
                 BarButton {
                     Layout.alignment: Qt.AlignCenter
                     icon: "power"

@@ -63,12 +63,16 @@ Scope {
         case "~":
             return fileItems(term, fileList);
         default:
-            return Apps.search(term, 40).map(entry => ({
+            const apps = Apps.search(term, 40).map(entry => ({
                 title: entry.name,
                 subtitle: entry.genericName || entry.comment || "",
                 iconSource: Quickshell.iconPath(entry.icon, "application-x-executable"),
                 run: () => Apps.launch(entry)
             }));
+            // « jeu », « steam », « big picture » : le mode jeu en premier.
+            if (term.length >= 2 && Fuzzy.strict(term, ["Mode jeu", "jeux", "Steam Big Picture", "gamescope"]) >= 0)
+                apps.unshift({ title: "Mode jeu", subtitle: "Steam Big Picture en plein écran, à la manette", icon: "gamepad", run: () => Session.run("game") });
+            return apps;
         }
     }
 

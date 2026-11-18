@@ -1,0 +1,3 @@
+#!/bin/sh
+# Fuseau horaire choisi dans Steam : appliqué par timedated (polkit décide de l'autorisation).
+[ -n "$1" ] && exec timedatectl set-timezone "$1"

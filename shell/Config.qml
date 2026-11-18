@@ -22,6 +22,7 @@ Singleton {
     property alias weatherCity: json.weatherCity
     property alias nightLight: json.nightLight
     property alias nightTemperature: json.nightTemperature
+    property alias sounds: json.sounds
 
     FileView {
         id: file
@@ -48,6 +49,7 @@ Singleton {
             property string weatherCity: "Paris"
             property bool nightLight: false
             property int nightTemperature: 4500
+            property bool sounds: true
         }
     }
 }

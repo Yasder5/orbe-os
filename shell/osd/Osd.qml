@@ -30,6 +30,7 @@ Scope {
         target: Audio
         function onTouched() {
             root.show("volume");
+            Sounds.play("audio-volume-change");
         }
     }
     Connections {

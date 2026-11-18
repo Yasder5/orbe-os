@@ -1,0 +1,14 @@
+#!/bin/sh
+# Identité Orbe OS : /usr/lib/os-release (lien depuis /etc/os-release), /etc/lsb-release et
+# /etc/issue appartiennent aux paquets filesystem et lsb-release d'Arch ; ce script les réécrit
+# après chaque installation ou mise à jour de ces paquets (hook pacman orbe-branding.hook).
+set -e
+install -m644 /usr/share/orbe/branding/os-release /usr/lib/os-release
+if [ -f /etc/lsb-release ]; then
+  cat > /etc/lsb-release <<'LSB'
+DISTRIB_ID="Orbe"
+DISTRIB_RELEASE="rolling"
+DISTRIB_DESCRIPTION="Orbe OS"
+LSB
+fi
+printf 'Orbe OS \\r (\\l)\n\n' > /etc/issue

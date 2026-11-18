@@ -1,0 +1,41 @@
+#!/bin/bash
+# Passe du bureau au mode jeu, ou l'inverse.
+# Usage : orbe-switch-session jeu|bureau
+state=${XDG_STATE_HOME:-$HOME/.local/state}/orbe
+mode=${1:-}
+case $mode in
+  jeu|bureau) ;;
+  *) echo "Usage : orbe-switch-session jeu|bureau" >&2; exit 2 ;;
+esac
+
+note() { notify-send -a Orbe -i input-gaming "$1" "$2" 2>/dev/null || echo "$1 : $2" >&2; }
+
+if [[ -z ${ORBE_SESSION:-} ]]; then
+  note "Changement de session impossible" "Cette session n'a pas été ouverte par Orbe OS (orbe-session)."
+  exit 1
+fi
+if [[ $mode == jeu ]] && ! { command -v gamescope && command -v steam; } >/dev/null; then
+  note "Mode jeu indisponible" "Installe les paquets steam et gamescope."
+  exit 1
+fi
+
+mkdir -p "$state"
+previous=$(cat "$state/session" 2>/dev/null || echo bureau)
+echo "$mode" > "$state/session"
+: > "$state/switch"
+
+if [[ -n ${HYPRLAND_INSTANCE_SIGNATURE:-} ]]; then
+  # Ferme les applications proprement (elles peuvent proposer d'enregistrer), puis quitte Hyprland.
+  if command -v hyprshutdown >/dev/null; then
+    [[ $mode == jeu ]] && title="Passage en mode jeu" || title="Changement de session"
+    hyprshutdown --no-fork -t "$title" && exit 0
+    # Fermeture annulée : on reste sur le bureau.
+    echo "$previous" > "$state/session"
+    rm -f "$state/switch"
+    exit 1
+  fi
+  hyprctl dispatch 'hl.dsp.exit()' >/dev/null
+elif pgrep -u "$UID" -x steam >/dev/null; then
+  # Mode jeu : Steam se ferme proprement, gamescope s'arrête avec lui.
+  steam -shutdown >/dev/null 2>&1 &
+fi

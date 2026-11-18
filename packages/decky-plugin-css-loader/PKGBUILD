@@ -1,0 +1,23 @@
+# Maintainer: yasder5
+# CSS Loader : greffon Decky qui applique des thèmes CSS à l'interface de Steam (DeckThemes, GPL-3.0).
+# Archive officielle installée telle quelle dans /usr/share ; orbe-steam-setup la copie dans
+# ~/homebrew/plugins au lancement du mode jeu.
+
+pkgname=decky-plugin-css-loader
+pkgver=2.1.2
+pkgrel=1
+pkgdesc="CSS Loader, thèmes CSS pour l'interface manette de Steam (greffon Decky)"
+arch=('any')
+url="https://github.com/DeckThemes/SDH-CssLoader"
+license=('GPL-3.0-only')
+optdepends=("decky-loader: chargeur de greffons qui l'exécute")
+options=('!strip' '!debug')
+source=("SDH-CSSLoader-Decky-$pkgver.zip::$url/releases/download/v$pkgver/SDH-CSSLoader-Decky.zip")
+sha256sums=('0105b29cba25eacbfb8574b8a72e24b82cd1a8fb1ea6a9b3460597c9583e79ed')
+
+package() {
+  install -d "$pkgdir/usr/share/orbe/decky/plugins"
+  cp -r "$srcdir/SDH-CssLoader" "$pkgdir/usr/share/orbe/decky/plugins/"
+  find "$pkgdir/usr/share/orbe/decky" -type d -exec chmod 755 {} + -o -type f -exec chmod 644 {} +
+  install -Dm644 "$srcdir/SDH-CssLoader/LICENSE" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}

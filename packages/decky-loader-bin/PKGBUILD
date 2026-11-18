@@ -1,0 +1,28 @@
+# Maintainer: yasder5
+# Decky Loader : chargeur de greffons pour l'interface manette de Steam. Orbe OS s'en sert pour
+# CSS Loader et le thème Steam Orbe. Binaire officiel publié par SteamDeckHomebrew (GPL-2.0),
+# installé tel quel ; service écrit pour Orbe OS (dossier ~/homebrew, comme sur le Steam Deck).
+
+pkgname=decky-loader-bin
+pkgver=3.3.1
+pkgrel=1
+pkgdesc="Decky Loader, greffons pour l'interface manette de Steam (binaire officiel)"
+arch=('x86_64')
+url="https://github.com/SteamDeckHomebrew/decky-loader"
+license=('GPL-2.0-only')
+depends=('glibc' 'zlib')
+provides=('decky-loader')
+conflicts=('decky-loader')
+options=('!strip' '!debug')
+source=("PluginLoader-$pkgver::$url/releases/download/v$pkgver/PluginLoader"
+        "decky-loader@.service"
+        "decky-loader-prepare")
+sha256sums=('7bb73b0502c49e7194f34f9ce4ddb6777764e9277d7a5e54665f66460d50c315'
+            'SKIP'
+            'SKIP')
+
+package() {
+  install -Dm755 "$srcdir/PluginLoader-$pkgver" "$pkgdir/usr/lib/decky-loader/PluginLoader"
+  install -Dm755 "$srcdir/decky-loader-prepare" "$pkgdir/usr/lib/decky-loader/prepare"
+  install -Dm644 "$srcdir/decky-loader@.service" "$pkgdir/usr/lib/systemd/system/decky-loader@.service"
+}

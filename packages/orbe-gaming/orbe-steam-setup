@@ -1,0 +1,26 @@
+#!/bin/bash
+# Prépare Steam pour le mode jeu : CSS Loader et thème Orbe dans le dossier de Decky Loader.
+# Le thème est mis à jour à chaque version d'Orbe OS ; les choix faits dans CSS Loader sont gardés.
+hb=$HOME/homebrew
+mkdir -p "$hb/plugins" "$hb/themes"
+
+plugin=/usr/share/orbe/decky/plugins/SDH-CssLoader
+if [[ -d $plugin ]] && ! cmp -s "$plugin/package.json" "$hb/plugins/SDH-CssLoader/package.json"; then
+  rm -rf "$hb/plugins/SDH-CssLoader"
+  cp -r "$plugin" "$hb/plugins/"
+fi
+
+theme=/usr/share/orbe/steam/Orbe
+if [[ -d $theme ]]; then
+  mkdir -p "$hb/themes/Orbe"
+  cp -r "$theme/." "$hb/themes/Orbe/"
+  # Thème actif au premier lancement (CSS Loader lit config_USER.json, ou config_ROOT.json sous root).
+  for f in config_USER.json config_ROOT.json; do
+    [[ -f $hb/themes/Orbe/$f ]] ||
+      printf '{"active": true, "Police Archivo": "Yes", "Fond orbe": "Yes"}\n' > "$hb/themes/Orbe/$f"
+  done
+fi
+
+# Decky ne se branche sur Steam que si le débogage distant de son interface est autorisé.
+mkdir -p "$HOME/.local/share/Steam"
+touch "$HOME/.local/share/Steam/.cef-enable-remote-debugging"

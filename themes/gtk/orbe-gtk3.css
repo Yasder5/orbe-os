@@ -1,0 +1,33 @@
+/* Orbe pour GTK 3 (avec le thème adw-gtk3-dark, qui suit les couleurs nommées de libadwaita).
+   Inclus par ~/.config/gtk-3.0/gtk.css (@import), donc mis à jour avec le paquet orbe-themes. */
+@define-color accent_color #d3fd50;
+@define-color accent_bg_color #d3fd50;
+@define-color accent_fg_color #0a0a0a;
+@define-color destructive_color #ff6b5a;
+@define-color destructive_bg_color #ff6b5a;
+@define-color destructive_fg_color #0a0a0a;
+@define-color success_color #d3fd50;
+@define-color warning_color #f0c75e;
+@define-color error_color #ff6b5a;
+@define-color window_bg_color #0a0a0a;
+@define-color window_fg_color #f5f5f0;
+@define-color view_bg_color #0d0d0c;
+@define-color view_fg_color #f5f5f0;
+@define-color headerbar_bg_color #121212;
+@define-color headerbar_fg_color #f5f5f0;
+@define-color headerbar_border_color #262624;
+@define-color headerbar_backdrop_color #0a0a0a;
+@define-color sidebar_bg_color #121212;
+@define-color sidebar_fg_color #f5f5f0;
+@define-color card_bg_color #121212;
+@define-color card_fg_color #f5f5f0;
+@define-color dialog_bg_color #121212;
+@define-color dialog_fg_color #f5f5f0;
+@define-color popover_bg_color #121212;
+@define-color popover_fg_color #f5f5f0;
+@define-color theme_selected_bg_color #d3fd50;
+@define-color theme_selected_fg_color #0a0a0a;
+
+button, entry, spinbutton, combobox button { border-radius: 6px; }
+menu, .menu, popover { border-radius: 8px; }
+tooltip { border-radius: 4px; }

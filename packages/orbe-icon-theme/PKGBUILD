@@ -1,0 +1,25 @@
+# Maintainer: yasder5
+# Thème d'icônes Orbe : Papirus-Dark avec les dossiers en citron. Seules les icônes de dossiers
+# sont produites ici (themes/icons/make-orbe-icons.py), le reste vient de Papirus par héritage.
+
+pkgname=orbe-icon-theme
+pkgver=${ORBE_VERSION:-0.1.0}
+pkgrel=1
+pkgdesc="Icônes Orbe : Papirus-Dark, dossiers aux couleurs d'Orbe"
+arch=('any')
+options=('!debug' '!strip')
+url="https://github.com/Yasder5/orbe-os"
+license=('GPL-3.0-only')
+depends=('papirus-icon-theme')
+makedepends=('papirus-icon-theme' 'python')
+
+build() {
+  : "${ORBE_SRC:?ORBE_SRC doit pointer vers la racine du dépôt}"
+  rm -rf "$srcdir/Orbe"
+  python3 -I "$ORBE_SRC/themes/icons/make-orbe-icons.py" "$srcdir/Orbe"
+}
+
+package() {
+  install -d "$pkgdir/usr/share/icons"
+  cp -a "$srcdir/Orbe" "$pkgdir/usr/share/icons/Orbe"
+}

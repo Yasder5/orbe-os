@@ -13,6 +13,8 @@ hl.bind(mod .. " + D",       hl.dsp.exec_cmd(shell .. "dashboard toggle"), { des
 hl.bind(mod .. " + A",       hl.dsp.exec_cmd(shell .. "quick toggle"),     { description = "Réglages rapides" })
 hl.bind(mod .. " + W",       hl.dsp.exec_cmd(shell .. "wallpaper picker"), { description = "Fond d'écran" })
 hl.bind(mod .. " + L",       hl.dsp.exec_cmd(shell .. "lock lock"),        { description = "Verrouiller" })
+-- Mode jeu : Steam Big Picture dans gamescope (les applications ouvertes sont d'abord fermées proprement).
+hl.bind(mod .. " + G",       hl.dsp.exec_cmd("orbe-switch-session jeu"),   { description = "Mode jeu" })
 
 -- Applications
 hl.bind(mod .. " + Return", hl.dsp.exec_cmd(terminal))

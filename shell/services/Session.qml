@@ -5,11 +5,14 @@ import Quickshell.Hyprland
 import QtQuick
 import qs
 
-// Actions de session : verrouiller, se déconnecter, veille, redémarrer, éteindre.
+// Actions de session : mode jeu, verrouiller, se déconnecter, veille, redémarrer, éteindre.
+// Déconnexion, redémarrage et arrêt passent par hyprshutdown, qui ferme d'abord les applications
+// proprement (elles peuvent proposer d'enregistrer).
 Singleton {
     id: root
 
     readonly property var actions: [
+        { id: "game", label: "Mode jeu", icon: "gamepad", danger: false },
         { id: "lock", label: "Verrouiller", icon: "lock", danger: false },
         { id: "logout", label: "Se déconnecter", icon: "logout", danger: false },
         { id: "suspend", label: "Mettre en veille", icon: "sleep", danger: false },
@@ -19,21 +22,35 @@ Singleton {
 
     function run(action) {
         switch (action) {
+        case "game":
+            Panels.sessionOpen = false;
+            Quickshell.execDetached(["orbe-switch-session", "jeu"]);
+            break;
         case "lock":
             Panels.lock();
             break;
         case "logout":
-            Hyprland.dispatch(Hyprland.usingLua ? "hl.dsp.exit()" : "exit");
+            shutdown("Déconnexion", "");
             break;
         case "suspend":
             Quickshell.execDetached(["systemctl", "suspend"]);
             break;
         case "reboot":
-            Quickshell.execDetached(["systemctl", "reboot"]);
+            shutdown("Redémarrage", "systemctl reboot");
             break;
         case "poweroff":
-            Quickshell.execDetached(["systemctl", "poweroff"]);
+            shutdown("Arrêt", "systemctl poweroff");
             break;
         }
+    }
+
+    // Quitte Hyprland avec hyprshutdown, puis lance la commande donnée. Sans hyprshutdown
+    // (aperçu, autre compositeur), la commande est lancée directement.
+    function shutdown(title, then) {
+        Panels.sessionOpen = false;
+        const exit = Hyprland.usingLua ? "hyprctl dispatch 'hl.dsp.exit()'" : "hyprctl dispatch exit";
+        const fallback = then || exit;
+        const args = then ? ` -p '${then}'` : "";
+        Quickshell.execDetached(["sh", "-c", `command -v hyprshutdown >/dev/null && hyprshutdown -t '${title}'${args} || ${fallback}`]);
     }
 }

@@ -1,3 +1,6 @@
 # Paquets ajoutés à l'ISO seulement s'ils ont pu être construits (sources externes).
 # Heroic Games Launcher : jeux Epic, GOG et Amazon, thème Orbe (paquet [orbe] depuis l'AUR)
 heroic-games-launcher-bin
+# Decky Loader et CSS Loader : thème Steam Orbe en mode jeu (binaires officiels, GitHub)
+decky-loader-bin
+decky-plugin-css-loader

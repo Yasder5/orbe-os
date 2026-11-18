@@ -1,0 +1,22 @@
+# Decky Loader pour le compte %i : greffons dans /home/%i/homebrew.
+# Activé par compte : systemctl enable decky-loader@NOM.service
+[Unit]
+Description=Decky Loader (greffons Steam) pour %i
+After=network.target systemd-tmpfiles-setup.service
+
+[Service]
+Type=simple
+User=root
+Restart=always
+RestartSec=5
+KillMode=process
+TimeoutStopSec=15
+ExecStartPre=/usr/lib/decky-loader/prepare %i
+ExecStart=/usr/lib/decky-loader/PluginLoader
+WorkingDirectory=-/home/%i/homebrew
+Environment=UNPRIVILEGED_PATH=/home/%i/homebrew
+Environment=PRIVILEGED_PATH=/home/%i/homebrew
+Environment=LOG_LEVEL=INFO
+
+[Install]
+WantedBy=multi-user.target

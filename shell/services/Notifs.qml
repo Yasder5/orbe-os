@@ -49,8 +49,10 @@ Singleton {
         onNotification: notification => {
             notification.tracked = true;
             // Ne pas déranger : seules les notifications critiques s'affichent.
-            if (!root.doNotDisturb || notification.urgency === NotificationUrgency.Critical)
+            if (!root.doNotDisturb || notification.urgency === NotificationUrgency.Critical) {
                 root.popups = [notification, ...root.popups];
+                Sounds.play(notification.urgency === NotificationUrgency.Critical ? "dialog-warning" : "message-new-instant");
+            }
             notification.closed.connect(() => root.hidePopup(notification));
         }
     }

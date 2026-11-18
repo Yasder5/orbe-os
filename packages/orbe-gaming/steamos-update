@@ -1,0 +1,4 @@
+#!/bin/sh
+# Steam (lancé avec -steamos3) demande s'il existe une mise à jour du système.
+# Celles d'Orbe OS passent par pacman : code 7, « aucune mise à jour », comme SteamOS.
+exit 7

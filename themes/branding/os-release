@@ -1,0 +1,12 @@
+NAME="Orbe OS"
+PRETTY_NAME="Orbe OS"
+ID=orbe
+ID_LIKE=arch
+BUILD_ID=rolling
+VERSION_ID=@VERSION@
+ANSI_COLOR="38;2;211;253;80"
+HOME_URL="https://github.com/Yasder5/orbe-os"
+DOCUMENTATION_URL="https://github.com/Yasder5/orbe-os/tree/main/docs"
+SUPPORT_URL="https://github.com/Yasder5/orbe-os/issues"
+BUG_REPORT_URL="https://github.com/Yasder5/orbe-os/issues"
+LOGO=orbe

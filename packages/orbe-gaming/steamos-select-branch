@@ -1,0 +1,6 @@
+#!/bin/sh
+# Canal de mise à jour du système, demandé par Steam : Orbe OS n'a qu'un canal.
+case "$1" in
+  -l) echo stable ;;
+  *) echo stable ;;
+esac

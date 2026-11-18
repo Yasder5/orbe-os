@@ -1,0 +1,8 @@
+[Sound Theme]
+Name=Orbe
+Comment=Sons courts et sobres d'Orbe OS, repris d'Orbe Launcher
+Inherits=freedesktop
+Directories=stereo
+
+[stereo]
+OutputProfile=stereo

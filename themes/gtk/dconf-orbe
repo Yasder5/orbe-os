@@ -1,0 +1,31 @@
+# Réglages par défaut d'Orbe OS pour les applications GNOME et le portail GTK (thème sombre,
+# icônes, curseur, polices, sons). Chaque compte peut les changer ; dconf update les compile.
+[org/gnome/desktop/interface]
+color-scheme='prefer-dark'
+gtk-theme='adw-gtk3-dark'
+icon-theme='Orbe'
+cursor-theme='Orbe'
+cursor-size=24
+font-name='Archivo 11'
+document-font-name='Archivo 11'
+monospace-font-name='JetBrains Mono 11'
+accent-color='green'
+font-antialiasing='grayscale'
+font-hinting='slight'
+
+[org/gnome/desktop/sound]
+theme-name='orbe'
+event-sounds=true
+
+[org/gnome/desktop/wm/preferences]
+button-layout=':close'
+titlebar-font='Archivo Semi-Bold 11'
+
+[org/gnome/nautilus/preferences]
+default-folder-viewer='icon-view'
+
+[org/gtk/settings/file-chooser]
+sort-directories-first=true
+
+[org/gtk/gtk4/settings/file-chooser]
+sort-directories-first=true

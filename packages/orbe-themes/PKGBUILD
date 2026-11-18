@@ -5,12 +5,22 @@
 pkgname=orbe-themes
 pkgver=${ORBE_VERSION:-0.1.0}
 pkgrel=1
-pkgdesc="Thèmes Orbe : police Archivo, terminal (foot, fish, Starship, fastfetch, btop)"
+pkgdesc="Thèmes Orbe : police, GTK, Qt, curseur, démarrage, sons, terminal, Heroic et Steam"
 arch=('any')
 options=('!debug')
 url="https://github.com/Yasder5/orbe-os"
 license=('MIT' 'OFL-1.1')
 depends=('fontconfig' 'ttf-jetbrains-mono')
+makedepends=('python-pillow' 'python-numpy' 'xorg-xcursorgen' 'hyprcursor')
+
+# Curseur et écran de démarrage sont dessinés par des scripts du dépôt (aucune image externe).
+build() {
+  : "${ORBE_SRC:?ORBE_SRC doit pointer vers la racine du dépôt}"
+  rm -rf "$srcdir/cursor" "$srcdir/cursor-theme" "$srcdir/plymouth"
+  python3 -I "$ORBE_SRC/themes/cursor/generate.py" "$srcdir/cursor"
+  bash "$ORBE_SRC/themes/cursor/build.sh" "$srcdir/cursor" "$srcdir/cursor-theme"
+  python3 -I "$ORBE_SRC/themes/plymouth/generate.py" "$srcdir/plymouth"
+}
 
 package() {
   : "${ORBE_SRC:?ORBE_SRC doit pointer vers la racine du dépôt}"
@@ -31,4 +41,45 @@ package() {
 
   # Heroic Games Launcher : thème personnalisé « orbe » (dossier customThemesPath).
   install -Dm644 "$ORBE_SRC/themes/heroic/orbe.css" "$pkgdir/usr/share/orbe/heroic/orbe.css"
+
+  # Steam (interface manette) : thème CSS Loader d'Orbe Launcher, copié dans ~/homebrew/themes
+  # par orbe-steam-setup au lancement du mode jeu.
+  local f
+  for f in theme.json shared.css fonts.css background.css orb.webp fonts/Archivo.woff2 fonts/OFL-Archivo.txt; do
+    install -Dm644 "$ORBE_SRC/themes/steam/Orbe/$f" "$pkgdir/usr/share/orbe/steam/Orbe/$f"
+  done
+  install -Dm644 "$ORBE_SRC/LICENSES/MIT-orbe-launcher.txt" "$pkgdir/usr/share/licenses/$pkgname/MIT-orbe-launcher.txt"
+
+  # GTK 3 et 4 (libadwaita) : couleurs Orbe, incluses par ~/.config/gtk-*/gtk.css.
+  install -Dm644 "$ORBE_SRC/themes/gtk/orbe-gtk3.css" "$pkgdir/usr/share/orbe/gtk/gtk3.css"
+  install -Dm644 "$ORBE_SRC/themes/gtk/orbe-gtk4.css" "$pkgdir/usr/share/orbe/gtk/gtk4.css"
+
+  # Qt (qt6ct, style Fusion) : palette et retouches.
+  install -Dm644 "$ORBE_SRC/themes/qt/orbe-colors.conf" "$pkgdir/usr/share/orbe/qt6ct/orbe-colors.conf"
+  install -Dm644 "$ORBE_SRC/themes/qt/orbe.qss" "$pkgdir/usr/share/orbe/qt6ct/orbe.qss"
+  install -Dm644 "$ORBE_SRC/themes/qt/orbe-colors.conf" "$pkgdir/usr/share/qt6ct/colors/Orbe.conf"
+
+  # Curseur Orbe (xcursor et hyprcursor), dans le thème « Orbe » dont orbe-icon-theme fournit
+  # les icônes et index.theme : un seul nom de thème pour les icônes et le curseur.
+  install -d "$pkgdir/usr/share/icons/Orbe"
+  cp -a "$srcdir/cursor-theme/Orbe/cursors" "$srcdir/cursor-theme/Orbe/hyprcursors" \
+    "$srcdir/cursor-theme/Orbe/manifest.hl" "$pkgdir/usr/share/icons/Orbe/"
+
+  # Plymouth : l'orbe se forme au démarrage (et demande le mot de passe d'un disque chiffré).
+  install -d "$pkgdir/usr/share/plymouth/themes/orbe"
+  install -m644 "$srcdir"/plymouth/*.png "$ORBE_SRC"/themes/plymouth/orbe.{plymouth,script} \
+    "$pkgdir/usr/share/plymouth/themes/orbe/"
+
+  # Sons système (thème freedesktop « orbe »), repris d'Orbe Launcher (MIT).
+  local snd=$pkgdir/usr/share/sounds/orbe
+  install -Dm644 "$ORBE_SRC/themes/sounds/index.theme" "$snd/index.theme"
+  install -d "$snd/stereo"
+  install -m644 "$ORBE_SRC"/themes/sounds/{select,move,back,error,launch}.wav "$snd/stereo/"
+  local pair
+  for pair in message-new-instant:select message:select complete:select window-attention:select \
+              device-added:select device-removed:back audio-volume-change:move bell:move \
+              dialog-error:error dialog-warning:error service-login:launch desktop-login:launch \
+              camera-shutter:select screen-capture:select; do
+    ln -s "${pair#*:}.wav" "$snd/stereo/${pair%%:*}.wav"
+  done
 }

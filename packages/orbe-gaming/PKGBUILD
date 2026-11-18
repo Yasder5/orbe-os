@@ -1,0 +1,57 @@
+# Maintainer: yasder5
+# Mode jeu Orbe OS : Steam Big Picture dans gamescope (comme SteamOS), bascule avec le bureau,
+# réglages du système pour le jeu (zram, ntsync, max_map_count, split lock) et MangoHud aux couleurs d'Orbe.
+# Version fournie par build.sh (ORBE_VERSION), dérivée de l'historique git.
+
+pkgname=orbe-gaming
+pkgver=${ORBE_VERSION:-0.1.0}
+pkgrel=1
+pkgdesc="Mode jeu Orbe OS : session Steam et gamescope, réglages du système pour le jeu"
+arch=('any')
+options=('!debug')
+url="https://github.com/Yasder5/orbe-os"
+license=('MIT')
+depends=(
+  'steam' 'gamescope' 'mangohud' 'lib32-mangohud' 'gamemode' 'lib32-gamemode'
+  'zram-generator' 'orbe-themes' 'libnotify'
+)
+optdepends=(
+  'decky-loader: greffons de Steam, nécessaire au thème Steam Orbe'
+  'decky-plugin-css-loader: thème Steam Orbe'
+  'lib32-nvidia-utils: jeux 32 bits sur carte NVIDIA (pilote propriétaire)'
+  'scx-scheds: ordonnanceur scx_lavd, réactivité en jeu'
+  'heroic-games-launcher-bin: jeux Epic, GOG et Amazon'
+)
+provides=('steamos-session-select')
+source=(orbe-session orbe-game-session orbe-switch-session orbe-steam-setup orbe.desktop
+        steamos-session-select steamos-update steamos-select-branch
+        jupiter-biosupdate steamos-set-timezone
+        sysctl-orbe-jeu.conf zram-generator.conf ntsync.conf 70-orbe-ntsync.rules MangoHud.conf)
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP'
+            'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+
+package() {
+  local f
+  for f in orbe-session orbe-game-session orbe-switch-session orbe-steam-setup; do
+    install -Dm755 "$srcdir/$f" "$pkgdir/usr/bin/$f"
+  done
+  install -Dm644 "$srcdir/orbe.desktop" "$pkgdir/usr/share/wayland-sessions/orbe.desktop"
+
+  # Commandes que Steam appelle quand il est lancé avec -steamos3 (Revenir au bureau, mises à jour).
+  for f in steamos-session-select steamos-update steamos-select-branch jupiter-biosupdate steamos-set-timezone; do
+    install -Dm755 "$srcdir/$f" "$pkgdir/usr/bin/$f"
+  done
+  install -d "$pkgdir/usr/bin/steamos-polkit-helpers"
+  for f in steamos-update steamos-select-branch jupiter-biosupdate steamos-set-timezone; do
+    ln -s "../$f" "$pkgdir/usr/bin/steamos-polkit-helpers/$f"
+  done
+
+  # Réglages du système pour le jeu.
+  install -Dm644 "$srcdir/sysctl-orbe-jeu.conf" "$pkgdir/usr/lib/sysctl.d/70-orbe-jeu.conf"
+  install -Dm644 "$srcdir/zram-generator.conf" "$pkgdir/usr/lib/systemd/zram-generator.conf"
+  install -Dm644 "$srcdir/ntsync.conf" "$pkgdir/usr/lib/modules-load.d/orbe-ntsync.conf"
+  install -Dm644 "$srcdir/70-orbe-ntsync.rules" "$pkgdir/usr/lib/udev/rules.d/70-orbe-ntsync.rules"
+
+  # MangoHud aux couleurs d'Orbe pour les nouveaux comptes.
+  install -Dm644 "$srcdir/MangoHud.conf" "$pkgdir/etc/skel/.config/MangoHud/MangoHud.conf"
+}

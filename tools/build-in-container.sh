@@ -25,7 +25,9 @@ pacman-key --init >/dev/null 2>&1
 pacman-key --populate archlinux >/dev/null 2>&1
 # freetype2, python-fonttools et ttf-jetbrains-mono : polices du thème GRUB.
 # qt6-shadertools : compilation des shaders d'Orbe Shell.
-pacman -Syu --noconfirm --needed archiso grub freetype2 python-fonttools ttf-jetbrains-mono qt6-shadertools base-devel git sudo
+# Pillow, numpy, xcursorgen, hyprcursor, Papirus : curseur, démarrage, logo et icônes Orbe.
+pacman -Syu --noconfirm --needed archiso grub freetype2 python-fonttools ttf-jetbrains-mono qt6-shadertools base-devel git sudo \
+  python-pillow python-numpy xorg-xcursorgen hyprcursor papirus-icon-theme
 
 log "Shaders d'Orbe Shell"
 bash /orbe/tools/build-shaders.sh /orbe/shell/shaders

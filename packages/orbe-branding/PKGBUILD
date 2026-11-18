@@ -1,0 +1,34 @@
+# Maintainer: yasder5
+# Identité Orbe OS : os-release (NAME="Orbe OS", ID=orbe, ID_LIKE=arch), lsb-release, issue
+# et logo (SVG et PNG). Les fichiers d'Arch sont réécrits par un hook pacman après chaque mise à jour.
+
+pkgname=orbe-branding
+pkgver=${ORBE_VERSION:-0.1.0}
+pkgrel=1
+pkgdesc="Identité Orbe OS : os-release et logo"
+arch=('any')
+options=('!debug')
+url="https://github.com/Yasder5/orbe-os"
+license=('MIT')
+depends=('filesystem')
+makedepends=('python-pillow' 'python-numpy')
+
+build() {
+  : "${ORBE_SRC:?ORBE_SRC doit pointer vers la racine du dépôt}"
+  python3 -I "$ORBE_SRC/themes/branding/generate.py" "$srcdir/logo"
+  sed "s/@VERSION@/${pkgver%%.r*}/" "$ORBE_SRC/themes/branding/os-release" > "$srcdir/os-release"
+}
+
+package() {
+  local b=$ORBE_SRC/themes/branding size
+  install -Dm644 "$srcdir/os-release" "$pkgdir/usr/share/orbe/branding/os-release"
+  install -Dm755 "$b/orbe-branding-apply" "$pkgdir/usr/share/orbe/branding/orbe-branding-apply"
+  install -Dm644 "$b/orbe-branding.hook" "$pkgdir/usr/share/libalpm/hooks/orbe-branding.hook"
+
+  install -Dm644 "$srcdir/logo/orbe.svg" "$pkgdir/usr/share/icons/hicolor/scalable/apps/orbe.svg"
+  install -Dm644 "$srcdir/logo/orbe.svg" "$pkgdir/usr/share/pixmaps/orbe.svg"
+  install -Dm644 "$srcdir/logo/orbe-512.png" "$pkgdir/usr/share/pixmaps/orbe.png"
+  for size in 16 22 24 32 48 64 128 256 512; do
+    install -Dm644 "$srcdir/logo/orbe-$size.png" "$pkgdir/usr/share/icons/hicolor/${size}x${size}/apps/orbe.png"
+  done
+}

@@ -11,13 +11,13 @@ import qs.services
 Scope {
     id: root
 
-    property int current: 0
+    property int current: 1
 
     Connections {
         target: Panels
         function onSessionOpenChanged() {
             if (Panels.sessionOpen)
-                root.current = 0;
+                root.current = Math.max(0, Session.actions.findIndex(a => a.id === "lock"));
         }
     }
 
