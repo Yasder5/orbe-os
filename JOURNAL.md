@@ -9,7 +9,7 @@ Tenu à jour à chaque étape : ce qui est fait, ce qui reste, les décisions et
 | 1. Construction de base | validée en VM (UEFI + BIOS), 2026-11-17 |
 | 2. Session live graphique | validée en VM, 2026-11-18 |
 | 3. Orbe Shell, premier jet | validée (banc d'essai + VM), 2026-11-18 |
-| 4. Tableau de bord, réglages rapides, verrouillage, fonds | à faire |
+| 4. Tableau de bord, réglages rapides, verrouillage, fonds | faite, validée sur le banc d'essai ; VM en cours |
 | 5. Thème global | en partie : menus de démarrage et terminal faits |
 | 6. Installateur Calamares | à faire |
 | 7. Réglages Orbe et mises à jour | à faire |
@@ -45,6 +45,15 @@ Tenu à jour à chaque étape : ce qui est fait, ce qui reste, les décisions et
 - **Lanceur rattaché à la barre** : il sort de derrière la barre (comme les autres panneaux), plutôt qu'au centre de l'écran. Préfixes `>` commande, `=` calcul, `:` émoji (noms Unicode + mots-clés français), `/` actions, `~` fichiers. Classement par usage, gardé dans l'état de Quickshell.
 - **Terminal stylé, avancé depuis l'étape 5** (demande de Yass) : fish par défaut, invite Starship Orbe, fastfetch avec l'orbe en ASCII au premier terminal de la session, eza (icônes et colonne git), bat (thème ANSI, donc la palette du terminal), btop au thème Orbe, police de symboles Nerd Font en secours.
 - **Banc d'essai du shell amélioré** : D-Bus de session, rendu OpenGL sur processeur (llvmpipe) pour les halos et ombres, frappe au clavier (wtype), terminal.
+
+### 2026-11-18 (étape 4)
+- **Orbe en shader** (`shell/shaders/orb.frag`) : pour chaque pixel, la particule la plus proche est retrouvée en temps constant par l'inverse de la répartition de Fibonacci (Keinert et al., 2015). Le processeur ne fait plus qu'avancer un angle. Le shader est compilé en `.qsb` au build (`tools/build-shaders.sh`, `qt6-shadertools`). Remplace le Canvas qui saturait le processeur émulé.
+- **Fonds d'écran générés** (`wallpapers/generate.py`, paquet `orbe-wallpapers`) : orbe, orbe au centre, grille, halo, en 3840x2160. Fond « Orbe vivant » dessiné en direct, à 30 images/s au plus, en pause sur batterie et quand une fenêtre est en plein écran. Le fond d'écran existant de Yass (`orbe-paysage.png`) n'est pas embarqué sans son accord.
+- **Verrouillage** : Quickshell (ext-session-lock) et PAM (`shell/lock/pam/orbe-lock`), hypridle pour la veille (5 min écran assombri, 10 min verrouillage, 11 min écran éteint, 30 min mise en veille), jamais en plein écran (règle `idle_inhibit`), désactivé dans la session live où le compte `orbe` a un mot de passe vide.
+- **Live : NetworkManager et BlueZ** à la place d'iwd et systemd-networkd, pour les réglages rapides.
+- **Espaces de travail par écran** : l'écran n utilise les espaces n×10+1 à n×10+9 (`workspaces.lua`), chaque barre affiche les siens.
+- **Heroic Games Launcher** (Epic, GOG, Amazon) : paquet officiel `-bin` reconstruit dans `[orbe]`, thème CSS Orbe (`themes/heroic/orbe.css`) et français écrits au premier lancement (`orbe-first-login`, chemins absolus du compte). Les paquets venant de l'AUR sont optionnels : si leur source est injoignable, le build continue sans eux (`archiso/packages.optional`).
+- **Steam Big Picture aux couleurs d'Orbe** : le skin de Yass passe par CSS Loader (Decky Loader). Prévu avec le mode jeu, qui en a besoin de toute façon.
 
 ## Vérifié le 2026-11-17 (dépôts Arch)
 quickshell 0.3.2, hyprland 0.57.2, hyprlock 0.9.7, hypridle 0.1.8, greetd 0.10.3, archiso 92, grub 2.16, grub-btrfs 4.14, qt6-base 6.12.0, linux 7.3.4, linux-zen 7.3.4, linux-lts 6.18.63, mesa 26.2.7, nvidia-open 620.70.06, gamemode 1.8.2, gamescope 3.17.0, mangohud 0.8.4, steam (multilib). Toujours absents des dépôts officiels : calamares, ttf-archivo, hyprland-qtutils (remplacé par hyprland-guiutils, présent), nvidia-580xx-dkms.
