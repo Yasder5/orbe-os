@@ -8,9 +8,9 @@ Tenu à jour à chaque étape : ce qui est fait, ce qui reste, les décisions et
 |---|---|
 | 1. Construction de base | validée en VM (UEFI + BIOS), 2026-11-17 |
 | 2. Session live graphique | validée en VM, 2026-11-18 |
-| 3. Orbe Shell, premier jet | à faire |
+| 3. Orbe Shell, premier jet | validée (banc d'essai + VM), 2026-11-18 |
 | 4. Tableau de bord, réglages rapides, verrouillage, fonds | à faire |
-| 5. Thème global | à faire |
+| 5. Thème global | en partie : menus de démarrage et terminal faits |
 | 6. Installateur Calamares | à faire |
 | 7. Réglages Orbe et mises à jour | à faire |
 | 8. Finitions | à faire |
@@ -39,6 +39,13 @@ Tenu à jour à chaque étape : ce qui est fait, ce qui reste, les décisions et
 - **Rendu 3D en VM sans GPU** : QEMU `egl-headless` exige un nœud DRM absent ici. `test.sh --xvfb --gl` lance un écran X virtuel (Xvfb) et QEMU en SDL avec virgl, rendu par llvmpipe sur le processeur.
 - **Direction « SteamOS nouvelle génération »** (Yass) : mode jeu plein écran pour la manette, optimisations de jeu, interface soignée. Proposition détaillée et choix à valider dans `docs/mode-jeu.md`.
 
+### 2026-11-18
+- **Sauvegarde GitHub** : dépôt privé `Yasder5/orbe-os` créé par Yass, historique rebasé sur son commit initial (sa `LICENSE` MIT est gardée), poussé avec son accord.
+- **Orbe Shell, organisation** : jetons dans `Theme.qml` seulement, réglages utilisateur dans `~/.config/orbe/shell.json` (rechargés à chaud), services en singletons, commandes IPC pour les raccourcis. Détails et pièges dans `docs/shell.md`.
+- **Lanceur rattaché à la barre** : il sort de derrière la barre (comme les autres panneaux), plutôt qu'au centre de l'écran. Préfixes `>` commande, `=` calcul, `:` émoji (noms Unicode + mots-clés français), `/` actions, `~` fichiers. Classement par usage, gardé dans l'état de Quickshell.
+- **Terminal stylé, avancé depuis l'étape 5** (demande de Yass) : fish par défaut, invite Starship Orbe, fastfetch avec l'orbe en ASCII au premier terminal de la session, eza (icônes et colonne git), bat (thème ANSI, donc la palette du terminal), btop au thème Orbe, police de symboles Nerd Font en secours.
+- **Banc d'essai du shell amélioré** : D-Bus de session, rendu OpenGL sur processeur (llvmpipe) pour les halos et ombres, frappe au clavier (wtype), terminal.
+
 ## Vérifié le 2026-11-17 (dépôts Arch)
 quickshell 0.3.2, hyprland 0.57.2, hyprlock 0.9.7, hypridle 0.1.8, greetd 0.10.3, archiso 92, grub 2.16, grub-btrfs 4.14, qt6-base 6.12.0, linux 7.3.4, linux-zen 7.3.4, linux-lts 6.18.63, mesa 26.2.7, nvidia-open 620.70.06, gamemode 1.8.2, gamescope 3.17.0, mangohud 0.8.4, steam (multilib). Toujours absents des dépôts officiels : calamares, ttf-archivo, hyprland-qtutils (remplacé par hyprland-guiutils, présent), nvidia-580xx-dkms.
 
@@ -59,7 +66,14 @@ quickshell 0.3.2, hyprland 0.57.2, hyprlock 0.9.7, hypridle 0.1.8, greetd 0.10.3
 - **Étape 2 validée en VM** (QEMU TCG + virgl rendu par llvmpipe, 1920x1080) : greetd ouvre Hyprland pour `orbe` sans intervention, Orbe Shell affiche la barre (orbe, espaces de travail, horloge à l'heure de Paris), Super + Entrée ouvre foot à la palette Orbe (bordure citron, rayon 8), le texte tapé sort en AZERTY, Super + 2 (code de touche) change d'espace de travail. Le bureau apparaît environ 6 min après le menu de démarrage en émulation, ce qui ne dit rien de la vitesse réelle. Captures : `out/captures/uefi-e2-bureau.png`, `uefi-e2-azerty.png`, `uefi-e2-espace2.png`, `uefi-e2b-couleurs.png`.
 - Correction trouvée en VM : foot 1.28 n'accepte plus la section `[colors]`, renommée `[colors-dark]` ; la configuration est maintenant vérifiée par `foot --check-config`.
 
+- **Étape 3 validée** : chaque composant vérifié sur le banc d'essai (captures `out/captures/shell-*.png`) et dans l'ISO en VM : Super seul ouvre le lanceur, la recherche lance foot, `notify-send` arrive dans les bulles et le centre (pastille sur la cloche), Super + Échap ouvre le menu de session. Calcul vérifié (`(12+3)*4^2` donne 240), recherche d'émojis en français (`:coeur`).
+- **Terminal en VM** : fastfetch Orbe, fish et Starship dans la vraie session Hyprland (capture `out/captures/uefi-e3-terminal.png`).
+
 ## À faire
+- **Orbe animé trop coûteux en Canvas** : 420 points redessinés en JavaScript 30 fois par seconde saturent le processeur émulé de la VM (le menu de session s'affiche avec retard). À réécrire en shader pour l'écran de verrouillage et le fond animé (étape 4), puis mesurer la consommation (objectif : 2 % au repos).
+- Le lanceur liste aussi les outils de secours de releng (lftp, vim, Software Token…) : trier la liste des paquets du live.
+- Barre : indicateurs réseau et Bluetooth, à faire avec les réglages rapides (étape 4, passage du live à NetworkManager).
+- Espaces de travail propres à chaque écran (multi-écran) : pas encore fait.
 - `loopback.cfg` (démarrage de l'ISO depuis un autre GRUB, Ventoy en mode GRUB par exemple) garde le menu texte.
 - Le thème GRUB du système installé viendra avec `orbe-themes` (étape 5), à partir des mêmes fichiers.
 - `/etc/os-release` et l'invite de connexion affichent encore « Arch Linux » : branding prévu dans `orbe-branding`.
