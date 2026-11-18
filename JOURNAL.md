@@ -9,7 +9,7 @@ Tenu à jour à chaque étape : ce qui est fait, ce qui reste, les décisions et
 | 1. Construction de base | validée en VM (UEFI + BIOS), 2026-11-17 |
 | 2. Session live graphique | validée en VM, 2026-11-18 |
 | 3. Orbe Shell, premier jet | validée (banc d'essai + VM), 2026-11-18 |
-| 4. Tableau de bord, réglages rapides, verrouillage, fonds | faite, validée sur le banc d'essai ; VM en cours |
+| 4. Tableau de bord, réglages rapides, verrouillage, fonds | validée (banc d'essai + VM), 2026-11-18 |
 | 5. Thème global | en partie : menus de démarrage et terminal faits |
 | 6. Installateur Calamares | à faire |
 | 7. Réglages Orbe et mises à jour | à faire |
@@ -78,11 +78,14 @@ quickshell 0.3.2, hyprland 0.57.2, hyprlock 0.9.7, hypridle 0.1.8, greetd 0.10.3
 - **Étape 3 validée** : chaque composant vérifié sur le banc d'essai (captures `out/captures/shell-*.png`) et dans l'ISO en VM : Super seul ouvre le lanceur, la recherche lance foot, `notify-send` arrive dans les bulles et le centre (pastille sur la cloche), Super + Échap ouvre le menu de session. Calcul vérifié (`(12+3)*4^2` donne 240), recherche d'émojis en français (`:coeur`).
 - **Terminal en VM** : fastfetch Orbe, fish et Starship dans la vraie session Hyprland (capture `out/captures/uefi-e3-terminal.png`).
 
+- **Étape 4 validée** : sur le banc d'essai, chaque panneau (tableau de bord et ses trois onglets, réglages rapides, sélecteur de fonds, verrouillage) ; dans l'ISO en VM : fond Orbe et barre (indicateur réseau), Super + D ouvre le tableau de bord, Super + L verrouille (orbe en shader, heure, champ avec anneau de focus), Entrée déverrouille le compte live, Heroic s'ouvre avec le thème Orbe (Archivo, accent citron, interface en français). Captures : `out/captures/uefi-e4-*.png`, `shell-e4-*.png`.
+- Super + A n'a pas été vérifié en VM : la commande de test envoie des positions de touches QWERTY, et la touche A de l'AZERTY est le Q du QWERTY (Super + Q ferme la fenêtre). Vérifié sur le banc d'essai.
+
 ## À faire
-- **Orbe animé trop coûteux en Canvas** : 420 points redessinés en JavaScript 30 fois par seconde saturent le processeur émulé de la VM (le menu de session s'affiche avec retard). À réécrire en shader pour l'écran de verrouillage et le fond animé (étape 4), puis mesurer la consommation (objectif : 2 % au repos).
-- Le lanceur liste aussi les outils de secours de releng (lftp, vim, Software Token…) : trier la liste des paquets du live.
-- Barre : indicateurs réseau et Bluetooth, à faire avec les réglages rapides (étape 4, passage du live à NetworkManager).
-- Espaces de travail propres à chaque écran (multi-écran) : pas encore fait.
+- Météo : non vérifiée ici (Open-Meteo n'est pas joignable depuis ce conteneur). Affiche « Météo indisponible » hors ligne.
+- Consommation du shell et de l'orbe animé à mesurer sur le PC de Yass (objectif : 2 % au repos).
+- Heroic affiche au premier lancement sa question sur les statistiques anonymes : laissée à l'utilisateur.
+- Steam Big Picture aux couleurs d'Orbe : avec le mode jeu (Decky Loader et CSS Loader).
 - `loopback.cfg` (démarrage de l'ISO depuis un autre GRUB, Ventoy en mode GRUB par exemple) garde le menu texte.
 - Le thème GRUB du système installé viendra avec `orbe-themes` (étape 5), à partir des mêmes fichiers.
 - `/etc/os-release` et l'invite de connexion affichent encore « Arch Linux » : branding prévu dans `orbe-branding`.
