@@ -35,7 +35,9 @@ bash /orbe/tools/build-shaders.sh /orbe/shell/shaders
 log "Dépôt [orbe]"
 mkdir -p "$repo"
 id builder >/dev/null 2>&1 || useradd -m builder
-echo 'builder ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/builder
+# Le proxy (s'il y en a un) doit suivre makepkg et le pacman lancé par sudo pour les dépendances.
+printf '%s\n' 'builder ALL=(ALL) NOPASSWD: ALL' \
+  'Defaults env_keep += "HTTPS_PROXY https_proxy HTTP_PROXY http_proxy NO_PROXY no_proxy"' > /etc/sudoers.d/builder
 # Les PKGBUILD Orbe lisent leurs sources dans le dépôt (ORBE_SRC) et leur version dans ORBE_VERSION.
 mkpkg() { sudo -u builder env ORBE_SRC=/orbe ORBE_VERSION="${ORBE_VERSION:-0.1.0}" PKGDEST="$repo" makepkg "$@"; }
 expected=()

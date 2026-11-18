@@ -7,4 +7,7 @@ hl.on("hyprland.start", function()
     -- Veille automatique (pas dans la session live) et filtre de lumière bleue, neutre au départ.
     hl.exec_cmd("orbe-idle")
     hl.exec_cmd("hyprsunset --identity")
+    -- Historique du presse-papiers (Super + V) : texte et images.
+    hl.exec_cmd("wl-paste --type text --watch cliphist store")
+    hl.exec_cmd("wl-paste --type image --watch cliphist store")
 end)

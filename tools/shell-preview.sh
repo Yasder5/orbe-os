@@ -10,11 +10,13 @@
 #   --type "TEXTE"   texte tapé au clavier (wtype) avant la capture, option répétable
 #   --name NOM       nom de la capture : out/captures/shell-NOM.png (défaut : apercu)
 #   --res 1920x1080  définition de l'écran virtuel
+#   --greeter        lance l'écran de connexion (greeter.qml) au lieu du bureau
+#   --perf N         mesure le processeur utilisé par Quickshell pendant N secondes (après les étapes)
 # Journal de Quickshell : out/captures/shell-NOM.log
 set -euo pipefail
 
 ROOT=$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)
-wait_s=6 name=apercu res=1920x1080
+wait_s=6 name=apercu res=1920x1080 entry="-c orbe" perf=0
 steps=""
 while (( $# )); do
   case "$1" in
@@ -24,7 +26,9 @@ while (( $# )); do
     --type) steps+="wtype -d 60 $(printf '%q' "$2"); sleep 1; "; shift ;;
     --name) name=$2; shift ;;
     --res) res=$2; shift ;;
-    -h|--help) sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    --greeter) entry="-p /etc/xdg/quickshell/orbe/greeter.qml" ;;
+    --perf) perf=$2; shift ;;
+    -h|--help) sed -n '2,16p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "Option inconnue : $1" >&2; exit 2 ;;
   esac
   shift
@@ -67,7 +71,7 @@ docker run --rm "${docker_args[@]}" \
   -v "$ROOT/packages:/orbe/packages:ro" \
   -v "$ROOT/wallpapers:/orbe/wallpapers:ro" \
   -v "$ROOT/out/captures:/out" \
-  -e RES="$res" -e WAIT="$wait_s" -e NAME="$name" -e STEPS="$steps" -e HOST_UID="$(id -u)" \
+  -e RES="$res" -e WAIT="$wait_s" -e NAME="$name" -e STEPS="$steps" -e ENTRY="$entry" -e PERF="$perf" -e HOST_UID="$(id -u)" \
   "$preview_image" dbus-run-session -- bash -c '
     bash /orbe/tools/build-shaders.sh /etc/xdg/quickshell/orbe/shaders
     # Fichiers des paquets orbe-themes et orbe-desktop, pris directement dans le dépôt.
@@ -90,9 +94,15 @@ docker run --rm "${docker_args[@]}" \
     for _ in $(seq 50); do ls "$XDG_RUNTIME_DIR" | grep -q "^wayland-[0-9]*$" && break; sleep 0.1; done
     export WAYLAND_DISPLAY=$(ls "$XDG_RUNTIME_DIR" | grep -m1 "^wayland-[0-9]*$")
     # Rendu OpenGL sur le processeur (llvmpipe), comme dans une VM sans accélération.
-    LIBGL_ALWAYS_SOFTWARE=1 qs -c orbe > "/out/shell-$NAME.log" 2>&1 &
+    LIBGL_ALWAYS_SOFTWARE=1 qs $ENTRY > "/out/shell-$NAME.log" 2>&1 &
     sleep "$WAIT"
     eval "$STEPS"
+    if (( PERF > 0 )); then
+      # Temps processeur (utilisateur + système) de Quickshell sur PERF secondes, 100 % = un cœur.
+      pid=$(pgrep -x qs | head -n1); tck=$(getconf CLK_TCK)
+      t0=$(awk "{print \$14+\$15}" /proc/$pid/stat); sleep "$PERF"; t1=$(awk "{print \$14+\$15}" /proc/$pid/stat)
+      echo "Quickshell : $(awk -v a=$t0 -v b=$t1 -v t=$tck -v s=$PERF "BEGIN{printf \"%.2f\", (b-a)/t/s*100}") % (100 % = un cœur) sur $PERF s, mémoire $(awk "/VmRSS/{printf \"%d Mo\", \$2/1024}" /proc/$pid/status)"
+    fi
     grim "/out/shell-$NAME.png"
     chown "$HOST_UID" "/out/shell-$NAME.png" "/out/shell-$NAME.log" /etc/xdg/quickshell/orbe/shaders/*.qsb
     sed "s/\x1b\[[0-9;]*m//g" "/out/shell-$NAME.log" | grep -E "ERROR|WARN|caused by" | grep -v "locale" | head -20 || true'

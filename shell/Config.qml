@@ -23,6 +23,7 @@ Singleton {
     property alias nightLight: json.nightLight
     property alias nightTemperature: json.nightTemperature
     property alias sounds: json.sounds
+    property alias welcomeDone: json.welcomeDone
 
     FileView {
         id: file
@@ -50,6 +51,7 @@ Singleton {
             property bool nightLight: false
             property int nightTemperature: 4500
             property bool sounds: true
+            property bool welcomeDone: false
         }
     }
 }

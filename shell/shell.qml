@@ -13,6 +13,9 @@ import qs.quicksettings
 import qs.services
 import qs.session
 import qs.wallpaper
+import qs.welcome
+import qs.settings
+import qs.help
 
 ShellRoot {
     Wallpaper {}
@@ -26,8 +29,11 @@ ShellRoot {
     QuickSettings {}
     Dashboard {}
     Lock {}
+    Welcome {}
+    Settings {}
+    Help {}
 
     // Les services qui répondent aux raccourcis par IPC, ou qui appliquent un réglage au
     // démarrage, doivent exister dès le lancement.
-    Component.onCompleted: [Brightness.available, Keyboard.capsLock, Notifs.count, Panels.launcherOpen, Night.enabled, Weather.city]
+    Component.onCompleted: [Brightness.available, Keyboard.capsLock, Notifs.count, Panels.launcherOpen, Night.enabled, Weather.city, Reglages.kbLayout]
 }

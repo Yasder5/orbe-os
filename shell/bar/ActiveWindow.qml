@@ -11,7 +11,9 @@ Item {
 
     readonly property var toplevel: ToplevelManager.activeToplevel
     readonly property var entry: toplevel ? DesktopEntries.heuristicLookup(toplevel.appId) : null
-    readonly property string iconSource: entry ? Quickshell.iconPath(entry.icon, "application-x-executable") : ""
+    // Fenêtres du shell lui-même (Réglages Orbe) : logo Orbe.
+    readonly property string iconSource: toplevel && toplevel.appId === "org.quickshell" ? Quickshell.iconPath("orbe", "application-x-executable")
+                                         : entry ? Quickshell.iconPath(entry.icon, "application-x-executable") : ""
 
     implicitWidth: Theme.barSize - Theme.space3
     implicitHeight: Theme.barSize - Theme.space3

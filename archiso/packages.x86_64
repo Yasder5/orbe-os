@@ -135,6 +135,15 @@ orbe-wallpapers
 orbe-icon-theme
 orbe-branding
 plymouth
+# Installateur (Calamares) et outils du système installé : instantanés btrfs, thème GRUB
+orbe-installer
+calamares
+orbe-grub-theme
+snapper
+snap-pac
+grub-btrfs
+inotify-tools
+cage
 greetd
 greetd-agreety
 # Pilotes graphiques libres (AMD, Intel, NVIDIA nouveau), Vulkan et décodage vidéo

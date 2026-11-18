@@ -26,12 +26,17 @@ depends=(
   'hyprshutdown'
   # Thème global : fichiers (GTK 4), GTK 3, Qt, icônes, démarrage, identité, réglages dconf
   'nautilus' 'adw-gtk-theme' 'qt6ct' 'orbe-icon-theme' 'orbe-branding' 'plymouth' 'dconf'
+  # Écran de connexion Orbe (greetd, cage, Quickshell)
+  'greetd' 'cage'
+  # Réglages Orbe : liste des mises à jour (checkupdates), réseau avancé ; presse-papiers
+  'pacman-contrib' 'cliphist'
 )
 install=orbe-desktop.install
 # Modules Hyprland (orbe.lua charge les autres) et fichiers personnels copiés dans /etc/skel.
 source=(orbe.lua environment.lua look.lua input.lua binds.lua workspaces.lua rules.lua autostart.lua
-        hyprland.lua foot.ini btop.conf heroic-store.json orbe-first-login orbe-idle hypridle.conf hyprtoolkit.conf)
-sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+        hyprland.lua foot.ini btop.conf heroic-store.json orbe-first-login orbe-idle hypridle.conf hyprtoolkit.conf orbe-greeter
+        orbe-update orbe-autologin orbe-add-user orbe-reglages.desktop)
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
 
 package() {
   local f
@@ -65,6 +70,12 @@ package() {
   install -Dm644 "$srcdir/heroic-store.json" "$pkgdir/etc/skel/.config/heroic/store/config.json"
   install -Dm755 "$srcdir/orbe-first-login" "$pkgdir/usr/bin/orbe-first-login"
   install -Dm755 "$srcdir/orbe-idle" "$pkgdir/usr/bin/orbe-idle"
+  install -Dm755 "$srcdir/orbe-greeter" "$pkgdir/usr/bin/orbe-greeter"
+  local tool
+  for tool in orbe-update orbe-autologin orbe-add-user; do
+    install -Dm755 "$srcdir/$tool" "$pkgdir/usr/bin/$tool"
+  done
+  install -Dm644 "$srcdir/orbe-reglages.desktop" "$pkgdir/usr/share/applications/orbe-reglages.desktop"
   install -Dm644 "$srcdir/hypridle.conf" "$pkgdir/usr/share/orbe/hypr/hypridle.conf"
 
   # Entrées masquées du lanceur : outils en ligne de commande et doublons. Ce dossier passe

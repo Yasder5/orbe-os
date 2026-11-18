@@ -1,0 +1,39 @@
+# Maintainer: yasder5
+# Installateur Orbe OS : configuration et habillage de Calamares (calamares/ à la racine du dépôt),
+# module « orbe » qui transforme la copie du live en système installé.
+
+pkgname=orbe-installer
+pkgver=${ORBE_VERSION:-0.1.0}
+pkgrel=1
+pkgdesc="Installateur Orbe OS (Calamares aux couleurs d'Orbe)"
+arch=('any')
+options=('!debug')
+url="https://github.com/Yasder5/orbe-os"
+license=('MIT')
+depends=('calamares' 'python' 'python-yaml' 'sudo' 'orbe-branding'
+         'snapper' 'snap-pac' 'grub-btrfs' 'inotify-tools' 'btrfs-progs' 'efibootmgr' 'grub' 'orbe-grub-theme')
+makedepends=('python-pillow' 'python-numpy')
+
+build() {
+  : "${ORBE_SRC:?ORBE_SRC doit pointer vers la racine du dépôt}"
+  rm -rf "$srcdir/logo"
+  python3 -I "$ORBE_SRC/themes/branding/generate.py" "$srcdir/logo"
+}
+
+package() {
+  local c=$ORBE_SRC/calamares f
+  install -Dm644 "$c/settings.conf" "$pkgdir/etc/calamares/settings.conf"
+  for f in "$c"/modules/*.conf; do
+    install -Dm644 "$f" "$pkgdir/etc/calamares/modules/$(basename "$f")"
+  done
+  for f in branding.desc stylesheet.qss show.qml; do
+    install -Dm644 "$c/branding/orbe/$f" "$pkgdir/etc/calamares/branding/orbe/$f"
+  done
+  install -Dm644 "$srcdir/logo/orbe-256.png" "$pkgdir/etc/calamares/branding/orbe/logo.png"
+  install -Dm644 "$srcdir/logo/orbe-512.png" "$pkgdir/etc/calamares/branding/orbe/welcome.png"
+  install -Dm644 "$srcdir/logo/orbe-512.png" "$pkgdir/etc/calamares/branding/orbe/orb.png"
+  install -Dm644 "$c/orbe-module/module.desc" "$pkgdir/usr/lib/calamares/modules/orbe/module.desc"
+  install -Dm644 "$c/orbe-module/main.py" "$pkgdir/usr/lib/calamares/modules/orbe/main.py"
+  install -Dm755 "$c/orbe-install" "$pkgdir/usr/bin/orbe-install"
+  install -Dm644 "$c/orbe-install.desktop" "$pkgdir/usr/share/applications/orbe-install.desktop"
+}

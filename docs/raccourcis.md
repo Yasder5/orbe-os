@@ -10,13 +10,13 @@ Source : `packages/orbe-desktop/binds.lua`.
 |---|---|
 | Super + Entrée | Terminal |
 | Super + E | Fichiers |
-| Super (seul) | Lanceur d'applications : `>` commande, `=` calcul, `:` émoji, `/` actions, `~` fichiers |
-| Super + V | Historique du presse-papiers (à venir) |
+| Super (seul) | Lanceur d'applications : `>` commande, `=` calcul, `:` émoji, `/` actions, `~` fichiers, `#` presse-papiers |
+| Super + V | Historique du presse-papiers |
 | Super + D | Tableau de bord : heure, météo, calendrier, système, média |
 | Super + A | Réglages rapides : Wi-Fi, Bluetooth, son, mode nuit, énergie |
 | Super + W | Fond d'écran |
 | Super + G | Mode jeu : Steam Big Picture en plein écran (les fenêtres ouvertes sont d'abord fermées proprement) |
-| Super + Maj + : | Aide des raccourcis (à venir ; Super + / sur un clavier QWERTY) |
+| Super + Maj + : | Aide des raccourcis (Super + / sur un clavier QWERTY) |
 
 ## Fenêtres
 

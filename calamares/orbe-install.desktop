@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Installer Orbe OS
+GenericName=Installateur
+Comment=Installer Orbe OS sur ce PC
+Exec=orbe-install
+Icon=orbe
+Categories=System;
+Keywords=installer;installation;calamares;disque;

@@ -3,11 +3,19 @@
 # et passe de l'une à l'autre quand orbe-switch-session le demande.
 #   ~/.local/state/orbe/session : « bureau » ou « jeu », la session à ouvrir
 #   ~/.local/state/orbe/switch  : présent quand la session qui se termine a demandé une bascule
+# Argument facultatif (« bureau » ou « jeu », choisi dans le greeter) : session à ouvrir, retenue
+# pour la prochaine fois.
 state=${XDG_STATE_HOME:-$HOME/.local/state}/orbe
 mkdir -p "$state"
 export ORBE_SESSION=1
+case ${1:-} in
+  bureau|jeu) echo "$1" > "$state/session" ;;
+esac
 
 next=$(cat "$state/session" 2>/dev/null)
+# Choix fait dans Réglages Orbe : toujours le bureau, ou toujours le mode jeu (sinon la dernière).
+start=$(cat "${XDG_CONFIG_HOME:-$HOME/.config}/orbe/demarrage" 2>/dev/null)
+[[ -z ${1:-} && ( $start == bureau || $start == jeu ) ]] && next=$start
 while :; do
   rm -f "$state/switch"
   if [[ $next == jeu ]] && command -v gamescope >/dev/null && command -v steam >/dev/null; then
@@ -18,6 +26,9 @@ while :; do
   fi
   if [[ -f $state/switch ]]; then
     next=$(cat "$state/session" 2>/dev/null)
+# Choix fait dans Réglages Orbe : toujours le bureau, ou toujours le mode jeu (sinon la dernière).
+start=$(cat "${XDG_CONFIG_HOME:-$HOME/.config}/orbe/demarrage" 2>/dev/null)
+[[ -z ${1:-} && ( $start == bureau || $start == jeu ) ]] && next=$start
     continue
   fi
   # Steam s'est fermé sans demander de bascule (plantage, quitter) : retour au bureau,

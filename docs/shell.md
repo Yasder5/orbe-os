@@ -22,6 +22,10 @@ Orbe Shell est une configuration Quickshell (QML, Qt 6) nommée `orbe`, install�
 | `wallpaper/` | fond d'écran (image ou orbe animé) et sélecteur |
 | `quicksettings/` | réglages rapides |
 | `dashboard/` | tableau de bord (accueil, système, média) et réglage de cava |
+| `settings/` | application « Réglages Orbe » (une page par fichier `Page*.qml`) |
+| `welcome/` | assistant de bienvenue du premier lancement (et proposition d'installer, en live) |
+| `help/` | aide des raccourcis clavier |
+| `greeter/`, `greeter.qml` | écran de connexion de greetd (`orbe-greeter` lance `qs -p .../greeter.qml` dans cage) |
 | `shaders/` | orbe de particules en shader (`orb.frag`, compilé en `.qsb` par `tools/build-shaders.sh`) |
 | `scripts/` | mesures système du tableau de bord |
 
@@ -61,8 +65,15 @@ Utilisées par les raccourcis de `packages/orbe-desktop/binds.lua`, et utilisabl
 | `qs -c orbe ipc call quick toggle` | réglages rapides |
 | `qs -c orbe ipc call wallpaper picker` | sélecteur de fond d'écran |
 | `qs -c orbe ipc call lock lock` | verrouille (appelé par hypridle et Super + L) |
+| `qs -c orbe ipc call settings open apparence` | Réglages Orbe, sur une page (`apparence`, `ecrans`, `clavier`, `son`, `reseau`, `bluetooth`, `jeu`, `comptes`, `maj`, `apropos`) |
+| `qs -c orbe ipc call help toggle` | aide des raccourcis |
+| `qs -c orbe ipc call welcome open` / `step 3` | assistant de bienvenue, ou une de ses étapes |
 
 `qs -c orbe ipc show` liste tout ce qui est disponible.
+
+## Réglages de Hyprland (`~/.config/orbe/reglages.json`)
+
+Écrans, clavier, souris et pavé tactile réglés dans « Réglages Orbe ». Le service `Reglages` les traduit en Lua dans `~/.config/orbe/hyprland.lua`, chargé à la fin de la configuration Hyprland d'Orbe, puis lance `hyprctl reload`. `startSession` (`derniere`, `bureau`, `jeu`) est recopié dans `~/.config/orbe/demarrage`, lu par `orbe-session`.
 
 ## Calques Wayland
 

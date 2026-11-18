@@ -1,0 +1,53 @@
+/* Calamares aux couleurs d'Orbe (jetons de docs/PROMPT.md). */
+QWidget {
+  background-color: #0a0a0a;
+  color: #f5f5f0;
+  font-family: "Archivo";
+  font-size: 11pt;
+  selection-background-color: #d3fd50;
+  selection-color: #0a0a0a;
+}
+#sidebarApp, #sidebarMenuApp { background-color: #121212; }
+#logoApp { padding: 18px; }
+QLabel { background: transparent; }
+QPushButton {
+  background-color: #1a1a19;
+  color: #f5f5f0;
+  border: 1px solid #262624;
+  border-radius: 6px;
+  padding: 8px 18px;
+}
+QPushButton:hover { background-color: #262624; }
+QPushButton:focus { border: 1px solid #d3fd50; }
+QPushButton:default, #view-button-next {
+  background-color: #d3fd50;
+  color: #0a0a0a;
+  border-color: #d3fd50;
+  font-weight: 600;
+}
+QPushButton:default:hover, #view-button-next:hover { background-color: #e1ff80; }
+QPushButton:disabled { color: #5c5c58; background-color: #121212; }
+QLineEdit, QComboBox, QSpinBox, QListView, QTreeView, QTableView, QTextEdit, QPlainTextEdit {
+  background-color: #0d0d0c;
+  color: #f5f5f0;
+  border: 1px solid #262624;
+  border-radius: 6px;
+  padding: 6px 8px;
+}
+QLineEdit:focus, QComboBox:focus { border: 1px solid #d3fd50; }
+QComboBox QAbstractItemView { background: #121212; border: 1px solid #262624; }
+QRadioButton, QCheckBox { background: transparent; spacing: 10px; }
+QRadioButton::indicator, QCheckBox::indicator {
+  width: 16px; height: 16px; border: 1px solid #3a3a37; background: #0d0d0c;
+}
+QRadioButton::indicator { border-radius: 8px; }
+QCheckBox::indicator { border-radius: 4px; }
+QRadioButton::indicator:checked, QCheckBox::indicator:checked { background: #d3fd50; border-color: #d3fd50; }
+QProgressBar {
+  background: #1a1a19; border: none; border-radius: 4px; height: 8px; text-align: center; color: transparent;
+}
+QProgressBar::chunk { background: #d3fd50; border-radius: 4px; }
+QScrollBar:vertical { background: transparent; width: 10px; }
+QScrollBar::handle:vertical { background: #3a3a37; border-radius: 4px; min-height: 24px; }
+QScrollBar::add-line, QScrollBar::sub-line { height: 0; width: 0; }
+QToolTip { background: #1a1a19; color: #f5f5f0; border: 1px solid #262624; border-radius: 4px; }

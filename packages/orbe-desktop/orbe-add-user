@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# Ajoute un compte Orbe OS (lancé dans un terminal par Réglages Orbe).
+set -u
+read -rp "Identifiant (minuscules, sans espace) : " login
+read -rp "Nom affiché : " name
+read -rp "Administrateur, avec sudo (o/N) ? " admin
+groups=users,video,audio,input,network,storage,lp,gamemode
+[[ $admin == [oO]* ]] && groups+=,wheel
+if sudo useradd -m -c "$name" -G "$groups" -s /usr/bin/fish "$login" && sudo passwd "$login"; then
+  sudo systemctl enable "decky-loader@$login.service" 2>/dev/null
+  echo "Compte $login créé."
+fi
+read -rp "Entrée pour fermer " _

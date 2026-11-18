@@ -1,0 +1,10 @@
+#!/bin/sh
+# Greeter Orbe pour greetd : écran de connexion Quickshell (shell/greeter.qml) dans cage,
+# un compositeur Wayland qui n'affiche qu'une seule fenêtre en plein écran.
+export XDG_SESSION_TYPE=wayland QT_QPA_PLATFORM=wayland QT_QPA_PLATFORMTHEME=
+export XCURSOR_THEME=Orbe XCURSOR_SIZE=24
+# Clavier : disposition choisie à l'installation (localectl), AZERTY sinon.
+layout=$(sed -n 's/.*"XkbLayout" *"\([^",]*\).*/\1/p' /etc/X11/xorg.conf.d/00-keyboard.conf 2>/dev/null | head -n1)
+variant=$(sed -n 's/.*"XkbVariant" *"\([^",]*\).*/\1/p' /etc/X11/xorg.conf.d/00-keyboard.conf 2>/dev/null | head -n1)
+export XKB_DEFAULT_LAYOUT=${layout:-fr} XKB_DEFAULT_VARIANT=$variant
+exec cage -s -d -- qs -p /etc/xdg/quickshell/orbe/greeter.qml

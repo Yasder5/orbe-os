@@ -1,0 +1,86 @@
+{
+    "archinstall-language": "French",
+    "additional-repositories": [
+        "multilib"
+    ],
+    "audio_config": {
+        "audio": "pipewire"
+    },
+    "bootloader": "Grub",
+    "hostname": "orbe",
+    "kernels": [
+        "linux"
+    ],
+    "locale_config": {
+        "kb_layout": "fr",
+        "sys_enc": "UTF-8",
+        "sys_lang": "fr_FR.UTF-8"
+    },
+    "network_config": {
+        "type": "nm"
+    },
+    "ntp": true,
+    "swap": true,
+    "timezone": "Europe/Paris",
+    "profile_config": {
+        "profile": {
+            "main": "Minimal",
+            "details": []
+        },
+        "gfx_driver": "All open-source"
+    },
+    "packages": [
+        "hyprland",
+        "quickshell",
+        "greetd",
+        "cage",
+        "foot",
+        "fish",
+        "starship",
+        "fastfetch",
+        "eza",
+        "bat",
+        "btop",
+        "pipewire",
+        "pipewire-pulse",
+        "wireplumber",
+        "networkmanager",
+        "bluez",
+        "bluez-utils",
+        "power-profiles-daemon",
+        "hypridle",
+        "hyprsunset",
+        "hyprshutdown",
+        "hyprpolkitagent",
+        "xdg-desktop-portal-hyprland",
+        "xdg-desktop-portal-gtk",
+        "nautilus",
+        "adw-gtk-theme",
+        "qt6ct",
+        "papirus-icon-theme",
+        "ttf-jetbrains-mono",
+        "noto-fonts",
+        "noto-fonts-emoji",
+        "ttf-nerd-fonts-symbols-mono",
+        "wl-clipboard",
+        "cliphist",
+        "grim",
+        "slurp",
+        "brightnessctl",
+        "playerctl",
+        "plymouth",
+        "snapper",
+        "snap-pac",
+        "grub-btrfs",
+        "steam",
+        "gamescope",
+        "gamemode",
+        "mangohud",
+        "zram-generator"
+    ],
+    "services": [
+        "NetworkManager",
+        "bluetooth",
+        "greetd"
+    ]
+}

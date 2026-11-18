@@ -18,6 +18,11 @@ Singleton {
     property bool dashboardOpen: false
     property string dashboardTab: "accueil"
     property bool quickOpen: false
+    property bool welcomeOpen: false
+    property bool settingsOpen: false
+    property bool helpOpen: false
+    property string settingsPage: ""
+    property int welcomeStep: 0
     property bool locked: false
 
     // Écran où s'ouvrent les panneaux : celui qui a le focus dans Hyprland, sinon le premier.
@@ -35,6 +40,8 @@ Singleton {
         wallpaperOpen = false;
         dashboardOpen = false;
         quickOpen = false;
+        welcomeOpen = false;
+        helpOpen = false;
     }
 
     function openLauncher(text) {
@@ -141,6 +148,35 @@ Singleton {
 
         function toggle(): void {
             root.toggleQuick();
+        }
+    }
+
+    IpcHandler {
+        target: "help"
+
+        function toggle(): void {
+            const open = !root.helpOpen;
+            root.closeAll();
+            root.helpOpen = open;
+        }
+    }
+
+    IpcHandler {
+        target: "welcome"
+
+        function open(): void {
+            root.closeAll();
+            root.welcomeStep = 0;
+            root.welcomeOpen = true;
+        }
+        function close(): void {
+            root.welcomeOpen = false;
+        }
+        // Ouvre directement une étape (0 à 4) : aperçus et tests.
+        function step(index: int): void {
+            root.closeAll();
+            root.welcomeStep = index;
+            root.welcomeOpen = true;
         }
     }
 

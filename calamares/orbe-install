@@ -1,0 +1,5 @@
+#!/bin/sh
+# Lance l'installateur Orbe OS depuis la session live : Calamares tourne en root, affiché dans
+# la session Wayland de l'utilisateur live (sudo sans mot de passe dans le live uniquement).
+exec sudo --preserve-env=WAYLAND_DISPLAY,XDG_RUNTIME_DIR,XDG_SESSION_TYPE,LANG \
+  env QT_QPA_PLATFORM=wayland QT_QPA_PLATFORMTHEME= calamares "$@"

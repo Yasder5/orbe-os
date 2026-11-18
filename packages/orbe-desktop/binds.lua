@@ -14,6 +14,10 @@ hl.bind(mod .. " + A",       hl.dsp.exec_cmd(shell .. "quick toggle"),     { des
 hl.bind(mod .. " + W",       hl.dsp.exec_cmd(shell .. "wallpaper picker"), { description = "Fond d'écran" })
 hl.bind(mod .. " + L",       hl.dsp.exec_cmd(shell .. "lock lock"),        { description = "Verrouiller" })
 -- Mode jeu : Steam Big Picture dans gamescope (les applications ouvertes sont d'abord fermées proprement).
+hl.bind(mod .. " + V",       hl.dsp.exec_cmd(shell .. "launcher open '#'"), { description = "Historique du presse-papiers" })
+-- Aide des raccourcis : Super + Maj + : sur un clavier AZERTY (Maj + : donne /), Super + / en QWERTY.
+hl.bind(mod .. " + SHIFT + slash", hl.dsp.exec_cmd(shell .. "help toggle"), { description = "Aide des raccourcis" })
+hl.bind(mod .. " + slash",         hl.dsp.exec_cmd(shell .. "help toggle"))
 hl.bind(mod .. " + G",       hl.dsp.exec_cmd("orbe-switch-session jeu"),   { description = "Mode jeu" })
 
 -- Applications

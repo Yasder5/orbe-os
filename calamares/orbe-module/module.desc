@@ -1,0 +1,6 @@
+# Module Calamares propre à Orbe OS : transforme la copie du système live en système installé.
+---
+type:       "job"
+name:       "orbe"
+interface:  "python"
+script:     "main.py"

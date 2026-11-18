@@ -1,5 +1,5 @@
 // Lanceur d'applications (Super) : panneau qui sort de la barre, recherche floue.
-// Préfixes : > commande, = calcul, : émoji, / actions, ~ fichiers.
+// Préfixes : > commande, = calcul, : émoji, / actions, ~ fichiers, # presse-papiers (cliphist).
 // Clavier : ↑ ↓ (ou Tab) pour choisir, Entrée pour ouvrir, Échap pour fermer.
 
 import Quickshell
@@ -20,16 +20,18 @@ Scope {
     property int current: 0
     property var emojis: []
     property var files: []
-    readonly property string prefix: ">=:/~".includes(query.charAt(0)) ? query.charAt(0) : ""
+    property var clips: []
+    readonly property string prefix: ">=:/~#".includes(query.charAt(0)) ? query.charAt(0) : ""
     readonly property string term: (prefix ? query.slice(1) : query).trim()
-    readonly property var items: compute(query, files, emojis)
+    readonly property var items: compute(query, files, emojis, clips)
 
     readonly property var modes: [
         { prefix: ">", label: "commande", icon: "command" },
         { prefix: "=", label: "calcul", icon: "calculator" },
         { prefix: ":", label: "émoji", icon: "emoji" },
         { prefix: "/", label: "actions", icon: "action" },
-        { prefix: "~", label: "fichiers", icon: "folder" }
+        { prefix: "~", label: "fichiers", icon: "folder" },
+        { prefix: "#", label: "presse-papiers", icon: "copy" }
     ]
 
     function close() {
@@ -50,7 +52,7 @@ Scope {
     }
 
     // Construit la liste de résultats selon le préfixe.
-    function compute(q, fileList, emojiList) {
+    function compute(q, fileList, emojiList, clipList) {
         switch (prefix) {
         case ">":
             return commandItems(term);
@@ -62,6 +64,8 @@ Scope {
             return actionItems(term);
         case "~":
             return fileItems(term, fileList);
+        case "#":
+            return clipItems(term, clipList);
         default:
             const apps = Apps.search(term, 40).map(entry => ({
                 title: entry.name,
@@ -166,10 +170,40 @@ Scope {
         });
     }
 
+    // Historique du presse-papiers : lignes « id<TAB>aperçu » de cliphist list, la plus récente d'abord.
+    function clipItems(q, list) {
+        if (list.length === 0)
+            return [{ title: "Presse-papiers vide", subtitle: "Ce que tu copies apparaîtra ici", icon: "copy" }];
+        return list.filter(line => !q || Fuzzy.strict(q, [line.slice(line.indexOf("\t") + 1)]) >= 0).slice(0, 50).map(line => {
+            const preview = line.slice(line.indexOf("\t") + 1).replace(/\s+/g, " ").trim();
+            return {
+                title: preview.startsWith("[[ binary") ? "Image" : preview,
+                subtitle: preview.startsWith("[[ binary") ? preview.replace(/[\[\]]/g, "").trim() : "Entrée pour copier",
+                icon: preview.startsWith("[[ binary") ? "image" : "copy",
+                run: () => Quickshell.execDetached(["sh", "-c", 'printf "%s" "$1" | cliphist decode | wl-copy', "sh", line])
+            };
+        });
+    }
+
     onQueryChanged: {
         current = 0;
         if (prefix === "~")
             fileDelay.restart();
+    }
+    onPrefixChanged: {
+        if (prefix === "#") {
+            clipper.running = false;
+            clipper.running = true;
+        }
+    }
+
+    Process {
+        id: clipper
+
+        command: ["cliphist", "list"]
+        stdout: StdioCollector {
+            onStreamFinished: root.clips = text.split("\n").filter(l => l)
+        }
     }
 
     Connections {

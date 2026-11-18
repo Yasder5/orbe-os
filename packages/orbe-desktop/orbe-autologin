@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Ouverture automatique de la session au démarrage (greetd), comme une console.
+# Usage (en root, via pkexec depuis Réglages Orbe) : orbe-autologin on COMPTE | off
+set -euo pipefail
+conf=/etc/greetd/config.toml
+[[ $EUID -eq 0 ]] || { echo "À lancer en root (pkexec orbe-autologin ...)" >&2; exit 1; }
+tmp=$(mktemp)
+trap 'rm -f "$tmp"' EXIT
+# Retire l'éventuelle section [initial_session], garde le reste.
+awk '/^\[initial_session\]/ { skip = 1; next } /^\[/ { skip = 0 } !skip' "$conf" > "$tmp"
+case ${1:-} in
+  on)
+    user=${2:?compte manquant}
+    id "$user" >/dev/null
+    printf '\n[initial_session]\ncommand = "orbe-session"\nuser = "%s"\n' "$user" >> "$tmp" ;;
+  off) ;;
+  *) echo "Usage : orbe-autologin on COMPTE | off" >&2; exit 2 ;;
+esac
+install -m644 "$tmp" "$conf"
+echo "Ouverture automatique : ${1}"

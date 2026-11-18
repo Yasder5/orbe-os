@@ -1,0 +1,36 @@
+# Habillage Orbe de Calamares : noir profond, accent citron, police Archivo.
+---
+componentName:  orbe
+welcomeStyleCalamares:   true
+welcomeExpandingLogo:   true
+windowExpanding:    normal
+windowSize: 1100px,700px
+windowPlacement: center
+sidebar: widget
+navigation: widget
+
+strings:
+    productName:         "Orbe OS"
+    shortProductName:    "Orbe OS"
+    version:             "rolling"
+    shortVersion:        "rolling"
+    versionedName:       "Orbe OS"
+    shortVersionedName:  "Orbe OS"
+    bootloaderEntryName: "Orbe OS"
+    productUrl:          "https://github.com/Yasder5/orbe-os"
+    supportUrl:          "https://github.com/Yasder5/orbe-os/issues"
+    knownIssuesUrl:      "https://github.com/Yasder5/orbe-os/blob/main/JOURNAL.md"
+
+images:
+    productIcon:         "logo.png"
+    productLogo:         "logo.png"
+    productWelcome:      "welcome.png"
+
+style:
+   SidebarBackground:        "#121212"
+   SidebarText:              "#f5f5f0"
+   SidebarTextCurrent:       "#0a0a0a"
+   SidebarBackgroundCurrent: "#d3fd50"
+
+slideshow:               "show.qml"
+slideshowAPI: 2

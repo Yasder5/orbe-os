@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Réglages Orbe
+GenericName=Réglages
+Comment=Apparence, écrans, clavier, son, réseau, mode jeu, mises à jour
+Exec=qs -c orbe ipc call settings open ""
+Icon=orbe
+Categories=Settings;
+Keywords=réglages;paramètres;settings;préférences;écran;son;

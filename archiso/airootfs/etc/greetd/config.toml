@@ -3,9 +3,9 @@
 [terminal]
 vt = 1
 
-# Après une déconnexion : invite texte, en attendant le greeter Orbe (étape 6).
+# Après une déconnexion : écran de connexion Orbe (le compte live n'a pas de mot de passe : Entrée suffit).
 [default_session]
-command = "agreety --cmd orbe-session"
+command = "orbe-greeter"
 user = "greeter"
 
 [initial_session]

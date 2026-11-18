@@ -16,3 +16,10 @@ require(base .. "autostart")
 
 -- Réglages propres au matériel (pilote NVIDIA, etc.), générés au démarrage s'ils existent.
 pcall(require, "/run/orbe/hypr-hardware")
+
+-- Réglages faits dans l'application « Réglages Orbe » (écrans, clavier, souris, pavé tactile),
+-- réécrits par elle dans ~/.config/orbe/hyprland.lua, puis appliqués par hyprctl reload.
+local home = os.getenv("HOME")
+if home then
+    pcall(require, home .. "/.config/orbe/hyprland")
+end
