@@ -1,6 +1,4 @@
 -- Raccourcis clavier Orbe (docs/raccourcis.md). Super est la touche principale.
--- Les chiffres sont liés aux codes de touches (code:10 à code:18) : en AZERTY, ils
--- demandent Maj, mais la touche physique reste la même quelle que soit la disposition.
 
 local mod      = "SUPER"
 local terminal = "foot"
@@ -11,6 +9,10 @@ local shell    = "qs -c orbe ipc call "
 hl.bind(mod .. " + Super_L", hl.dsp.exec_cmd(shell .. "launcher toggle"), { release = true, description = "Lanceur d'applications" })
 hl.bind(mod .. " + Escape",  hl.dsp.exec_cmd(shell .. "session toggle"),  { description = "Menu de session" })
 hl.bind(mod .. " + N",       hl.dsp.exec_cmd(shell .. "center toggle"),   { description = "Centre de notifications" })
+hl.bind(mod .. " + D",       hl.dsp.exec_cmd(shell .. "dashboard toggle"), { description = "Tableau de bord" })
+hl.bind(mod .. " + A",       hl.dsp.exec_cmd(shell .. "quick toggle"),     { description = "Réglages rapides" })
+hl.bind(mod .. " + W",       hl.dsp.exec_cmd(shell .. "wallpaper picker"), { description = "Fond d'écran" })
+hl.bind(mod .. " + L",       hl.dsp.exec_cmd(shell .. "lock lock"),        { description = "Verrouiller" })
 
 -- Applications
 hl.bind(mod .. " + Return", hl.dsp.exec_cmd(terminal))
@@ -30,14 +32,7 @@ hl.bind(mod .. " + down",  hl.dsp.focus({ direction = "down" }))
 hl.bind(mod .. " + mouse:272", hl.dsp.window.drag(),   { mouse = true })
 hl.bind(mod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
 
--- Espaces de travail 1 à 9
-for i = 1, 9 do
-    local key = "code:" .. (9 + i)
-    hl.bind(mod .. " + " .. key,           hl.dsp.focus({ workspace = i }))
-    hl.bind(mod .. " + SHIFT + " .. key,   hl.dsp.window.move({ workspace = i }))
-end
-hl.bind(mod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }))
-hl.bind(mod .. " + mouse_up",   hl.dsp.focus({ workspace = "e-1" }))
+-- Espaces de travail : voir workspaces.lua (propres à chaque écran).
 
 -- Capture d'une zone : copiée dans le presse-papiers et enregistrée dans ~/Images/Captures.
 hl.bind(mod .. " + SHIFT + S", hl.dsp.exec_cmd(

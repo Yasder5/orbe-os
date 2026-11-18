@@ -1,0 +1,173 @@
+/*
+ * Thème Orbe pour Heroic Games Launcher (jeux Epic, GOG et Amazon).
+ * Thème personnalisé de Heroic : ce fichier est dans le dossier customThemesPath
+ * (/usr/share/orbe/heroic), et Heroic applique la classe « orbe » au corps de la page.
+ * Variables tirées des thèmes intégrés de Heroic 2.22 (src/frontend/themes.scss).
+ */
+
+body.orbe {
+  /* Polices */
+  --default-primary-font-family: 'Archivo', sans-serif;
+  --default-secondary-font-family: 'Archivo', sans-serif;
+  --primary-font-family: 'Archivo', sans-serif;
+  --secondary-font-family: 'Archivo', sans-serif;
+  --actions-font-family: 'Archivo', sans-serif;
+  --content-font-family: 'Archivo', sans-serif;
+
+  /* Accent citron */
+  --accent: #d3fd50;
+  --accent-overlay: #e1ff80;
+  --accent-02: #bde83a;
+  --brand-primary: #d3fd50;
+  --brand-primary-hover: #e1ff80;
+  --brand-secondary: #1a1a19;
+  --primary: #d3fd50;
+  --primary-hover: #e1ff80;
+  --primary-active: #bde83a;
+  --secondary: #1a1a19;
+  --link-highlight: #d3fd50;
+  --button-stroke: #d3fd50;
+  --progress: #d3fd50;
+  --installing-effect: rgba(211, 253, 80, 0.16);
+
+  /* Boutons : texte noir sur l'accent */
+  --primary-button: #d3fd50;
+  --secondary-button: #d3fd50;
+  --secondary-button-overlay: #e1ff80;
+  --success-button: #d3fd50;
+  --play-button: #d3fd50;
+  --install-button: #d3fd50;
+  --install-button-hover: #e1ff80;
+  --download-button: #d3fd50;
+  --tertiary-button: #262624;
+  --tertiary-button-overlay: #3a3a37;
+  --cancel-button: #ff6b5a;
+  --cancel-button-overlay: #ff8f80;
+  --cancel-button-hover: #ff8f80;
+  --stop-button: #262624;
+  --disabled-button: #262624;
+  --disabled-button-overlay: #3a3a37;
+
+  /* Texte */
+  --text-default: #f5f5f0;
+  --text-primary: #f5f5f0;
+  --text-title: #f5f5f0;
+  --text-hover: #ffffff;
+  --text-secondary: #8f8f8a;
+  --text-muted: #8f8f8a;
+  --text-quartenary: #8f8f8a;
+  --text-tertiary: #0a0a0a;
+  --text-danger: #ff6b5a;
+  --text-warning: #f5d76e;
+  --brand-text-01: #f5f5f0;
+  --brand-text-02: #8f8f8a;
+
+  /* Fonds : noir profond, surfaces Orbe */
+  --background: #121212;
+  --background-darker: #0a0a0a;
+  --background-darker-80: rgba(10, 10, 10, 0.82);
+  --background-lighter: #1a1a19;
+  --background-light: #1a1a19;
+  --background-secondary: #1a1a19;
+  --background-hover: #1a1a19;
+  --body-background: #0a0a0a;
+  --current-background: #0a0a0a;
+  --gradient-body-background: #0a0a0a;
+  --input-background: #1a1a19;
+  --search-bar-background: #1a1a19;
+  --search-bar-border: #262624;
+  --icons-background: #1a1a19;
+
+  /* Barre latérale */
+  --navbar-background: #121212;
+  --sidebar-background: #121212;
+  --navbar-active-background: #1a1a19;
+  --navbar-active: #d3fd50;
+  --navbar-inactive: #8f8f8a;
+  --navbar-accent: #d3fd50;
+  --sidebar-item-active-text-color: #d3fd50;
+  --sidebar-item-inactive-text-color: #8f8f8a;
+  --sidebar-hover-text-color: #f5f5f0;
+  --sidebar-active-item-background: #1a1a19;
+  --sidebar-divider-color: #262624;
+
+  /* Bordures, fenêtres, clavier virtuel */
+  --divider: #262624;
+  --border-color: #262624;
+  --modal-background: #121212;
+  --modal-border: #262624;
+  --modal-backdrop: rgba(10, 10, 10, 0.82);
+  --osk-background: #0a0a0a;
+  --osk-button-background: #1a1a19;
+  --osk-button-border: #262624;
+  --controller-hints-background: transparent;
+
+  /* Icônes d'action */
+  --action-icon: #f5f5f0;
+  --action-icon-hover: #d3fd50;
+  --action-icon-active: #d3fd50;
+  --icon-disabled: #3a3a37;
+  --icon-disabled-overlay: #3a3a37;
+
+  /* Gris de base */
+  --neutral-01: #0a0a0a;
+  --neutral-02: #121212;
+  --neutral-03: #1a1a19;
+  --neutral-04: #262624;
+  --neutral-05: #3a3a37;
+  --neutral-06: #8f8f8a;
+
+  /* États */
+  --success: #d3fd50;
+  --success-hover: #e1ff80;
+  --danger: #ff6b5a;
+  --danger-hover: #ff8f80;
+  --warning: #f5d76e;
+  --error: #ff6b5a;
+  --status-success: #d3fd50;
+  --status-success-hover: #e1ff80;
+  --status-danger: #ff6b5a;
+  --status-warning: #f5d76e;
+  --status-warning-hover: #ffe59a;
+  --status-info: #7cb4ff;
+  --status-default: #8f8f8a;
+
+  /* Cartes de jeu */
+  --gamecard-title-color: #f5f5f0;
+  --gradient-gamecard: linear-gradient(to top, rgba(10, 10, 10, 0.92), rgba(10, 10, 10, 0));
+
+  /* Barre de titre */
+  --titlebar-color: #0a0a0a;
+  --titlebar-symbol-color: #f5f5f0;
+
+  /* Filtre alphabétique */
+  --alphabet-filter-accent-color: #d3fd50;
+  --alphabet-filter-accent-hover: #e1ff80;
+}
+
+/* Angles presque droits (rayons Orbe 4, 6 et 8 px) */
+body.orbe button,
+body.orbe .button,
+body.orbe input,
+body.orbe select {
+  border-radius: 4px;
+}
+
+/* Anneau de focus Orbe : clavier et manette */
+body.orbe :focus-visible {
+  outline: 2px solid #d3fd50;
+  outline-offset: 2px;
+  box-shadow: 0 0 32px rgba(211, 253, 80, 0.28);
+}
+
+/* Animations Orbe, sans rebond, et respect du réglage « réduire les animations » */
+body.orbe * {
+  transition-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.orbe * {
+    transition-duration: 0ms !important;
+    animation-duration: 0ms !important;
+  }
+}

@@ -17,6 +17,11 @@ Singleton {
     property alias reduceMotion: json.reduceMotion
     property alias doNotDisturb: json.doNotDisturb
     property alias clock24h: json.clock24h
+    // Fond d'écran : chemin d'une image, ou « orbe-vivant » pour l'orbe animé.
+    property alias wallpaper: json.wallpaper
+    property alias weatherCity: json.weatherCity
+    property alias nightLight: json.nightLight
+    property alias nightTemperature: json.nightTemperature
 
     FileView {
         id: file
@@ -39,6 +44,10 @@ Singleton {
             property bool reduceMotion: false
             property bool doNotDisturb: false
             property bool clock24h: true
+            property string wallpaper: "/usr/share/backgrounds/orbe/orbe.png"
+            property string weatherCity: "Paris"
+            property bool nightLight: false
+            property int nightTemperature: 4500
         }
     }
 }

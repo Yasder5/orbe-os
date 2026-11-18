@@ -134,6 +134,10 @@ Scope {
         }));
         list.push(
             { title: "Menu de session", subtitle: "Verrouiller, veille, redémarrer, éteindre", icon: "power", run: () => Panels.toggleSession() },
+            { title: "Changer de fond d'écran", subtitle: "Apparence", icon: "image", run: () => Panels.toggleWallpaper() },
+            { title: "Tableau de bord", subtitle: "Météo, calendrier, système, média", icon: "home", run: () => Panels.toggleDashboard("accueil") },
+            { title: "Réglages rapides", subtitle: "Wi-Fi, Bluetooth, son, mode nuit", icon: "settings", run: () => Panels.toggleQuick() },
+            { title: Night.enabled ? "Désactiver le mode nuit" : "Activer le mode nuit", subtitle: "Écran", icon: "moon", run: () => Night.toggle() },
             { title: Notifs.doNotDisturb ? "Désactiver Ne pas déranger" : "Activer Ne pas déranger", subtitle: "Notifications", icon: Notifs.doNotDisturb ? "bell" : "bell-off", run: () => Notifs.toggleDoNotDisturb() },
             { title: Config.barVertical ? "Barre en haut de l'écran" : "Barre à gauche de l'écran", subtitle: "Apparence", icon: "apps", run: () => Config.barPosition = Config.barVertical ? "top" : "left" },
             { title: Config.reduceMotion ? "Rétablir les animations" : "Réduire les animations", subtitle: "Accessibilité", icon: "action", run: () => Config.reduceMotion = !Config.reduceMotion }

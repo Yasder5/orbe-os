@@ -130,6 +130,7 @@ zsh
 orbe-desktop
 orbe-shell
 orbe-themes
+orbe-wallpapers
 greetd
 greetd-agreety
 # Pilotes graphiques libres (AMD, Intel, NVIDIA nouveau), Vulkan et décodage vidéo
@@ -143,5 +144,9 @@ intel-media-driver
 nvidia-open
 nvidia-utils
 libva-nvidia-driver
+# Réseau et Bluetooth (réglages rapides d'Orbe Shell)
+networkmanager
+bluez
+bluez-utils
 # Intégration aux machines virtuelles (presse-papiers, redimensionnement)
 spice-vdagent

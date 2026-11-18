@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# Réglages de premier lancement d'un compte Orbe OS, appelés par Hyprland à chaque ouverture
+# de session. Chaque réglage n'est écrit que s'il n'existe pas : les choix de l'utilisateur gagnent.
+set -u
+
+config=${XDG_CONFIG_HOME:-$HOME/.config}
+
+# Heroic (jeux Epic et GOG) : thème Orbe, français. Chemins absolus, que Heroic attend ici.
+if [[ ! -e "$config/heroic/config.json" ]]; then
+  mkdir -p "$config/heroic"
+  cat > "$config/heroic/config.json" <<JSON
+{
+  "version": "v0",
+  "defaultSettings": {
+    "language": "fr",
+    "customThemesPath": "/usr/share/orbe/heroic",
+    "defaultInstallPath": "$HOME/Games/Heroic",
+    "winePrefix": "$HOME/Games/Heroic/Prefixes/default",
+    "defaultWinePrefix": "$HOME/Games/Heroic/Prefixes/default",
+    "defaultWinePrefixDir": "$HOME/Games/Heroic/Prefixes"
+  }
+}
+JSON
+fi

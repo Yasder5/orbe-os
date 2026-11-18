@@ -15,6 +15,13 @@ hl.window_rule({
     immediate = true,
 })
 
+-- Pas de mise en veille ni de verrouillage pendant un jeu ou une vidéo en plein écran.
+hl.window_rule({
+    name          = "pas-de-veille-en-plein-ecran",
+    match         = { class = ".*" },
+    idle_inhibit  = "fullscreen",
+})
+
 -- Les fenêtres ne demandent pas à se maximiser d'elles-mêmes.
 hl.window_rule({
     name           = "sans-maximisation-auto",

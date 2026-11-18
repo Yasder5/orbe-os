@@ -11,7 +11,7 @@ options=('!debug')
 url="https://github.com/Yasder5/orbe-os"
 license=('MIT')
 depends=(
-  'orbe-shell' 'orbe-themes'
+  'orbe-shell' 'orbe-themes' 'orbe-wallpapers'
   'hyprland' 'quickshell' 'hyprpolkitagent' 'hyprland-guiutils'
   'xdg-desktop-portal-hyprland' 'xdg-desktop-portal-gtk'
   'qt6-wayland' 'qt5-wayland' 'qt6-svg' 'qt6-5compat'
@@ -20,19 +20,36 @@ depends=(
   'noto-fonts' 'noto-fonts-emoji' 'ttf-jetbrains-mono' 'ttf-nerd-fonts-symbols-mono'
   # Terminal : shell fish, invite Starship, fastfetch, ls, cat et moniteur en couleurs
   'fish' 'starship' 'fastfetch' 'eza' 'bat' 'btop'
+  # Réglages rapides, verrouillage, mode nuit, visualiseur audio
+  'networkmanager' 'bluez' 'bluez-utils' 'power-profiles-daemon' 'hypridle' 'hyprsunset' 'cava'
 )
 # Modules Hyprland (orbe.lua charge les autres) et fichiers personnels copiés dans /etc/skel.
-source=(orbe.lua environment.lua look.lua input.lua binds.lua rules.lua autostart.lua
-        hyprland.lua foot.ini btop.conf)
-sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+source=(orbe.lua environment.lua look.lua input.lua binds.lua workspaces.lua rules.lua autostart.lua
+        hyprland.lua foot.ini btop.conf heroic-store.json orbe-first-login orbe-idle hypridle.conf)
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
 
 package() {
   local f
-  for f in orbe environment look input binds rules autostart; do
+  for f in orbe environment look input binds workspaces rules autostart; do
     install -Dm644 "$srcdir/$f.lua" "$pkgdir/usr/share/orbe/hypr/$f.lua"
   done
   # Fichier personnel copié dans le dossier des nouveaux comptes.
   install -Dm644 "$srcdir/hyprland.lua" "$pkgdir/etc/skel/.config/hypr/hyprland.lua"
   install -Dm644 "$srcdir/foot.ini" "$pkgdir/etc/skel/.config/foot/foot.ini"
   install -Dm644 "$srcdir/btop.conf" "$pkgdir/etc/skel/.config/btop/btop.conf"
+  # Heroic (jeux Epic et GOG) : thème Orbe choisi d'office ; le reste est écrit au premier
+  # lancement par orbe-first-login, avec les chemins absolus du compte.
+  install -Dm644 "$srcdir/heroic-store.json" "$pkgdir/etc/skel/.config/heroic/store/config.json"
+  install -Dm755 "$srcdir/orbe-first-login" "$pkgdir/usr/bin/orbe-first-login"
+  install -Dm755 "$srcdir/orbe-idle" "$pkgdir/usr/bin/orbe-idle"
+  install -Dm644 "$srcdir/hypridle.conf" "$pkgdir/usr/share/orbe/hypr/hypridle.conf"
+
+  # Entrées masquées du lanceur : outils en ligne de commande et doublons. Ce dossier passe
+  # avant /usr/share dans XDG_DATA_DIRS (environment.lua), donc ces fichiers l'emportent.
+  local id
+  for id in foot-server footclient org.quickshell lftp vim stoken-gui stoken-gui-small htop \
+            bvnc bssh avahi-discover qv4l2 qvidcap; do
+    printf '[Desktop Entry]\nType=Application\nName=%s\nNoDisplay=true\n' "$id" \
+      | install -Dm644 /dev/stdin "$pkgdir/usr/share/orbe/applications/$id.desktop"
+  done
 }

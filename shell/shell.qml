@@ -4,20 +4,30 @@ import Quickshell
 import QtQuick
 import qs
 import qs.bar
+import qs.dashboard
 import qs.launcher
+import qs.lock
 import qs.notifications
 import qs.osd
+import qs.quicksettings
 import qs.services
 import qs.session
+import qs.wallpaper
 
 ShellRoot {
+    Wallpaper {}
     Bar {}
     Launcher {}
     Popups {}
     Center {}
     Osd {}
     SessionMenu {}
+    Picker {}
+    QuickSettings {}
+    Dashboard {}
+    Lock {}
 
-    // Les services qui répondent aux raccourcis par IPC doivent exister dès le démarrage.
-    Component.onCompleted: [Brightness.available, Keyboard.capsLock, Notifs.count, Panels.launcherOpen]
+    // Les services qui répondent aux raccourcis par IPC, ou qui appliquent un réglage au
+    // démarrage, doivent exister dès le lancement.
+    Component.onCompleted: [Brightness.available, Keyboard.capsLock, Notifs.count, Panels.launcherOpen, Night.enabled, Weather.city]
 }

@@ -1,0 +1,14 @@
+# remove from airootfs!
+# Session live : le compte orbe a un mot de passe vide (et non verrouillé), pour que l'écran de
+# verrouillage s'ouvre avec un champ vide. Lancé après la création des comptes (20-systemd-sysusers).
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Type = Package
+Target = orbe-desktop
+
+[Action]
+Description = Compte live orbe sans mot de passe...
+When = PostTransaction
+Depends = shadow
+Exec = /usr/bin/passwd -d orbe

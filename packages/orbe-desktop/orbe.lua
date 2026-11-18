@@ -10,6 +10,7 @@ require(base .. "environment")
 require(base .. "look")
 require(base .. "input")
 require(base .. "binds")
+require(base .. "workspaces")
 require(base .. "rules")
 require(base .. "autostart")
 

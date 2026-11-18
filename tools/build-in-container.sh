@@ -24,7 +24,11 @@ sed -i 's/^#\?ParallelDownloads.*/ParallelDownloads = 5/' /etc/pacman.conf
 pacman-key --init >/dev/null 2>&1
 pacman-key --populate archlinux >/dev/null 2>&1
 # freetype2, python-fonttools et ttf-jetbrains-mono : polices du thème GRUB.
-pacman -Syu --noconfirm --needed archiso grub freetype2 python-fonttools ttf-jetbrains-mono base-devel git sudo
+# qt6-shadertools : compilation des shaders d'Orbe Shell.
+pacman -Syu --noconfirm --needed archiso grub freetype2 python-fonttools ttf-jetbrains-mono qt6-shadertools base-devel git sudo
+
+log "Shaders d'Orbe Shell"
+bash /orbe/tools/build-shaders.sh /orbe/shell/shaders
 
 log "Dépôt [orbe]"
 mkdir -p "$repo"
@@ -33,6 +37,7 @@ echo 'builder ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/builder
 # Les PKGBUILD Orbe lisent leurs sources dans le dépôt (ORBE_SRC) et leur version dans ORBE_VERSION.
 mkpkg() { sudo -u builder env ORBE_SRC=/orbe ORBE_VERSION="${ORBE_VERSION:-0.1.0}" PKGDEST="$repo" makepkg "$@"; }
 expected=()
+skipped=()
 for pkgbuild in /orbe/packages/*/PKGBUILD; do
   [[ -f "$pkgbuild" ]] || continue
   name=$(basename "$(dirname "$pkgbuild")")
@@ -47,9 +52,13 @@ for pkgbuild in /orbe/packages/*/PKGBUILD; do
     log "Construction de $name"
     (cd "$src" && mkpkg --nodeps --cleanbuild --noconfirm --force)
   elif (( missing )); then
-    # Paquets reconstruits depuis l'AUR : seulement quand leur version change.
+    # Paquets reconstruits depuis l'AUR : seulement quand leur version change. Un échec (source
+    # injoignable, par exemple) n'arrête pas le build : le paquet manquera, l'ISO s'en passera.
     log "Construction de $name"
-    (cd "$src" && mkpkg --syncdeps --cleanbuild --noconfirm --force)
+    if ! (cd "$src" && mkpkg --syncdeps --cleanbuild --noconfirm --force); then
+      echo "ATTENTION : $name n'a pas pu être construit, il sera absent de l'ISO." >&2
+      skipped+=("$name")
+    fi
   else
     echo "$name : déjà construit, ignoré"
   fi
@@ -73,7 +82,7 @@ else
   ln -sf orbe.db.tar.gz "$repo/orbe.db"
   ln -sf orbe.files.tar.gz "$repo/orbe.files"
 fi
-echo "[orbe] : ${#expected[@]} paquet(s)"
+echo "[orbe] : ${#expected[@]} paquet(s)${skipped[*]:+, absents : ${skipped[*]}}"
 
 [[ "${ORBE_PACKAGES_ONLY:-0}" == 1 ]] && exit 0
 
@@ -85,6 +94,18 @@ cp -a /orbe/archiso "$profile"
 for cfg in "$profile"/syslinux/*.cfg; do
   iconv -f UTF-8 -t CP437 "$cfg" -o "$cfg.cp437" && mv "$cfg.cp437" "$cfg"
 done
+# Paquets optionnels (archiso/packages.optional) : ajoutés seulement s'ils sont disponibles,
+# dans [orbe] ou dans les dépôts Arch. Les autres sont signalés.
+if [[ -f /orbe/archiso/packages.optional ]]; then
+  while read -r pkg; do
+    [[ -z "$pkg" || "$pkg" == \#* ]] && continue
+    if compgen -G "$repo/$pkg-[0-9]*.pkg.tar.*" >/dev/null || pacman -Si "$pkg" >/dev/null 2>&1; then
+      echo "$pkg" >> "$profile/packages.x86_64"
+    else
+      echo "ATTENTION : paquet optionnel $pkg indisponible, absent de l'ISO." >&2
+    fi
+  done < /orbe/archiso/packages.optional
+fi
 # Polices du thème GRUB, générées depuis les sources plutôt que versionnées.
 bash /orbe/tools/make-grub-fonts.sh "$profile/grub/themes/orbe"
 mkdir -p "$isodir"

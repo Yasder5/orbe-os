@@ -1,0 +1,17 @@
+# Maintainer: yasder5
+# Fonds d'écran Orbe, générés par wallpapers/generate.py (aucune image externe).
+# Le fond animé « Orbe vivant » est dessiné en direct par Orbe Shell.
+
+pkgname=orbe-wallpapers
+pkgver=${ORBE_VERSION:-0.1.0}
+pkgrel=1
+pkgdesc="Fonds d'écran Orbe : orbe de particules, grille, halo citron (3840x2160)"
+arch=('any')
+options=('!debug')
+url="https://github.com/Yasder5/orbe-os"
+license=('MIT')
+
+package() {
+  : "${ORBE_SRC:?ORBE_SRC doit pointer vers la racine du dépôt}"
+  install -Dm644 -t "$pkgdir/usr/share/backgrounds/orbe" "$ORBE_SRC"/wallpapers/rendus/*.png
+}

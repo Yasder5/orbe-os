@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Lance hypridle avec la configuration de l'utilisateur si elle existe, sinon celle d'Orbe.
+# Rien dans la session live (pas de verrouillage ni de mise en veille pendant un essai).
+[[ -d /run/archiso ]] && exit 0
+if [[ -e "${XDG_CONFIG_HOME:-$HOME/.config}/hypr/hypridle.conf" ]]; then
+  exec hypridle
+fi
+exec hypridle -c /usr/share/orbe/hypr/hypridle.conf

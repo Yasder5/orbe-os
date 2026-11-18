@@ -30,7 +30,7 @@ while (( $# )); do
   shift
 done
 
-preview_image=orbe-shell-preview:3
+preview_image=orbe-shell-preview:4
 docker_args=(--privileged -v orbe-pacman-cache:/var/cache/pacman/pkg)
 if [[ -n "${HTTPS_PROXY:-}${https_proxy:-}" ]]; then
   docker_args+=(--network host -e HTTPS_PROXY="${HTTPS_PROXY:-$https_proxy}" -e https_proxy="${https_proxy:-$HTTPS_PROXY}")
@@ -52,7 +52,7 @@ if ! docker image inspect "$preview_image" >/dev/null 2>&1; then
     fi
     echo "Server = https://geo.mirror.pkgbuild.com/\$repo/os/\$arch" > /etc/pacman.d/mirrorlist
     pacman-key --init >/dev/null 2>&1; pacman-key --populate archlinux >/dev/null 2>&1
-    pacman -Syu --noconfirm --needed sway quickshell grim wtype qt6-svg qt6-5compat mesa ttf-jetbrains-mono noto-fonts noto-fonts-emoji libnotify foot htop hicolor-icon-theme adwaita-icon-theme fish starship fastfetch eza bat btop ttf-nerd-fonts-symbols-mono git >/dev/null')
+    pacman -Syu --noconfirm --needed sway quickshell grim wtype qt6-svg qt6-5compat mesa ttf-jetbrains-mono noto-fonts noto-fonts-emoji libnotify foot htop hicolor-icon-theme adwaita-icon-theme fish starship fastfetch eza bat btop ttf-nerd-fonts-symbols-mono git qt6-shadertools cava playerctl >/dev/null')
   docker start -a "$cid"
   docker commit "$cid" "$preview_image" >/dev/null
   docker rm "$cid" >/dev/null
@@ -61,14 +61,18 @@ fi
 mkdir -p "$ROOT/out/captures"
 
 docker run --rm "${docker_args[@]}" \
-  -v "$ROOT/shell:/etc/xdg/quickshell/orbe:ro" \
+  -v "$ROOT/shell:/etc/xdg/quickshell/orbe" \
+  -v "$ROOT/tools:/orbe/tools:ro" \
   -v "$ROOT/themes:/orbe/themes:ro" \
   -v "$ROOT/packages:/orbe/packages:ro" \
+  -v "$ROOT/wallpapers:/orbe/wallpapers:ro" \
   -v "$ROOT/out/captures:/out" \
   -e RES="$res" -e WAIT="$wait_s" -e NAME="$name" -e STEPS="$steps" -e HOST_UID="$(id -u)" \
   "$preview_image" dbus-run-session -- bash -c '
+    bash /orbe/tools/build-shaders.sh /etc/xdg/quickshell/orbe/shaders
     # Fichiers des paquets orbe-themes et orbe-desktop, pris directement dans le dépôt.
     install -Dm644 -t /usr/share/fonts/orbe /orbe/themes/fonts/*.ttf
+    install -Dm644 -t /usr/share/backgrounds/orbe /orbe/wallpapers/rendus/*.png
     install -Dm644 /orbe/themes/terminal/foot-orbe.ini /usr/share/orbe/foot/orbe.ini
     install -Dm644 /orbe/themes/terminal/orbe.fish /usr/share/fish/vendor_conf.d/orbe.fish
     install -Dm644 /orbe/themes/terminal/starship.toml /usr/share/orbe/starship.toml
@@ -90,6 +94,6 @@ docker run --rm "${docker_args[@]}" \
     sleep "$WAIT"
     eval "$STEPS"
     grim "/out/shell-$NAME.png"
-    chown "$HOST_UID" "/out/shell-$NAME.png" "/out/shell-$NAME.log"
+    chown "$HOST_UID" "/out/shell-$NAME.png" "/out/shell-$NAME.log" /etc/xdg/quickshell/orbe/shaders/*.qsb
     sed "s/\x1b\[[0-9;]*m//g" "/out/shell-$NAME.log" | grep -E "ERROR|WARN|caused by" | grep -v "locale" | head -20 || true'
 echo "Capture : out/captures/shell-$name.png"

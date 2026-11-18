@@ -12,7 +12,9 @@ Source : `packages/orbe-desktop/binds.lua`. Tout ce qui est marqué « à venir 
 | Super + E | Fichiers |
 | Super (seul) | Lanceur d'applications : `>` commande, `=` calcul, `:` émoji, `/` actions, `~` fichiers |
 | Super + V | Historique du presse-papiers (à venir) |
-| Super + D | Tableau de bord (à venir) |
+| Super + D | Tableau de bord : heure, météo, calendrier, système, média |
+| Super + A | Réglages rapides : Wi-Fi, Bluetooth, son, mode nuit, énergie |
+| Super + W | Fond d'écran |
 | Super + Maj + : | Aide des raccourcis (à venir ; Super + / sur un clavier QWERTY) |
 
 ## Fenêtres
@@ -31,7 +33,7 @@ Source : `packages/orbe-desktop/binds.lua`. Tout ce qui est marqué « à venir 
 
 | Raccourci | Action |
 |---|---|
-| Super + 1 à 9 | Aller à l'espace de travail |
+| Super + 1 à 9 | Aller à l'espace de travail (de l'écran actif : chaque écran a les siens) |
 | Super + Maj + 1 à 9 | Y envoyer la fenêtre active |
 | Super + molette | Espace suivant ou précédent |
 | Trois doigts à l'horizontale | Espace suivant ou précédent (pavé tactile) |
@@ -41,7 +43,7 @@ Source : `packages/orbe-desktop/binds.lua`. Tout ce qui est marqué « à venir 
 | Raccourci | Action |
 |---|---|
 | Super + Maj + S | Capturer une zone (presse-papiers et ~/Images/Captures) |
-| Super + L | Verrouiller (à venir) |
+| Super + L | Verrouiller |
 | Super + Échap | Menu de session (verrouiller, veille, redémarrer, éteindre) |
 | Super + N | Centre de notifications |
 | Super + Maj + M | Quitter la session immédiatement (secours) |

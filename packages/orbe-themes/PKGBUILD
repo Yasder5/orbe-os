@@ -28,4 +28,7 @@ package() {
   install -Dm644 "$ORBE_SRC/themes/terminal/fastfetch.jsonc" "$pkgdir/usr/share/orbe/fastfetch/config.jsonc"
   install -Dm644 "$ORBE_SRC/themes/terminal/orbe-logo.txt" "$pkgdir/usr/share/orbe/fastfetch/orbe-logo.txt"
   install -Dm644 "$ORBE_SRC/themes/terminal/btop-orbe.theme" "$pkgdir/usr/share/btop/themes/orbe.theme"
+
+  # Heroic Games Launcher : thème personnalisé « orbe » (dossier customThemesPath).
+  install -Dm644 "$ORBE_SRC/themes/heroic/orbe.css" "$pkgdir/usr/share/orbe/heroic/orbe.css"
 }

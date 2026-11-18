@@ -1,4 +1,5 @@
-// Espaces de travail : actif en accent, occupés en text, vides en line.
+// Espaces de travail de cet écran : actif en accent, occupés en text, vides en line.
+// L'écran n utilise les espaces n×10+1 à n×10+9 (voir orbe-desktop/workspaces.lua).
 // Clic : y aller. Molette : suivant ou précédent.
 
 import Quickshell.Hyprland
@@ -9,8 +10,12 @@ Item {
     id: root
 
     property bool vertical: true
+    required property var screen
+    readonly property var monitor: Hyprland.monitorFor(screen)
+    readonly property int base: (monitor ? monitor.id : 0) * 10
+    readonly property var own: Hyprland.workspaces.values.filter(w => w.id > base && w.id <= base + 9)
     // Toujours au moins 5 cases, davantage si un espace plus loin est utilisé.
-    readonly property int count: Math.max(5, ...Hyprland.workspaces.values.map(w => w.id))
+    readonly property int count: Math.max(5, ...own.map(w => w.id - base))
     readonly property int cell: 6
     readonly property int activeLength: 20
 
@@ -43,9 +48,11 @@ Item {
                 id: cell
 
                 required property int index
-                readonly property int wsId: index + 1
-                readonly property var workspace: Hyprland.workspaces.values.find(w => w.id === wsId) ?? null
-                readonly property bool isActive: Hyprland.focusedWorkspace !== null && Hyprland.focusedWorkspace.id === wsId
+                readonly property int wsId: root.base + index + 1
+                readonly property var workspace: root.own.find(w => w.id === wsId) ?? null
+                // Espace affiché sur cet écran (chaque écran a le sien, même sans le focus).
+                readonly property var shown: root.monitor && root.monitor.activeWorkspace ? root.monitor.activeWorkspace : Hyprland.focusedWorkspace
+                readonly property bool isActive: shown !== null && shown.id === wsId
                 readonly property bool isOccupied: workspace !== null && workspace.toplevels.values.length > 0
                 readonly property int length: isActive ? root.activeLength : hover.containsMouse ? 10 : root.cell
 

@@ -88,6 +88,7 @@ Scope {
                 Workspaces {
                     Layout.alignment: Qt.AlignCenter
                     vertical: bar.vertical
+                    screen: bar.modelData
                 }
 
                 ActiveWindow {
@@ -110,11 +111,28 @@ Scope {
                     window: bar
                 }
 
+                // Réseau, Bluetooth et son : ouvrent les réglages rapides.
+                BarButton {
+                    Layout.alignment: Qt.AlignCenter
+                    icon: Network.icon
+                    iconColor: Network.online ? Theme.text : Theme.muted
+                    active: Panels.quickOpen
+                    onClicked: Panels.toggleQuick()
+                }
+
+                BarButton {
+                    Layout.alignment: Qt.AlignCenter
+                    visible: Bt.available && Bt.enabled
+                    icon: "bluetooth"
+                    iconColor: Bt.connected.length > 0 ? Theme.accent : Theme.text
+                    onClicked: Panels.toggleQuick()
+                }
+
                 BarButton {
                     Layout.alignment: Qt.AlignCenter
                     icon: Audio.icon
                     visible: Audio.ready
-                    onClicked: Audio.toggleMute()
+                    onClicked: event => event.button === Qt.MiddleButton ? Audio.toggleMute() : Panels.toggleQuick()
                     onWheel: event => Audio.setVolume(Audio.volume + (event.angleDelta.y > 0 ? 0.05 : -0.05))
                 }
 
@@ -143,6 +161,12 @@ Scope {
                 Clock {
                     Layout.alignment: Qt.AlignCenter
                     vertical: bar.vertical
+
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: Panels.toggleDashboard("accueil")
+                    }
                 }
 
                 BarButton {

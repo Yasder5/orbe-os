@@ -1,0 +1,5 @@
+#%PAM-1.0
+# Écran de verrouillage d'Orbe Shell : mot de passe du compte, vérifié par pam_unix.
+# nullok : un compte sans mot de passe (session live) se déverrouille avec un champ vide.
+auth      required  pam_unix.so try_first_pass nullok
+account   required  pam_unix.so

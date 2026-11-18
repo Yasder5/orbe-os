@@ -18,17 +18,27 @@ Orbe Shell est une configuration Quickshell (QML, Qt 6) nommée `orbe`, install�
 | `notifications/` | bulles et centre de notifications |
 | `osd/` | jauge de volume, luminosité et verrouillage majuscules |
 | `session/` | menu de session plein écran |
+| `lock/` | écran de verrouillage et sa configuration PAM (`lock/pam/orbe-lock`) |
+| `wallpaper/` | fond d'écran (image ou orbe animé) et sélecteur |
+| `quicksettings/` | réglages rapides |
+| `dashboard/` | tableau de bord (accueil, système, média) et réglage de cava |
+| `shaders/` | orbe de particules en shader (`orb.frag`, compilé en `.qsb` par `tools/build-shaders.sh`) |
+| `scripts/` | mesures système du tableau de bord |
 
 ## Réglages (`~/.config/orbe/shell.json`)
 
-Créé au premier lancement. Toute modification est appliquée sans redémarrer le shell.
+Créé au premier lancement. Toute modification est appliquée sans redémarrer le shell. `wallpaper` accepte un chemin d'image ou `orbe-vivant` (orbe animé).
 
 ```json
 {
   "barPosition": "left",
   "reduceMotion": false,
   "doNotDisturb": false,
-  "clock24h": true
+  "clock24h": true,
+  "wallpaper": "/usr/share/backgrounds/orbe/orbe.png",
+  "weatherCity": "Paris",
+  "nightLight": false,
+  "nightTemperature": 4500
 }
 ```
 
@@ -46,6 +56,10 @@ Utilisées par les raccourcis de `packages/orbe-desktop/binds.lua`, et utilisabl
 | `qs -c orbe ipc call brightness up` / `down` | luminosité, avec OSD |
 | `qs -c orbe ipc call keyboard capslock` | relit le voyant Verr. Maj et affiche l'OSD |
 | `qs -c orbe ipc call osd flash volume` | affiche l'OSD (`volume`, `brightness`, `capslock`) |
+| `qs -c orbe ipc call dashboard toggle` / `tab systeme` | tableau de bord, ou un onglet (`accueil`, `systeme`, `media`) |
+| `qs -c orbe ipc call quick toggle` | réglages rapides |
+| `qs -c orbe ipc call wallpaper picker` | sélecteur de fond d'écran |
+| `qs -c orbe ipc call lock lock` | verrouille (appelé par hypridle et Super + L) |
 
 `qs -c orbe ipc show` liste tout ce qui est disponible.
 
@@ -70,4 +84,5 @@ tools/shell-preview.sh --name calcul --ipc "launcher open =(12+3)*4^2"
 - Une propriété QML qui commence par `on` suivi d'une majuscule est prise pour un gestionnaire de signal (`onAccent` est invalide).
 - Un singleton ne doit pas porter le nom d'un type Qt Quick (`State` est déjà un type).
 - Une fonction IPC ne peut pas s'appeler `show` : la commande `qs ipc` la prend pour sa sous-commande.
+- Le moteur JavaScript de QML ne gère pas l'étalement d'objet (`{ ...a }`) : utiliser `Object.assign`. L'étalement de tableau (`[...a]`) fonctionne.
 - Les singletons sont créés à leur première utilisation : `shell.qml` les touche au démarrage pour que leurs points d'entrée IPC existent.

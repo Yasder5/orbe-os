@@ -3,6 +3,7 @@ pragma Singleton
 import Quickshell
 import Quickshell.Hyprland
 import QtQuick
+import qs
 
 // Actions de session : verrouiller, se déconnecter, veille, redémarrer, éteindre.
 Singleton {
@@ -19,7 +20,7 @@ Singleton {
     function run(action) {
         switch (action) {
         case "lock":
-            Quickshell.execDetached(["loginctl", "lock-session"]);
+            Panels.lock();
             break;
         case "logout":
             Hyprland.dispatch(Hyprland.usingLua ? "hl.dsp.exit()" : "exit");
