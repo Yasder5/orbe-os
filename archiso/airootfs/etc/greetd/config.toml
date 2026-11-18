@@ -1,0 +1,13 @@
+# greetd de la session live : le bureau s'ouvre tout seul pour l'utilisateur orbe.
+
+[terminal]
+vt = 1
+
+# Après une déconnexion : invite texte, en attendant le greeter Orbe (étape 6).
+[default_session]
+command = "agreety --cmd start-hyprland"
+user = "greeter"
+
+[initial_session]
+command = "start-hyprland"
+user = "orbe"

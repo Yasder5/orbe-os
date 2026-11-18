@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# Choix du pilote graphique de la session live, avant l'ouverture du bureau.
+#
+# Carte NVIDIA présente : essaie le pilote NVIDIA (nvidia-open, cartes GTX 16xx, RTX 20xx et
+# plus récentes). S'il ne prend pas la carte en charge (GTX 9xx, 10xx…), bascule sur nouveau.
+# Paramètre du noyau orbe.gpu=libre : force nouveau ; orbe.gpu=nvidia : force NVIDIA.
+#
+# Les deux pilotes sont exclus du chargement automatique (/etc/modprobe.d/orbe-live-gpu.conf)
+# pour que ce script décide. Il écrit /run/orbe/hypr-hardware.lua, lu par la configuration Hyprland.
+set -u
+
+out=/run/orbe/hypr-hardware.lua
+mkdir -p /run/orbe
+printf -- '-- Généré par orbe-gpu-setup au démarrage.\n' > "$out"
+
+choice=auto
+for arg in $(cat /proc/cmdline); do
+  case "$arg" in orbe.gpu=*) choice=${arg#orbe.gpu=} ;; esac
+done
+
+nvidia_present=0
+for dev in /sys/bus/pci/devices/*; do
+  [[ "$(cat "$dev/vendor" 2>/dev/null)" == 0x10de ]] || continue
+  case "$(cat "$dev/class" 2>/dev/null)" in 0x0300*|0x0302*) nvidia_present=1 ;; esac
+done
+(( nvidia_present )) || { echo "orbe-gpu-setup : pas de carte NVIDIA"; exit 0; }
+
+nvidia_bound() { compgen -G '/sys/bus/pci/drivers/nvidia/0000:*' >/dev/null; }
+
+if [[ "$choice" != libre ]] && modprobe nvidia_drm && nvidia_bound; then
+  echo "orbe-gpu-setup : pilote NVIDIA chargé"
+  cat >> "$out" <<'EOF'
+hl.env("LIBVA_DRIVER_NAME", "nvidia")
+hl.env("__GLX_VENDOR_LIBRARY_NAME", "nvidia")
+hl.env("NVD_BACKEND", "direct")
+EOF
+  exit 0
+fi
+
+[[ "$choice" == nvidia ]] && echo "orbe-gpu-setup : pilote NVIDIA forcé mais inutilisable" >&2
+modprobe -r nvidia_drm nvidia_modeset nvidia_uvm nvidia 2>/dev/null
+modprobe nouveau && echo "orbe-gpu-setup : pilote libre nouveau chargé"
+exit 0

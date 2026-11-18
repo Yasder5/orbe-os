@@ -1,0 +1,23 @@
+# Maintainer: yasder5
+# Orbe Shell : barre, lanceur, notifications et panneaux du bureau, en QML pour Quickshell.
+# Les sources sont dans shell/ à la racine du dépôt (ORBE_SRC, fourni par build.sh).
+
+pkgname=orbe-shell
+pkgver=${ORBE_VERSION:-0.1.0}
+pkgrel=1
+pkgdesc="Orbe Shell : bureau Quickshell aux couleurs d'Orbe"
+arch=('any')
+options=('!debug')
+url="https://github.com/Yasder5/orbe-os"
+license=('LicenseRef-Orbe')
+depends=('quickshell' 'qt6-declarative' 'qt6-svg' 'qt6-5compat' 'orbe-themes')
+
+package() {
+  : "${ORBE_SRC:?ORBE_SRC doit pointer vers la racine du dépôt}"
+  # Configuration Quickshell nommée « orbe », lancée par « qs -c orbe ».
+  install -d "$pkgdir/etc/xdg/quickshell/orbe"
+  cp -r --no-preserve=ownership "$ORBE_SRC/shell/." "$pkgdir/etc/xdg/quickshell/orbe/"
+  find "$pkgdir/etc/xdg/quickshell/orbe" -name '.gitkeep' -delete
+  find "$pkgdir/etc/xdg/quickshell/orbe" -type d -exec chmod 755 {} +
+  find "$pkgdir/etc/xdg/quickshell/orbe" -type f -exec chmod 644 {} +
+}

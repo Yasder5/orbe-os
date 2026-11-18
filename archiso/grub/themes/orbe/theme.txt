@@ -39,7 +39,7 @@ terminal-border: "0"
     left = 9%-14
     top = 22%+132
     width = 700
-    height = 460
+    height = 520
     item_font = "Archivo Regular 22"
     selected_item_font = "ArchivoSemiBold Regular 22"
     item_color = "#f5f5f0"
@@ -58,7 +58,7 @@ terminal-border: "0"
 + label {
     id = "__timeout__"
     left = 9%
-    top = 22%+618
+    top = 22%+676
     width = 40%
     height = 24
     text = "Démarrage automatique dans %d s"

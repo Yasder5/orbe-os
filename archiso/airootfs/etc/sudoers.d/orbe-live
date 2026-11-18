@@ -1,0 +1,2 @@
+# Session live : sudo sans mot de passe pour le groupe wheel.
+%wheel ALL=(ALL:ALL) NOPASSWD: ALL

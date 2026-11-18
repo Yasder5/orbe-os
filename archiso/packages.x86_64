@@ -126,3 +126,22 @@ xdg-utils
 xfsprogs
 xl2tpd
 zsh
+# Orbe OS : bureau (dépôt [orbe]) et connexion
+orbe-desktop
+orbe-shell
+orbe-themes
+greetd
+greetd-agreety
+# Pilotes graphiques libres (AMD, Intel, NVIDIA nouveau), Vulkan et décodage vidéo
+mesa
+vulkan-radeon
+vulkan-intel
+vulkan-nouveau
+vulkan-icd-loader
+intel-media-driver
+# NVIDIA (GTX 16xx, RTX 20xx et plus récentes) : choisi au démarrage par orbe-gpu-setup
+nvidia-open
+nvidia-utils
+libva-nvidia-driver
+# Intégration aux machines virtuelles (presse-papiers, redimensionnement)
+spice-vdagent

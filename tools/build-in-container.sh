@@ -30,24 +30,34 @@ log "Dépôt [orbe]"
 mkdir -p "$repo"
 id builder >/dev/null 2>&1 || useradd -m builder
 echo 'builder ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/builder
+# Les PKGBUILD Orbe lisent leurs sources dans le dépôt (ORBE_SRC) et leur version dans ORBE_VERSION.
+mkpkg() { sudo -u builder env ORBE_SRC=/orbe ORBE_VERSION="${ORBE_VERSION:-0.1.0}" PKGDEST="$repo" makepkg "$@"; }
 expected=()
 for pkgbuild in /orbe/packages/*/PKGBUILD; do
   [[ -f "$pkgbuild" ]] || continue
   name=$(basename "$(dirname "$pkgbuild")")
   src=/build/$name
-  rm -rf "$src" && mkdir -p /build && cp -a "$(dirname "$pkgbuild")" "$src" && chown -R builder: "$src" /build
-  mapfile -t files < <(cd "$src" && sudo -u builder PKGDEST="$repo" makepkg --packagelist)
+  rm -rf "$src" && mkdir -p /build && cp -a "$(dirname "$pkgbuild")" "$src" && chown -R builder: "$src" /build "$repo"
+  mapfile -t files < <(cd "$src" && mkpkg --packagelist)
   expected+=("${files[@]}")
   missing=0
   for f in "${files[@]}"; do [[ -f "$f" ]] || missing=1; done
-  if (( missing )); then
+  if [[ "$name" == orbe-* ]]; then
+    # Paquets Orbe : de simples fichiers, reconstruits à chaque fois, sans dépendance de construction.
     log "Construction de $name"
-    chown builder: "$repo"
-    (cd "$src" && sudo -u builder PKGDEST="$repo" makepkg --syncdeps --cleanbuild --noconfirm --force)
+    (cd "$src" && mkpkg --nodeps --cleanbuild --noconfirm --force)
+  elif (( missing )); then
+    # Paquets reconstruits depuis l'AUR : seulement quand leur version change.
+    log "Construction de $name"
+    (cd "$src" && mkpkg --syncdeps --cleanbuild --noconfirm --force)
   else
     echo "$name : déjà construit, ignoré"
   fi
 done
+# Garde seulement les paquets réellement produits (--packagelist annonce aussi les paquets -debug).
+built=()
+for f in "${expected[@]}"; do [[ -f "$f" ]] && built+=("$f"); done
+expected=("${built[@]}")
 # Supprime les anciennes versions, puis reconstruit la base du dépôt de zéro.
 for f in "$repo"/*.pkg.tar.*; do
   [[ -f "$f" ]] || continue

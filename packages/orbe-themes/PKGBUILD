@@ -1,0 +1,24 @@
+# Maintainer: yasder5
+# Thèmes Orbe : polices et habillage des applications (terminal pour l'instant).
+# Les sources sont dans themes/ à la racine du dépôt (ORBE_SRC, fourni par build.sh).
+
+pkgname=orbe-themes
+pkgver=${ORBE_VERSION:-0.1.0}
+pkgrel=1
+pkgdesc="Thèmes Orbe : police Archivo, palette du terminal"
+arch=('any')
+options=('!debug')
+url="https://github.com/Yasder5/orbe-os"
+license=('LicenseRef-Orbe' 'OFL-1.1')
+depends=('fontconfig' 'ttf-jetbrains-mono')
+
+package() {
+  : "${ORBE_SRC:?ORBE_SRC doit pointer vers la racine du dépôt}"
+  # Archivo, police variable de l'interface (OFL, absente des dépôts Arch).
+  install -Dm644 "$ORBE_SRC/themes/fonts/Archivo[wdth,wght].ttf" "$pkgdir/usr/share/fonts/orbe/Archivo[wdth,wght].ttf"
+  install -Dm644 "$ORBE_SRC/themes/fonts/Archivo-Italic[wdth,wght].ttf" "$pkgdir/usr/share/fonts/orbe/Archivo-Italic[wdth,wght].ttf"
+  install -Dm644 "$ORBE_SRC/LICENSES/OFL-Archivo.txt" "$pkgdir/usr/share/licenses/$pkgname/OFL-Archivo.txt"
+
+  # Palette du terminal foot, incluse par ~/.config/foot/foot.ini (fichier fourni par orbe-desktop).
+  install -Dm644 "$ORBE_SRC/themes/terminal/foot-orbe.ini" "$pkgdir/usr/share/orbe/foot/orbe.ini"
+}

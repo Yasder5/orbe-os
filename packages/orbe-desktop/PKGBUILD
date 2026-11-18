@@ -1,0 +1,35 @@
+# Maintainer: yasder5
+# Bureau Orbe OS : dépendances de la session et configuration Hyprland par défaut.
+# Version fournie par build.sh (ORBE_VERSION), dérivée de l'historique git.
+
+pkgname=orbe-desktop
+pkgver=${ORBE_VERSION:-0.1.0}
+pkgrel=1
+pkgdesc="Bureau Orbe OS : session Hyprland et Orbe Shell, réglages par défaut"
+arch=('any')
+options=('!debug')
+url="https://github.com/Yasder5/orbe-os"
+license=('LicenseRef-Orbe')
+depends=(
+  'orbe-shell' 'orbe-themes'
+  'hyprland' 'quickshell' 'hyprpolkitagent' 'hyprland-guiutils'
+  'xdg-desktop-portal-hyprland' 'xdg-desktop-portal-gtk'
+  'qt6-wayland' 'qt5-wayland' 'qt6-svg' 'qt6-5compat'
+  'pipewire' 'pipewire-pulse' 'pipewire-alsa' 'wireplumber'
+  'foot' 'wl-clipboard' 'grim' 'slurp' 'brightnessctl' 'playerctl' 'xdg-utils' 'polkit'
+  'noto-fonts' 'noto-fonts-emoji' 'ttf-jetbrains-mono'
+)
+# Modules Hyprland (orbe.lua charge les autres) et fichiers personnels copiés dans /etc/skel.
+source=(orbe.lua environment.lua look.lua input.lua binds.lua rules.lua autostart.lua
+        hyprland.lua foot.ini)
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+
+package() {
+  local f
+  for f in orbe environment look input binds rules autostart; do
+    install -Dm644 "$srcdir/$f.lua" "$pkgdir/usr/share/orbe/hypr/$f.lua"
+  done
+  # Fichier personnel copié dans le dossier des nouveaux comptes.
+  install -Dm644 "$srcdir/hyprland.lua" "$pkgdir/etc/skel/.config/hypr/hyprland.lua"
+  install -Dm644 "$srcdir/foot.ini" "$pkgdir/etc/skel/.config/foot/foot.ini"
+}

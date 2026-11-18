@@ -7,6 +7,11 @@
 #   --no-iso             démarre seulement le disque (système installé)
 #   --gl                 rendu 3D virtio-gpu (virgl), utile pour Hyprland
 #   --headless           sans fenêtre (pour les captures automatiques)
+#   --xvfb               écran X virtuel (Xvfb) : rendu 3D sans carte graphique, avec --gl,
+#                        captures prises sur l'écran X (screendump ne voit pas le rendu GL),
+#                        demande xwininfo (x11-utils) et Pillow
+#   --res 1920x1080      définition de l'écran de la machine virtuelle
+#   --serial             journal du port série dans out/qemu/serial.log
 #   --at "S:ACTION"      action S secondes après le lancement, option répétable :
 #                          shot[:nom]  capture PNG dans out/captures/
 #                          keys:a b c  touches QEMU (ex. keys:ret, keys:ctrl-alt-f2)
@@ -20,7 +25,7 @@ set -euo pipefail
 ROOT=$(cd "$(dirname "$(readlink -f "$0")")" && pwd)
 cd "$ROOT"
 
-mode=uefi iso="" disk="" use_iso=1 gl=0 headless=0 mem=4G cpus=4
+mode=uefi iso="" disk="" use_iso=1 gl=0 headless=0 xvfb=0 serial=0 res=1920x1080 mem=4G cpus=4
 actions=()
 while (( $# )); do
   case "$1" in
@@ -31,10 +36,13 @@ while (( $# )); do
     --no-iso) use_iso=0 ;;
     --gl) gl=1 ;;
     --headless) headless=1 ;;
+    --xvfb) xvfb=1 ;;
+    --res) res=$2; shift ;;
+    --serial) serial=1 ;;
     --at) actions+=("$2"); shift ;;
     --mem) mem=$2; shift ;;
     --cpus) cpus=$2; shift ;;
-    -h|--help) sed -n '2,19p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help) sed -n '2,23p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "Option inconnue : $1 (voir --help)" >&2; exit 2 ;;
   esac
   shift
@@ -55,14 +63,33 @@ else
   args+=(-accel tcg,thread=multi -cpu max)
 fi
 
-if (( gl )); then
-  args+=(-device virtio-vga-gl)
-  display=${ORBE_QEMU_DISPLAY:-$( (( headless )) && echo egl-headless || echo gtk,gl=on )}
-else
-  args+=(-device virtio-vga)
-  display=${ORBE_QEMU_DISPLAY:-$( (( headless )) && echo none || echo gtk )}
+xres=${res%x*} yres=${res#*x}
+xvfb_pid=""
+if (( xvfb )); then
+  # Écran X virtuel à la définition de la machine virtuelle, QEMU en plein écran dessus.
+  command -v Xvfb >/dev/null || die "Xvfb absent (sudo apt install -y xvfb)."
+  for n in $(seq 90 120); do [[ -e /tmp/.X11-unix/X$n ]] || { xdisplay=:$n; break; }; done
+  # Écran deux fois plus grand : sans gestionnaire de fenêtres, QEMU ne se place pas en 0,0.
+  Xvfb "$xdisplay" -screen 0 "$((xres * 2))x$((yres * 2))x24" +extension GLX -nolisten tcp >/dev/null 2>&1 &
+  xvfb_pid=$!
+  export DISPLAY=$xdisplay
+  for _ in $(seq 50); do [[ -e /tmp/.X11-unix/X${xdisplay#:} ]] && break; sleep 0.1; done
+  args+=(-full-screen)
 fi
+if (( gl )); then
+  args+=(-device "virtio-vga-gl,xres=$xres,yres=$yres")
+  if (( xvfb )); then default_display=sdl,gl=on
+  elif (( headless )); then default_display=egl-headless
+  else default_display=gtk,gl=on; fi
+else
+  args+=(-device "virtio-vga,xres=$xres,yres=$yres")
+  if (( xvfb )); then default_display=sdl
+  elif (( headless )); then default_display=none
+  else default_display=gtk; fi
+fi
+display=${ORBE_QEMU_DISPLAY:-$default_display}
 args+=(-display "$display")
+(( serial )) && args+=(-serial file:out/qemu/serial.log)
 
 if [[ "$mode" == uefi ]]; then
   code=""
@@ -140,7 +167,7 @@ type_keys() {
 echo "QEMU : $mode, $( (( use_iso )) && echo "ISO $iso" ) ${disk:+disque $disk}, affichage $display"
 qemu-system-x86_64 "${args[@]}" &
 qemu_pid=$!
-trap 'rm -f "$sock"' EXIT
+trap 'rm -f "$sock"; [[ -n "$xvfb_pid" ]] && kill "$xvfb_pid" 2>/dev/null' EXIT
 
 if (( ${#actions[@]} )); then
   start=$(date +%s)
@@ -155,7 +182,11 @@ if (( ${#actions[@]} )); then
       shot|shot:*)
         name=${what#shot}; name=${name#:}
         file=out/captures/$mode-${name:-${at}s}.png
-        monitor "screendump $file -f png"
+        if (( xvfb )); then
+          python3 -I "$ROOT/tools/xshot.py" "$DISPLAY" "$file"
+        else
+          monitor "screendump $file -f png"
+        fi
         echo "Capture : $file" ;;
       keys:*) for k in ${what#keys:}; do monitor "sendkey $k"; done ;;
       type:*) type_keys "${what#type:}" ;;

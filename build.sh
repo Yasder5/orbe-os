@@ -57,11 +57,18 @@ ensure_image() {
 }
 ensure_image
 
+# Version des paquets Orbe : 0.1.0.r<nombre de commits>.g<commit>, croissante à chaque commit.
+orbe_version=0.1.0
+if git -C "$ROOT" rev-parse --git-dir >/dev/null 2>&1; then
+  orbe_version="0.1.0.r$(git -C "$ROOT" rev-list --count HEAD).g$(git -C "$ROOT" rev-parse --short HEAD)"
+fi
+
 docker_args=(--rm --privileged
   -v "$ROOT:/orbe"
   -v orbe-pacman-cache:/var/cache/pacman/pkg
   -v orbe-work:/work
   -e ORBE_FAST="$fast"
+  -e ORBE_VERSION="$orbe_version"
   -e ORBE_PACKAGES_ONLY="$packages_only"
   -e ORBE_MIRROR="${ORBE_MIRROR:-}"
   -e HOST_UID="$(id -u)" -e HOST_GID="$(id -g)")
