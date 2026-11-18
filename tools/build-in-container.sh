@@ -114,7 +114,13 @@ fi
 bash /orbe/tools/make-grub-fonts.sh "$profile/grub/themes/orbe"
 mkdir -p "$isodir"
 rm -f "$isodir"/orbe-os-*.iso "$isodir"/orbe-os-*.iso.sha256
-mkarchiso -v -r -w /work/iso -o "$isodir" "$profile"
+# Jusqu'à trois essais : un miroir trop lent un instant fait échouer pacstrap sans autre raison.
+for attempt in 1 2 3; do
+  mkarchiso -v -r -w /work/iso -o "$isodir" "$profile" && break
+  (( attempt < 3 )) || exit 1
+  log "mkarchiso a échoué (essai $attempt), nouvel essai dans 30 s"
+  sleep 30
+done
 cd "$isodir"
 for iso in orbe-os-*.iso; do sha256sum "$iso" > "$iso.sha256"; done
 ls -lh "$isodir"

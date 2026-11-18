@@ -143,6 +143,7 @@ snapper
 snap-pac
 grub-btrfs
 inotify-tools
+os-prober
 cage
 greetd
 greetd-agreety

@@ -2,7 +2,8 @@
 // ~/.config/orbe/shell.json), ou par qs -c orbe ipc call welcome open.
 // Dans la session live, il propose d'abord d'installer Orbe OS.
 // Étapes : bienvenue, apparence, météo, applications, raccourcis. Tout se fait au clavier :
-// Entrée pour continuer, Échap pour revenir, Tab pour passer d'un choix à l'autre.
+// Entrée pour continuer (en live, à la première étape : installer), Échap pour revenir,
+// Tab pour passer d'un choix à l'autre.
 
 import Quickshell
 import Quickshell.Io
@@ -49,6 +50,12 @@ Scope {
             step++;
         else
             finish();
+    }
+
+    // Session live : l'action principale est l'installation.
+    function install() {
+        finish();
+        Quickshell.execDetached(["orbe-install"]);
     }
 
     function back() {
@@ -148,7 +155,9 @@ Scope {
 
                 Keys.onPressed: event => {
                     if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
-                        if (root.step === 3 && root.focusIndex < root.apps.length)
+                        if (root.step === 0 && root.live)
+                            root.install();
+                        else if (root.step === 3 && root.focusIndex < root.apps.length)
                             root.toggleApp(root.focusIndex);
                         else
                             root.next();
@@ -574,10 +583,7 @@ Scope {
                                 visible: root.step === 0 && root.live
                                 text: "Installer Orbe OS"
                                 accent: true
-                                onClicked: {
-                                    root.finish();
-                                    Quickshell.execDetached(["orbe-install"]);
-                                }
+                                onClicked: root.install()
                             }
                             OButton {
                                 text: root.step === 0 ? (root.live ? "Essayer d'abord" : "Commencer") : root.step === root.steps.length - 1 ? "Terminer" : root.step === 3 ? "Installer et continuer" : "Continuer"

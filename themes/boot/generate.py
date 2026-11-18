@@ -141,6 +141,13 @@ def icon(kind, color, size=24, scale=8):
             r = s * 0.085
             d.ellipse([s * knob - r, s * y - r, s * knob + r, s * y + r], fill=(0, 0, 0, 0), outline=c, width=lw)
             d.ellipse([s * knob - r + lw / 2, s * y - r + lw / 2, s * knob + r - lw / 2, s * y + r - lw / 2], fill=BG + (255,))
+    elif kind == "windows":
+        # Autre système (Windows, trouvé par os-prober) : quatre carreaux au trait.
+        m, g = s * 0.2, s * 0.06
+        h = (s - 2 * m - g) / 2
+        for x in (m, m + h + g):
+            for y in (m, m + h + g):
+                d.rounded_rectangle([x, y, x + h, y + h], 1.5 * scale, outline=c, width=lw)
     elif kind == "shutdown":
         m = s * 0.2
         d.arc([m, m, s - m, s - m], start=-50, end=230, fill=c, width=lw)
@@ -169,7 +176,7 @@ def main():
     # Console GRUB (touche C ou E) : même panneau.
     nine_slice(rounded_box((48, 48), 8, SURFACE, LINE, 1), 12, "terminal", GRUB)
 
-    for kind, color in (("orbe", ACCENT), ("memtest86", TEXT), ("efi", TEXT),
+    for kind, color in (("orbe", ACCENT), ("memtest86", TEXT), ("efi", TEXT), ("windows", TEXT),
                         ("shutdown", DANGER), ("reboot", TEXT)):
         icon(kind, color).save(GRUB / "icons" / f"{kind}.png")
 
