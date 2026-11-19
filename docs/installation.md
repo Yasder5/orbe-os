@@ -11,6 +11,7 @@
 | Clavier | AZERTY par défaut (déduit de la langue) |
 | Disque | effacer le disque (défaut) ou partitionnement manuel ; **btrfs** (défaut) ou ext4 ; **chiffrement LUKS2** en option ; table GPT |
 | Compte | nom, identifiant, mot de passe (aussi celui de sudo) ; ouverture automatique au choix ; shell fish |
+| Options | noyau LTS (secours), noyau Zen (réactivité), outils de diagnostic : téléchargés seulement si Internet répond, sinon ignorés |
 
 ### Ce qui se passe pendant l'installation
 

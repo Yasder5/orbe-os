@@ -157,7 +157,7 @@ type_keys() {
         *) k=$ch ;;
       esac
     else
-      case "$ch" in ' ') k=spc ;; '.') k=dot ;; '-') k=minus ;; '/') k=slash ;; *) k=$ch ;; esac
+      case "$ch" in ' ') k=spc ;; '.') k=dot ;; '-') k=minus ;; '/') k=slash ;; '(') k=shift-9 ;; ')') k=shift-0 ;; ',') k=comma ;; ';') k=semicolon ;; ':') k=shift-semicolon ;; '=') k=equal ;; '@') k=shift-2 ;; *) k=$ch ;; esac
     fi
     keys+=("$k")
   done

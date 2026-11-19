@@ -12,7 +12,7 @@ Tenu à jour à chaque étape : ce qui est fait, ce qui reste, les décisions et
 | 4. Tableau de bord, réglages rapides, verrouillage, fonds | validée (banc d'essai + VM), 2026-11-18 |
 | Mode jeu (demande de Yass) | fait ; bascule bureau ↔ jeu validée en VM, Steam et gamescope à tester sur matériel |
 | 5. Thème global | validée en VM et sur le banc d'essai, 2026-11-18 (Plymouth pas encore capturé en VM) |
-| 6. Installateur Calamares | écrit, test d'installation en VM en cours |
+| 6. Installateur Calamares | installation btrfs sans chiffrement validée en VM de bout en bout ; avec chiffrement : en cours |
 | 7. Réglages Orbe et mises à jour | écrit, vérifié sur le banc d'essai |
 | 8. Finitions | en partie : contraste, mesure du processeur, aide des raccourcis, presse-papiers, licences, README |
 | 9. Test sur vrai matériel | guide prêt (`docs/test-materiel.md`), test par Yass |
@@ -103,6 +103,8 @@ quickshell 0.3.2, hyprland 0.57.2, hyprlock 0.9.7, hypridle 0.1.8, greetd 0.10.3
 
 - **Mode jeu en VM** : Super + G ferme la session Hyprland, `orbe-session` tente le mode jeu (gamescope ne démarre pas sans carte graphique Vulkan), puis revient au bureau. zram actif, Decky Loader démarré. Captures `out/captures/uefi-jeu-*.png`.
 - **Étape 5 en VM** : fastfetch affiche « Orbe OS », Nautilus (GTK 4) et foot assortis (fond, police, bordure citron), curseur Orbe. Sur le banc d'essai : greeter, assistant de bienvenue, Réglages Orbe, aide des raccourcis.
+- **Installation en VM (btrfs, sans chiffrement)** : assistant live, Entrée lance Calamares aux couleurs d'Orbe, pages Bienvenue, Emplacement (Europe/Paris), Clavier (français), Partitions (effacer le disque, 2 Go FAT32 sur `/boot` + 62 Go btrfs), Utilisateurs, Résumé, installation (37 min en émulation, surtout la copie), « Installation terminée ». Au redémarrage sur le disque : menu GRUB Orbe, écran de connexion Orbe avec le compte créé, connexion, assistant de bienvenue. Captures `out/captures/uefi-i-*.png` et `uefi-d-*.png`.
+- Corrigé après ce test : l'assistant perdait le focus clavier après l'étape Météo (et la touche Entrée y décochait Firefox) ; le diaporama de Calamares avait un cadre blanc.
 - En VM, Orbe Shell met parfois plus de 5 min à apparaître : il attend des réponses D-Bus (UPower, power-profiles-daemon, BlueZ) qui expirent au bout de 25 s en émulation lente. Pas d'erreur dans son journal ; à surveiller sur matériel réel.
 
 ## À faire
