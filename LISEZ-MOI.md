@@ -22,11 +22,13 @@ cat orbe-os-2026.11.19-x86_64.iso.part-* > orbe-os-2026.11.19-x86_64.iso
 sha256sum -c SHA256SUMS --ignore-missing
 ```
 
-Windows (PowerShell), dans le dossier cloné :
+Windows (invite de commandes `cmd`), dans le dossier cloné ; les morceaux sont pris dans l'ordre alphabétique :
 
-```powershell
-Get-ChildItem orbe-os-2026.11.19-x86_64.iso.part-* | Sort-Object Name | Get-Content -AsByteStream -ReadCount 0 | Set-Content orbe-os-2026.11.19-x86_64.iso -AsByteStream
+```bat
+copy /b orbe-os-2026.11.19-x86_64.iso.part-* orbe-os-2026.11.19-x86_64.iso
 ```
+
+Puis, dans PowerShell, comparer avec la somme ci-dessus :
 
 ```powershell
 Get-FileHash orbe-os-2026.11.19-x86_64.iso
