@@ -70,6 +70,9 @@ Tenu à jour à chaque étape : ce qui est fait, ce qui reste, les décisions et
 - **Réglages de Hyprland faits dans l'application** : écrits en Lua dans `~/.config/orbe/hyprland.lua`, chargé à la fin de la configuration Orbe, puis `hyprctl reload`. Le clavier choisi à l'installation est lu dans `/etc/X11/xorg.conf.d/00-keyboard.conf`.
 - **Pas de navigateur dans l'ISO** (taille) : Firefox est coché par défaut dans l'assistant de bienvenue.
 
+### 2026-11-19
+- **ISO rangée dans la branche `iso`** (demande de Yass, son serveur étant en maintenance) : 27 morceaux de 95 Mo au plus (GitHub refuse les fichiers de plus de 100 Mo), sommes SHA-256 et mode d'emploi. Les versions GitHub (« releases ») ne sont pas permises depuis cette session. Le dépôt est **public** : la branche l'est aussi tant qu'il n'est pas passé en privé. Elle ajoute 2,6 Go au dépôt ; à supprimer quand le serveur de Yass reprend (`git push origin --delete iso`), en sachant que GitHub peut garder les objets un moment.
+
 ## Mesures
 - **Orbe Shell au repos** (banc d'essai, fond fixe, rendu logiciel) : **0,2 % d'un cœur**, objectif de 2 % tenu. Mémoire 330 Mo, gonflée par le rendu logiciel (llvmpipe). Un orbe animé plein écran rendu par le processeur (VM sans GPU) prend un cœur entier : c'est pourquoi le fond par défaut est fixe ; sur une vraie carte graphique, le shader ne coûte presque rien au processeur (à confirmer sur le PC de Yass).
 - **Contraste** (WCAG) : texte `#f5f5f0` sur fond 18:1, texte secondaire `#8f8f8a` sur fond 6,1:1 et sur `surface-2` 5,4:1, noir sur citron 16,9:1, `danger` sur fond 7,1:1 : tout dépasse AA (4,5:1).

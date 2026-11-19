@@ -25,6 +25,8 @@ Il faut Docker (le conteneur doit pouvoir tourner en `--privileged`) et environ 
 
 L'ISO arrive dans `out/iso/orbe-os-AAAA.MM.JJ-x86_64.iso`, avec sa somme SHA-256. `./build.sh --fast` compresse moins, pour les essais. `bash tools/preflight.sh` vérifie la machine.
 
+Une ISO déjà construite (2026.11.19) est rangée, découpée, dans la branche `iso` : `git clone --single-branch --branch iso https://github.com/Yasder5/orbe-os.git`, puis le mode d'emploi de son `LISEZ-MOI.md`. `tools/decouper-iso.sh` découpe une nouvelle ISO de la même façon.
+
 ## Tester dans une machine virtuelle
 
 ```bash
