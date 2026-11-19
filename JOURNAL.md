@@ -11,10 +11,10 @@ Tenu à jour à chaque étape : ce qui est fait, ce qui reste, les décisions et
 | 3. Orbe Shell, premier jet | validée (banc d'essai + VM), 2026-11-18 |
 | 4. Tableau de bord, réglages rapides, verrouillage, fonds | validée (banc d'essai + VM), 2026-11-18 |
 | Mode jeu (demande de Yass) | fait ; bascule bureau ↔ jeu validée en VM, Steam et gamescope à tester sur matériel |
-| 5. Thème global | validée en VM et sur le banc d'essai, 2026-11-18 (Plymouth pas encore capturé en VM) |
-| 6. Installateur Calamares | installation btrfs sans chiffrement validée en VM de bout en bout ; avec chiffrement : en cours |
-| 7. Réglages Orbe et mises à jour | écrit, vérifié sur le banc d'essai |
-| 8. Finitions | en partie : contraste, mesure du processeur, aide des raccourcis, presse-papiers, licences, README |
+| 5. Thème global | validée en VM et sur le banc d'essai, 2026-11-18 (sauf l'écran Plymouth, invisible en VM : à vérifier sur matériel) |
+| 6. Installateur Calamares | validée en VM, 2026-11-19 : btrfs sans chiffrement et btrfs + LUKS2, installation, redémarrage, écran de connexion, assistant |
+| 7. Réglages Orbe et mises à jour | faite : application vérifiée sur le banc d'essai (toutes les pages), `orbe-update` ; à essayer en vrai avec Internet |
+| 8. Finitions | faite pour l'essentiel : contraste AA, navigation au clavier, réduction des animations, processeur mesuré, aide des raccourcis, presse-papiers, README avec captures, licences ; restent les points listés plus bas |
 | 9. Test sur vrai matériel | guide prêt (`docs/test-materiel.md`), test par Yass |
 
 ## Décisions
@@ -73,7 +73,7 @@ Tenu à jour à chaque étape : ce qui est fait, ce qui reste, les décisions et
 ## Mesures
 - **Orbe Shell au repos** (banc d'essai, fond fixe, rendu logiciel) : **0,2 % d'un cœur**, objectif de 2 % tenu. Mémoire 330 Mo, gonflée par le rendu logiciel (llvmpipe). Un orbe animé plein écran rendu par le processeur (VM sans GPU) prend un cœur entier : c'est pourquoi le fond par défaut est fixe ; sur une vraie carte graphique, le shader ne coûte presque rien au processeur (à confirmer sur le PC de Yass).
 - **Contraste** (WCAG) : texte `#f5f5f0` sur fond 18:1, texte secondaire `#8f8f8a` sur fond 6,1:1 et sur `surface-2` 5,4:1, noir sur citron 16,9:1, `danger` sur fond 7,1:1 : tout dépasse AA (4,5:1).
-- **ISO** : 2,7 Go en compression rapide (`--fast`, zstd 3). Compression finale à mesurer.
+- **ISO** : 2,7 Go en compression rapide (`--fast`, zstd 3), **2,5 Go en compression finale** (`./build.sh`, zstd 19, 9 min de construction). Au-dessus de la limite de 2 Gio par fichier des versions GitHub : **décision de Yass** pour la distribution (hébergement ailleurs, ISO découpée, ou une variante plus légère sans pilote NVIDIA ni Heroic, installés ensuite par le réseau).
 
 ## Vérifié le 2026-11-17 (dépôts Arch)
 quickshell 0.3.2, hyprland 0.57.2, hyprlock 0.9.7, hypridle 0.1.8, greetd 0.10.3, archiso 92, grub 2.16, grub-btrfs 4.14, qt6-base 6.12.0, linux 7.3.4, linux-zen 7.3.4, linux-lts 6.18.63, mesa 26.2.7, nvidia-open 620.70.06, gamemode 1.8.2, gamescope 3.17.0, mangohud 0.8.4, steam (multilib). Toujours absents des dépôts officiels : calamares, ttf-archivo, hyprland-qtutils (remplacé par hyprland-guiutils, présent), nvidia-580xx-dkms.
@@ -104,6 +104,10 @@ quickshell 0.3.2, hyprland 0.57.2, hyprlock 0.9.7, hypridle 0.1.8, greetd 0.10.3
 - **Mode jeu en VM** : Super + G ferme la session Hyprland, `orbe-session` tente le mode jeu (gamescope ne démarre pas sans carte graphique Vulkan), puis revient au bureau. zram actif, Decky Loader démarré. Captures `out/captures/uefi-jeu-*.png`.
 - **Étape 5 en VM** : fastfetch affiche « Orbe OS », Nautilus (GTK 4) et foot assortis (fond, police, bordure citron), curseur Orbe. Sur le banc d'essai : greeter, assistant de bienvenue, Réglages Orbe, aide des raccourcis.
 - **Installation en VM (btrfs, sans chiffrement)** : assistant live, Entrée lance Calamares aux couleurs d'Orbe, pages Bienvenue, Emplacement (Europe/Paris), Clavier (français), Partitions (effacer le disque, 2 Go FAT32 sur `/boot` + 62 Go btrfs), Utilisateurs, Résumé, installation (37 min en émulation, surtout la copie), « Installation terminée ». Au redémarrage sur le disque : menu GRUB Orbe, écran de connexion Orbe avec le compte créé, connexion, assistant de bienvenue. Captures `out/captures/uefi-i-*.png` et `uefi-d-*.png`.
+- **Installation chiffrée en VM (btrfs + LUKS2)** : la case « Chiffrer le système » et la phrase de passe passent au clavier, Calamares crée 2 Go FAT32 sur `/boot` + 62 Go LUKS2, installation terminée. Au démarrage, la phrase de passe tapée ouvre le disque et l'écran de connexion Orbe s'affiche. Captures `out/captures/uefi-e-*.png`, `uefi-f-*.png`.
+- **Contrôle du disque installé** (monté depuis un conteneur) : hooks `base udev autodetect microcode kms modconf block keyboard keymap consolefont plymouth filesystems`, thème Plymouth `orbe`, `splash` au démarrage, greetd sur le greeter Orbe, configuration snapper `root` et `/.snapshots` dans fstab, `os-release` « Orbe OS », plus de `sudoers.d/orbe-live`, `decky-loader@yass` et `grub-btrfsd` activés. Le menu GRUB installé a bien le thème Orbe et l'entrée « Orbe OS snapshots ».
+- **Plymouth jamais visible en VM**, ni dans le live ni installé : l'image reste celle de GRUB jusqu'au pilote graphique, puis noir pur (pas le noir Orbe). En émulation, la minuterie de GRUB et l'affichage précoce sont peu fiables ; ajouté `plymouth.use-simpledrm` (écran de démarrage sur le tampon d'image du micrologiciel, recommandé pour NVIDIA, dont le pilote n'est pas dans l'initramfs). **À vérifier sur le PC de Yass.**
+- GRUB installé : les entrées « EFI BootNext » de GRUB 2.16 (une par entrée du micrologiciel) masquées, variantes de démarrage dans un sous-menu.
 - Corrigé après ce test : l'assistant perdait le focus clavier après l'étape Météo (et la touche Entrée y décochait Firefox) ; le diaporama de Calamares avait un cadre blanc.
 - En VM, Orbe Shell met parfois plus de 5 min à apparaître : il attend des réponses D-Bus (UPower, power-profiles-daemon, BlueZ) qui expirent au bout de 25 s en émulation lente. Pas d'erreur dans son journal ; à surveiller sur matériel réel.
 
@@ -113,6 +117,8 @@ quickshell 0.3.2, hyprland 0.57.2, hyprlock 0.9.7, hypridle 0.1.8, greetd 0.10.3
 - Heroic affiche au premier lancement sa question sur les statistiques anonymes : laissée à l'utilisateur.
 - `loopback.cfg` (démarrage de l'ISO depuis un autre GRUB, Ventoy en mode GRUB par exemple) garde le menu texte, avec l'écran Plymouth.
 - **Dépôt `[orbe]` hébergé** : décision de Yass (voir `docs/installation.md`). Sans lui, les paquets Orbe d'un système installé ne se mettent pas à jour.
+- Page « Options » de l'installateur (noyaux LTS et Zen) : non testée, la VM n'a pas d'accès à Internet pour pacman.
+- Le menu GRUB installé s'appelle « Orbe OS Linux » (GRUB ajoute « Linux » au nom de la distribution).
 - Instantanés btrfs : le noyau est sur la partition EFI, hors des instantanés. Démarrer un instantané pris avant une mise à jour du noyau peut échouer (modules d'une autre version) : à documenter ou corriger (copie du noyau dans l'instantané).
 - `xpadneo` (manettes Xbox en Bluetooth) et `game-devices-udev` pas encore empaquetés.
 - Détection NVIDIA du live (`orbe-gpu-setup`) à tester sur le PC de Yass (RTX 3050).
