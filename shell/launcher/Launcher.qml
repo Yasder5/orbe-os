@@ -191,8 +191,8 @@ Scope {
             .sort((a, b) => b.s - a.s).slice(0, max).map(x => ({
                 title: x.g.name,
                 subtitle: "Jeu " + x.g.source,
-                icon: "gamepad",
-                iconSource: x.g.cover ? "file://" + x.g.cover : "",
+                icon: x.g.cover ? "" : "gamepad",
+                cover: x.g.cover ? "file://" + x.g.cover : "",
                 run: () => Quickshell.execDetached(["xdg-open", x.g.launch])
             }));
     }
@@ -558,6 +558,24 @@ Scope {
                                 width: 32
                                 height: 32
 
+                                // Jaquette d'un jeu, au format portrait.
+                                Rectangle {
+                                    anchors.centerIn: parent
+                                    visible: !!row.modelData.cover
+                                    width: 30
+                                    height: 44
+                                    radius: Theme.radiusS
+                                    color: Theme.surface2
+                                    clip: true
+
+                                    Image {
+                                        anchors.fill: parent
+                                        source: row.modelData.cover ?? ""
+                                        sourceSize: Qt.size(60, 88)
+                                        fillMode: Image.PreserveAspectCrop
+                                        asynchronous: true
+                                    }
+                                }
                                 IconImage {
                                     anchors.fill: parent
                                     visible: !!row.modelData.iconSource
