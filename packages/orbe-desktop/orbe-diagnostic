@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# Rapport de diagnostic d'Orbe OS : rassemble ce qu'il faut pour comprendre un problème
+# (matériel, pilotes, erreurs du démarrage, journaux de Hyprland, d'Orbe Shell et du mode jeu)
+# dans ~/orbe-rapport-AAAA-MM-JJ_HH-MM.tar.gz. Aucun mot de passe, aucune clé Wi-Fi.
+set -u
+date=$(date +%Y-%m-%d_%H-%M)
+dir=$(mktemp -d)
+out=$HOME/orbe-rapport-$date.tar.gz
+r=$dir/orbe-rapport-$date
+mkdir -p "$r"
+run() { # fichier, commande...
+  local f=$1; shift
+  { echo "\$ $*"; "$@" 2>&1; } > "$r/$f" || true
+}
+echo "Rapport Orbe OS en cours..."
+run systeme.txt sh -c 'cat /etc/os-release; echo; uname -a; echo; uptime; echo; cat /proc/cmdline'
+run materiel.txt sh -c 'lscpu | head -20; echo; free -h; echo; lspci -nnk; echo; lsusb'
+run disques.txt sh -c 'lsblk -f; echo; df -h; echo; findmnt -t btrfs,ext4,vfat'
+run gpu.txt sh -c 'nvidia-smi 2>&1 | head -30; echo; ls -l /sys/class/drm/; echo; cat /run/orbe/hypr-hardware.lua 2>/dev/null; echo; lsmod | grep -Ei "nvidia|nouveau|amdgpu|i915|xe|virtio"'
+run ecrans.txt hyprctl monitors all
+run erreurs-demarrage.txt journalctl -b -p 3 --no-pager
+run services-en-echec.txt systemctl --failed --no-pager
+run demarrage.txt systemd-analyze blame
+run paquets-orbe.txt sh -c 'pacman -Q | grep -E "^(orbe|decky|calamares|heroic|steam|gamescope|mangohud|nvidia|lib32-nvidia|mesa|vulkan|linux|hyprland|quickshell)"'
+run reseau.txt sh -c 'nmcli general status; echo; nmcli device status; echo; ip -brief address'
+run son.txt sh -c 'wpctl status'
+run veille.txt sh -c 'cat /sys/power/mem_sleep 2>/dev/null; echo; journalctl -b -u systemd-suspend --no-pager | tail -40'
+state=${XDG_STATE_HOME:-$HOME/.local/state}/orbe
+cp "$state/jeu.log" "$state/jeu-echecs" "$state/session" "$r/" 2>/dev/null
+cp "${XDG_CONFIG_HOME:-$HOME/.config}"/orbe/{shell.json,reglages.json,jeu.conf,hyprland.lua} "$r/" 2>/dev/null
+# Journaux de Hyprland et d'Orbe Shell de la session en cours.
+for f in "$XDG_RUNTIME_DIR"/hypr/*/hyprland.log; do [[ -f $f ]] && tail -n 400 "$f" > "$r/hyprland.log"; done
+for f in "$XDG_RUNTIME_DIR"/quickshell/by-id/*/log.qslog; do [[ -f $f ]] && qs log -t 300 "$f" > "$r/orbe-shell.log" 2>&1; done
+tar -czf "$out" -C "$dir" "orbe-rapport-$date"
+rm -rf "$dir"
+echo "Rapport créé : $out"
+notify-send -a Orbe -i document-save "Rapport créé" "$out : à envoyer pour un dépannage. Il ne contient aucun mot de passe." 2>/dev/null
+[[ -t 0 ]] && read -rp "Entrée pour fermer " _
+exit 0

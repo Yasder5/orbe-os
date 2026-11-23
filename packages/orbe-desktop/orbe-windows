@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Redémarrer sous Windows (double démarrage) : choisit l'entrée Windows du menu GRUB pour le
+# prochain démarrage seulement (grub-reboot), puis redémarre.
+#   orbe-windows --scan     (root, au démarrage) note l'entrée Windows dans /var/lib/orbe/windows
+#   orbe-windows --reboot   (root, via pkexec, sans mot de passe) prépare GRUB puis redémarre
+# Orbe Shell et le greeter lisent /var/lib/orbe/windows pour proposer l'action.
+set -u
+cache=/var/lib/orbe/windows
+case ${1:-} in
+  --scan)
+    mkdir -p /var/lib/orbe
+    title=$(grep -oP "^menuentry ['\"]\K[^'\"]*Windows[^'\"]*" /boot/grub/grub.cfg 2>/dev/null | head -n1)
+    printf '%s\n' "$title" > "$cache"
+    chmod 644 "$cache"
+    ;;
+  --reboot)
+    title=$(cat "$cache" 2>/dev/null)
+    [[ -n $title ]] || { echo "Pas d'entrée Windows dans le menu de démarrage." >&2; exit 1; }
+    grub-reboot "$title" && systemctl reboot
+    ;;
+  *)
+    echo "Usage : orbe-windows --scan | --reboot" >&2; exit 2 ;;
+esac

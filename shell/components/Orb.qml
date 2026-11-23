@@ -33,16 +33,20 @@ ShaderEffect {
     fragmentShader: Qt.resolvedUrl("../shaders/orb.frag.qsb")
     blending: true
 
-    FrameAnimation {
-        property real pending: 0
+    // Une image toutes les 1/maxFps secondes : l'orbe n'est redessiné que quand l'angle change,
+    // pas à chaque image de l'écran (144 Hz et plus sur un écran de jeu).
+    Timer {
+        property double last: 0
 
+        interval: Math.round(1000 / Math.max(1, orb.maxFps))
+        repeat: true
         running: orb.running
+        onRunningChanged: last = 0
         onTriggered: {
-            pending += frameTime;
-            if (pending >= 1 / orb.maxFps) {
-                orb.yaw = (orb.yaw + orb.speed * pending) % (2 * Math.PI);
-                pending = 0;
-            }
+            const now = Date.now();
+            const dt = last > 0 ? (now - last) / 1000 : interval / 1000;
+            last = now;
+            orb.yaw = (orb.yaw + orb.speed * Math.min(dt, 0.25)) % (2 * Math.PI);
         }
     }
 }

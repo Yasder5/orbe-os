@@ -5,7 +5,7 @@ Lancé après « users » (le compte existe) et avant « initcpiocfg » (l'initr
 - retire ce qui ne sert qu'à la session live (compte orbe, sudo sans mot de passe, services) ;
 - remet le noyau dans /boot (archiso le retire de l'image) ;
 - greetd : greeter Orbe, ouverture automatique de la session si elle a été demandée ;
-- Decky Loader pour le nouveau compte ;
+- carte NVIDIA : pilote chargé tôt (initramfs), nouveau exclu, veille NVIDIA ;
 - btrfs : configuration snapper « root » et entrées des instantanés dans GRUB ;
 - clés de pacman, mot de passe root verrouillé.
 """
@@ -21,6 +21,7 @@ LIVE_FILES = [
     "etc/sudoers.d/orbe-live",
     "etc/sysusers.d/orbe-live.conf",
     "etc/tmpfiles.d/orbe-live.conf",
+    "etc/modprobe.d/orbe-live-gpu.conf",
     "etc/mkinitcpio.conf.d/archiso.conf",
     "etc/motd",
     "etc/ssh/sshd_config.d/10-archiso.conf",
@@ -115,6 +116,19 @@ def root_is_btrfs():
     return False
 
 
+def nvidia_present():
+    """Carte graphique NVIDIA dans ce PC (lu dans le système live, même matériel)."""
+    for dev in glob.glob("/sys/bus/pci/devices/*"):
+        try:
+            vendor = open(os.path.join(dev, "vendor")).read().strip()
+            cls = open(os.path.join(dev, "class")).read().strip()
+        except OSError:
+            continue
+        if vendor == "0x10de" and (cls.startswith("0x0300") or cls.startswith("0x0302")):
+            return True
+    return False
+
+
 def run():
     root = libcalamares.globalstorage.value("rootMountPoint")
     user = libcalamares.globalstorage.value("username")
@@ -140,14 +154,20 @@ def run():
         config += '\n[initial_session]\ncommand = "orbe-session"\nuser = "{}"\n'.format(autologin)
     write(root, "etc/greetd/config.toml", config)
 
-    # Decky Loader (thème Steam) pour le nouveau compte.
-    wants = os.path.join(root, "etc/systemd/system/multi-user.target.wants")
-    os.makedirs(wants, exist_ok=True)
-    unit = "/usr/lib/systemd/system/decky-loader@.service"
-    if os.path.exists(os.path.join(root, unit.lstrip("/"))):
-        link = os.path.join(wants, "decky-loader@{}.service".format(user))
-        if not os.path.lexists(link):
-            os.symlink(unit, link)
+    # Carte NVIDIA : pilote fixé à l'installation (le live choisit à chaque démarrage). Modules
+    # dans l'initramfs (« ? » : sans erreur si un noyau n'a pas encore son module), nouveau
+    # exclu, mémoire vidéo gardée pendant la veille. Decky Loader, lui, est démarré par le mode
+    # jeu pour le compte qui l'ouvre (règle polkit d'orbe-gaming).
+    if nvidia_present():
+        write(root, "etc/mkinitcpio.conf.d/orbe-nvidia.conf",
+              "# Pilote NVIDIA chargé tôt (Orbe OS).\nMODULES+=(nvidia? nvidia_modeset? nvidia_uvm? nvidia_drm?)\n")
+        write(root, "etc/modprobe.d/orbe-nvidia.conf",
+              "# Carte NVIDIA (Orbe OS) : pilote nvidia-open, pas de nouveau.\n"
+              "blacklist nouveau\n"
+              "options nvidia_drm modeset=1 fbdev=1\n"
+              "options nvidia NVreg_PreserveVideoMemoryAllocations=1\n")
+        for unit in ("nvidia-suspend.service", "nvidia-resume.service", "nvidia-hibernate.service"):
+            target_env_call(["systemctl", "enable", unit])
 
     # Instantanés btrfs : snapper sur « / » (sous-volume @snapshots monté sur /.snapshots).
     if root_is_btrfs():

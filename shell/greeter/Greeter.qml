@@ -25,6 +25,13 @@ Scope {
         { id: "jeu", label: "Mode jeu", icon: "gamepad" }
     ]
     property int sessionIndex: 0
+    // Entrée Windows du menu de démarrage (orbe-windows --scan) : bouton « Windows ».
+    property string windowsEntry: ""
+
+    FileView {
+        path: "/var/lib/orbe/windows"
+        onLoaded: root.windowsEntry = text().trim()
+    }
 
     function submit() {
         if (busy || !user)
@@ -317,9 +324,9 @@ Scope {
 
             Repeater {
                 model: [
-                    { label: "Redémarrer", icon: "restart", cmd: ["systemctl", "reboot"] },
-                    { label: "Éteindre", icon: "power", cmd: ["systemctl", "poweroff"] }
-                ]
+                    { label: "Redémarrer", icon: "restart", cmd: ["systemctl", "reboot"] }
+                ].concat(root.windowsEntry ? [{ label: "Windows", icon: "windows", cmd: ["pkexec", "orbe-windows", "--reboot"] }] : [])
+                 .concat([{ label: "Éteindre", icon: "power", cmd: ["systemctl", "poweroff"] }])
 
                 Rectangle {
                     id: action

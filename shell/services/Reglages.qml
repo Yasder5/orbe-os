@@ -5,9 +5,12 @@ import Quickshell.Io
 import QtQuick
 import qs
 
-// Réglages de Hyprland faits dans « Réglages Orbe » : clavier, souris, pavé tactile, écrans.
-// Gardés dans ~/.config/orbe/reglages.json (relus à chaud) et traduits en Lua dans
-// ~/.config/orbe/hyprland.lua, chargé par la configuration Hyprland d'Orbe.
+// Réglages faits dans « Réglages Orbe », gardés dans ~/.config/orbe/reglages.json (relus à chaud)
+// et traduits pour chaque outil :
+//   - clavier, souris, pavé tactile, écrans : ~/.config/orbe/hyprland.lua (Lua de Hyprland) ;
+//   - mode jeu : ~/.config/orbe/jeu.conf (lu par orbe-game-session et orbe-steam-fond) ;
+//   - énergie : ~/.config/orbe/hypridle.conf (lu par orbe-idle) ;
+//   - session au démarrage : ~/.config/orbe/demarrage (lu par orbe-session).
 Singleton {
     id: root
 
@@ -21,6 +24,22 @@ Singleton {
     property alias monitors: json.monitors
     // Session ouverte au démarrage : « derniere », « bureau » ou « jeu » (lu par orbe-session).
     property alias startSession: json.startSession
+    // Mode jeu : écran de gamescope (vide : le premier), profil « performances », moteur
+    // (« gamescope » ou « secours »), Steam en arrière-plan sur le bureau.
+    property alias jeuEcran: json.jeuEcran
+    property alias jeuPerf: json.jeuPerf
+    property alias jeuMoteur: json.jeuMoteur
+    property alias steamFond: json.steamFond
+    // Énergie, en minutes (0 : jamais).
+    property alias ecranEteint: json.ecranEteint
+    property alias veille: json.veille
+    property alias verrouillage: json.verrouillage
+
+    // Disposition du clavier du système (choisie à l'installation), utilisée tant que
+    // l'utilisateur n'en a pas choisi une autre ici (kbLayout vide).
+    property string systemLayout: "fr"
+    property string systemVariant: ""
+    readonly property string currentLayout: kbLayout || systemLayout
 
     // Écrans connectés, lus dans hyprctl monitors -j : nom, modèle, mode actuel, modes possibles.
     property var outputs: []
@@ -38,9 +57,12 @@ Singleton {
         const lines = [
             "-- Généré par Réglages Orbe à partir de ~/.config/orbe/reglages.json : modifie plutôt l'application.",
             "hl.config({",
-            "    input = {",
-            "        kb_layout = " + luaString(kbLayout) + ",",
-            "        kb_variant = " + luaString(kbVariant) + ",",
+            "    input = {"
+        ];
+        // Disposition écrite seulement si elle a été choisie ici : sinon celle du système.
+        if (kbLayout)
+            lines.push("        kb_layout = " + luaString(kbLayout) + ",", "        kb_variant = " + luaString(kbVariant) + ",");
+        lines.push(
             "        sensitivity = " + Number(sensitivity).toFixed(2) + ",",
             "        accel_profile = " + luaString(accelFlat ? "flat" : "adaptive") + ",",
             "        touchpad = {",
@@ -49,7 +71,7 @@ Singleton {
             "        },",
             "    },",
             "})"
-        ];
+        );
         for (const name in monitors) {
             const m = monitors[name];
             lines.push("hl.monitor({ output = " + luaString(name) + ", mode = " + luaString(m.mode || "preferred")
@@ -57,6 +79,39 @@ Singleton {
         }
         lua.setText(lines.join("\n") + "\n");
         Quickshell.execDetached(["sh", "-c", "sleep 0.3; hyprctl reload >/dev/null"]);
+    }
+
+    // Mode jeu : fichier de variables pour les scripts (orbe-game-session, orbe-steam-fond).
+    function applyJeu() {
+        jeuFile.setText([
+            "# Généré par Réglages Orbe (Mode jeu) : modifie plutôt l'application.",
+            "ORBE_JEU_ECRAN=" + JSON.stringify(jeuEcran),
+            "ORBE_JEU_PERF=" + (jeuPerf ? 1 : 0),
+            "ORBE_JEU_MOTEUR=" + (jeuMoteur === "secours" ? "secours" : "gamescope"),
+            "ORBE_STEAM_FOND=" + (steamFond ? 1 : 0)
+        ].join("\n") + "\n");
+    }
+
+    // Énergie : configuration de hypridle, puis relance de hypridle.
+    function applyEnergie() {
+        const lines = [
+            "# Généré par Réglages Orbe (Énergie) : modifie plutôt l'application.",
+            "general {",
+            "    lock_cmd = qs -c orbe ipc call lock lock",
+            "    before_sleep_cmd = loginctl lock-session",
+            "    after_sleep_cmd = hyprctl dispatch 'hl.dsp.dpms({ action = \"enable\" })'",
+            "}"
+        ];
+        if (verrouillage > 0)
+            lines.push("listener {", "    timeout = " + verrouillage * 60, "    on-timeout = loginctl lock-session", "}");
+        if (ecranEteint > 0)
+            lines.push("listener {", "    timeout = " + ecranEteint * 60,
+                       "    on-timeout = hyprctl dispatch 'hl.dsp.dpms({ action = \"disable\" })'",
+                       "    on-resume = hyprctl dispatch 'hl.dsp.dpms({ action = \"enable\" })'", "}");
+        if (veille > 0)
+            lines.push("listener {", "    timeout = " + veille * 60, "    on-timeout = orbe-suspend-check && systemctl suspend", "}");
+        idleFile.setText(lines.join("\n") + "\n");
+        Quickshell.execDetached(["sh", "-c", "sleep 0.3; orbe-idle --relancer"]);
     }
 
     function setMonitor(name, key, value) {
@@ -86,7 +141,7 @@ Singleton {
         JsonAdapter {
             id: json
 
-            property string kbLayout: "fr"
+            property string kbLayout: ""
             property string kbVariant: ""
             property real sensitivity: 0
             property bool accelFlat: true
@@ -94,6 +149,41 @@ Singleton {
             property bool tapToClick: true
             property var monitors: ({})
             property string startSession: "derniere"
+            property string jeuEcran: ""
+            property bool jeuPerf: true
+            property string jeuMoteur: "gamescope"
+            property bool steamFond: false
+            property int ecranEteint: 11
+            property int veille: 60
+            property int verrouillage: 10
+        }
+    }
+
+    FileView {
+        id: jeuFile
+
+        path: root.dir + "/jeu.conf"
+        atomicWrites: true
+    }
+
+    FileView {
+        id: idleFile
+
+        path: root.dir + "/hypridle.conf"
+        atomicWrites: true
+    }
+
+    // Disposition du clavier du système (Calamares ou localectl l'écrivent ici).
+    FileView {
+        path: "/etc/X11/xorg.conf.d/00-keyboard.conf"
+        onLoaded: {
+            const t = text();
+            const l = t.match(/"XkbLayout"\s+"([^",]+)/);
+            const v = t.match(/"XkbVariant"\s+"([^",]*)/);
+            if (l)
+                root.systemLayout = l[1];
+            if (v)
+                root.systemVariant = v[1];
         }
     }
 

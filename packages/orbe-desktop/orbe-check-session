@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+# Vérifications à l'ouverture du bureau, annoncées par une notification d'Orbe Shell :
+#   - le mode jeu s'est arrêté sans demande (gamescope ou Steam a planté) ;
+#   - une carte NVIDIA tourne sur le pilote libre nouveau, ou sans ses bibliothèques 32 bits.
+# Lancé par autostart.lua, après le démarrage du shell.
+set -u
+sleep 6
+state=${XDG_STATE_HOME:-$HOME/.local/state}/orbe
+seen=$state/jeu-echecs-vus
+
+notify() { # titre, texte, action (libellé), commande de l'action
+  local action
+  action=$(notify-send -a Orbe -i "$5" -A "go=$3" "$1" "$2")
+  [[ $action == go ]] && eval "$4"
+}
+
+# Mode jeu arrêté sans demande depuis la dernière vérification.
+if [[ -f $state/jeu-echecs ]]; then
+  last=$(tail -n1 "$state/jeu-echecs")
+  if [[ $last != "$(cat "$seen" 2>/dev/null)" ]]; then
+    echo "$last" > "$seen"
+    read -r _ code duree <<< "$last"
+    if (( duree < 60 )); then
+      titre="Le mode jeu n'a pas démarré"
+      texte="Retour au bureau (code $code). Après deux échecs de suite, le mode de secours, sans gamescope, prend le relais."
+    else
+      titre="Le mode jeu s'est arrêté"
+      texte="Steam ou gamescope s'est fermé sans demande, au bout de $(( duree / 60 )) min."
+    fi
+    notify "$titre" "$texte" "Voir le journal" "foot -T 'Journal du mode jeu' less '$state/jeu.log'" dialog-warning &
+  fi
+fi
+
+# Carte NVIDIA : pilote utilisé et bibliothèques 32 bits (pas dans la session live).
+nvidia=0
+for dev in /sys/bus/pci/devices/*; do
+  [[ $(cat "$dev/vendor" 2>/dev/null) == 0x10de ]] || continue
+  case $(cat "$dev/class" 2>/dev/null) in 0x0300*|0x0302*) nvidia=1 ;; esac
+done
+if (( nvidia )); then
+  if compgen -G '/sys/bus/pci/drivers/nouveau/0000:*' >/dev/null; then
+    notify "Carte NVIDIA sur le pilote libre" \
+      "Le pilote NVIDIA n'a pas pu se charger (noyau sans module, ou carte trop ancienne) : les jeux seront lents. Crée un rapport dans Réglages, À propos." \
+      "Créer un rapport" "foot -T 'Rapport Orbe OS' orbe-diagnostic" video-display &
+  elif [[ ! -d /run/archiso ]] && ! pacman -Q lib32-nvidia-utils >/dev/null 2>&1; then
+    notify "Pilote NVIDIA 32 bits manquant" \
+      "Steam et les jeux Proton en ont besoin. L'installation demande Internet et ton mot de passe." \
+      "Installer" "foot -T 'Pilote NVIDIA' sudo orbe-nvidia" video-display &
+  fi
+fi
+wait

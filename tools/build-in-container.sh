@@ -99,12 +99,13 @@ for cfg in "$profile"/syslinux/*.cfg; do
   iconv -f UTF-8 -t CP437 "$cfg" -o "$cfg.cp437" && mv "$cfg.cp437" "$cfg"
 done
 # Paquets optionnels (archiso/packages.optional) : ajoutés seulement s'ils sont disponibles,
-# dans [orbe] ou dans les dépôts Arch. Les autres sont signalés.
+# dans [orbe] ou dans les dépôts Arch. Les autres sont signalés. Les paquets écrits après le
+# premier sur la même ligne ne sont ajoutés qu'avec lui (ex. les en-têtes du noyau d'un DKMS).
 if [[ -f /orbe/archiso/packages.optional ]]; then
-  while read -r pkg; do
+  while read -r pkg extras; do
     [[ -z "$pkg" || "$pkg" == \#* ]] && continue
     if compgen -G "$repo/$pkg-[0-9]*.pkg.tar.*" >/dev/null || pacman -Si "$pkg" >/dev/null 2>&1; then
-      echo "$pkg" >> "$profile/packages.x86_64"
+      printf '%s\n' "$pkg" $extras >> "$profile/packages.x86_64"
     else
       echo "ATTENTION : paquet optionnel $pkg indisponible, absent de l'ISO." >&2
     fi

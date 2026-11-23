@@ -3,6 +3,7 @@ pragma Singleton
 import Quickshell
 import Quickshell.Io
 import Quickshell.Hyprland
+import qs.services
 import QtQuick
 
 // Ce qui est ouvert à l'écran, et les points d'entrée IPC appelés par les raccourcis Hyprland
@@ -21,6 +22,12 @@ Singleton {
     property bool welcomeOpen: false
     property bool settingsOpen: false
     property bool helpOpen: false
+    // Confirmation du passage en mode jeu quand des fenêtres sont ouvertes.
+    property bool gameConfirmOpen: false
+    // Enregistrement en cours (orbe-record) : « video », « replay » ou « off ».
+    property string recordState: "off"
+    // Une fenêtre en plein écran sur un écran : jeu, vidéo. Coupe les bulles et l'orbe vivant.
+    readonly property bool anyFullscreen: Hyprland.monitors.values.some(m => m.activeWorkspace && m.activeWorkspace.hasFullscreen)
     property string settingsPage: ""
     property int welcomeStep: 0
     property bool locked: false
@@ -42,6 +49,7 @@ Singleton {
         quickOpen = false;
         welcomeOpen = false;
         helpOpen = false;
+        gameConfirmOpen = false;
     }
 
     function openLauncher(text) {
@@ -113,6 +121,19 @@ Singleton {
 
         function toggle(): void {
             root.toggleSession();
+        }
+        // Super + G : mode jeu, avec confirmation si des fenêtres sont ouvertes.
+        function game(): void {
+            Session.run("game");
+        }
+    }
+
+    // orbe-record annonce l'état de l'enregistrement : indicateur fixe dans la barre.
+    IpcHandler {
+        target: "record"
+
+        function state(value: string): void {
+            root.recordState = value;
         }
     }
 

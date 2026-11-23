@@ -1,5 +1,6 @@
 // Lanceur d'applications (Super) : panneau qui sort de la barre, recherche floue.
-// Préfixes : > commande, = calcul, : émoji, / actions, ~ fichiers, # presse-papiers (cliphist).
+// Préfixes : > commande, = calcul, : émoji, / actions, ~ fichiers, # presse-papiers (cliphist),
+// ! jeux (Steam, Heroic). Les jeux apparaissent aussi dans la recherche normale.
 // Clavier : ↑ ↓ (ou Tab) pour choisir, Entrée pour ouvrir, Échap pour fermer.
 
 import Quickshell
@@ -21,9 +22,11 @@ Scope {
     property var emojis: []
     property var files: []
     property var clips: []
-    readonly property string prefix: ">=:/~#".includes(query.charAt(0)) ? query.charAt(0) : ""
+    // Jeux installés (orbe-games) : relus à chaque ouverture du lanceur.
+    property var games: []
+    readonly property string prefix: ">=:/~#!".includes(query.charAt(0)) ? query.charAt(0) : ""
     readonly property string term: (prefix ? query.slice(1) : query).trim()
-    readonly property var items: compute(query, files, emojis, clips)
+    readonly property var items: compute(query, files, emojis, clips, games)
 
     readonly property var modes: [
         { prefix: ">", label: "commande", icon: "command" },
@@ -31,7 +34,8 @@ Scope {
         { prefix: ":", label: "émoji", icon: "emoji" },
         { prefix: "/", label: "actions", icon: "action" },
         { prefix: "~", label: "fichiers", icon: "folder" },
-        { prefix: "#", label: "presse-papiers", icon: "copy" }
+        { prefix: "#", label: "presse-papiers", icon: "copy" },
+        { prefix: "!", label: "jeux", icon: "gamepad" }
     ]
 
     function close() {
@@ -52,7 +56,7 @@ Scope {
     }
 
     // Construit la liste de résultats selon le préfixe.
-    function compute(q, fileList, emojiList, clipList) {
+    function compute(q, fileList, emojiList, clipList, gameList) {
         switch (prefix) {
         case ">":
             return commandItems(term);
@@ -66,6 +70,8 @@ Scope {
             return fileItems(term, fileList);
         case "#":
             return clipItems(term, clipList);
+        case "!":
+            return gameItems(term, gameList, 40);
         default:
             const apps = Apps.search(term, 40).map(entry => ({
                 title: entry.name,
@@ -73,6 +79,9 @@ Scope {
                 iconSource: Quickshell.iconPath(entry.icon, "application-x-executable"),
                 run: () => Apps.launch(entry)
             }));
+            // Jeux installés qui correspondent, avant les applications.
+            if (term.length >= 2)
+                apps.unshift(...gameItems(term, gameList, 5));
             // « jeu », « steam », « big picture » : le mode jeu en premier.
             if (term.length >= 2 && Fuzzy.strict(term, ["Mode jeu", "jeux", "Steam Big Picture", "gamescope"]) >= 0)
                 apps.unshift({ title: "Mode jeu", subtitle: "Steam Big Picture en plein écran, à la manette", icon: "gamepad", run: () => Session.run("game") });
@@ -148,7 +157,11 @@ Scope {
             { title: Night.enabled ? "Désactiver le mode nuit" : "Activer le mode nuit", subtitle: "Écran", icon: "moon", run: () => Night.toggle() },
             { title: Notifs.doNotDisturb ? "Désactiver Ne pas déranger" : "Activer Ne pas déranger", subtitle: "Notifications", icon: Notifs.doNotDisturb ? "bell" : "bell-off", run: () => Notifs.toggleDoNotDisturb() },
             { title: Config.barVertical ? "Barre en haut de l'écran" : "Barre à gauche de l'écran", subtitle: "Apparence", icon: "apps", run: () => Config.barPosition = Config.barVertical ? "top" : "left" },
-            { title: Config.reduceMotion ? "Rétablir les animations" : "Réduire les animations", subtitle: "Accessibilité", icon: "action", run: () => Config.reduceMotion = !Config.reduceMotion }
+            { title: Config.reduceMotion ? "Rétablir les animations" : "Réduire les animations", subtitle: "Accessibilité", icon: "action", run: () => Config.reduceMotion = !Config.reduceMotion },
+            { title: Panels.recordState === "video" ? "Arrêter l'enregistrement" : "Enregistrer l'écran", subtitle: "Vidéo, Super + Maj + R", icon: "record", run: () => Quickshell.execDetached(["orbe-record", "video"]) },
+            { title: Panels.recordState === "replay" ? "Couper la relecture" : "Relecture", subtitle: "Garder les 30 dernières secondes avec Super + Maj + G", icon: "record", run: () => Quickshell.execDetached(["orbe-record", "replay"]) },
+            { title: "Réglages Orbe", subtitle: "Apparence, écrans, mode jeu, énergie, mises à jour", icon: "settings", run: () => Panels.settingsOpen = true },
+            { title: "Rapport de diagnostic", subtitle: "Pour un dépannage, sans mot de passe", icon: "report", run: () => Quickshell.execDetached(["foot", "-T", "Rapport Orbe OS", "orbe-diagnostic"]) }
         );
         if (!q)
             return list;
@@ -168,6 +181,20 @@ Scope {
                 run: () => Quickshell.execDetached(["xdg-open", path])
             };
         });
+    }
+
+    // Jeux installés : Steam (steam://rungameid/ID), Epic et GOG par Heroic (heroic://launch/...).
+    function gameItems(q, list, max) {
+        if (list.length === 0)
+            return q ? [] : [{ title: "Aucun jeu installé", subtitle: "Les jeux de Steam et de Heroic apparaîtront ici", icon: "gamepad" }];
+        return list.map(g => ({ g, s: q ? Fuzzy.strict(q, [g.name]) : 0 })).filter(x => x.s >= 0)
+            .sort((a, b) => b.s - a.s).slice(0, max).map(x => ({
+                title: x.g.name,
+                subtitle: "Jeu " + x.g.source,
+                icon: "gamepad",
+                iconSource: x.g.cover ? "file://" + x.g.cover : "",
+                run: () => Quickshell.execDetached(["xdg-open", x.g.launch])
+            }));
     }
 
     // Historique du presse-papiers : lignes « id<TAB>aperçu » de cliphist list, la plus récente d'abord.
@@ -198,6 +225,21 @@ Scope {
     }
 
     Process {
+        id: gameScan
+
+        command: ["orbe-games"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try {
+                    root.games = JSON.parse(text);
+                } catch (e) {
+                    root.games = [];
+                }
+            }
+        }
+    }
+
+    Process {
         id: clipper
 
         command: ["cliphist", "list"]
@@ -213,6 +255,8 @@ Scope {
             if (Panels.launcherOpen) {
                 root.query = Panels.launcherText;
                 root.current = 0;
+                gameScan.running = false;
+                gameScan.running = true;
             }
         }
     }

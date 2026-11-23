@@ -2,6 +2,7 @@ pragma Singleton
 
 import Quickshell
 import Quickshell.Hyprland
+import Quickshell.Io
 import QtQuick
 import qs
 
@@ -11,20 +12,47 @@ import qs
 Singleton {
     id: root
 
+    // Entrée Windows du menu de démarrage (double démarrage), notée par orbe-windows --scan.
+    property string windowsEntry: ""
+    readonly property int openWindows: Hyprland.toplevels.values.length
+
     readonly property var actions: [
         { id: "game", label: "Mode jeu", icon: "gamepad", danger: false },
         { id: "lock", label: "Verrouiller", icon: "lock", danger: false },
         { id: "logout", label: "Se déconnecter", icon: "logout", danger: false },
         { id: "suspend", label: "Mettre en veille", icon: "sleep", danger: false },
-        { id: "reboot", label: "Redémarrer", icon: "restart", danger: false },
-        { id: "poweroff", label: "Éteindre", icon: "power", danger: true }
-    ]
+        { id: "reboot", label: "Redémarrer", icon: "restart", danger: false }
+    ].concat(windowsEntry ? [{ id: "windows", label: "Windows", icon: "windows", danger: false }] : [])
+     .concat([{ id: "poweroff", label: "Éteindre", icon: "power", danger: true }])
+
+    FileView {
+        path: "/var/lib/orbe/windows"
+        watchChanges: true
+        onFileChanged: reload()
+        onLoaded: root.windowsEntry = text().trim()
+    }
+
+    // Passe en mode jeu tout de suite, ou demande confirmation si des fenêtres sont ouvertes
+    // (elles seront fermées ; celles qui ont du travail non enregistré le proposent).
+    function game(confirmed) {
+        Panels.sessionOpen = false;
+        if (!confirmed && openWindows > 0) {
+            Panels.closeAll();
+            Panels.gameConfirmOpen = true;
+            return;
+        }
+        Panels.gameConfirmOpen = false;
+        Quickshell.execDetached(["orbe-switch-session", "jeu"]);
+    }
 
     function run(action) {
         switch (action) {
         case "game":
+            game(false);
+            break;
+        case "windows":
             Panels.sessionOpen = false;
-            Quickshell.execDetached(["orbe-switch-session", "jeu"]);
+            Quickshell.execDetached(["sh", "-c", "pkexec orbe-windows --reboot"]);
             break;
         case "lock":
             Panels.lock();

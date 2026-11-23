@@ -169,6 +169,16 @@ Scope {
                     }
                 }
 
+                // Enregistrement en cours (orbe-record) : indicateur fixe, sans clignotement ; un
+                // clic arrête l'enregistrement, ou coupe la relecture.
+                BarButton {
+                    Layout.alignment: Qt.AlignCenter
+                    visible: Panels.recordState !== "off"
+                    icon: "record"
+                    iconColor: Theme.danger
+                    onClicked: Quickshell.execDetached(["orbe-record", Panels.recordState === "video" ? "video" : "replay"])
+                }
+
                 // Mode jeu : Steam Big Picture dans gamescope.
                 BarButton {
                     Layout.alignment: Qt.AlignCenter

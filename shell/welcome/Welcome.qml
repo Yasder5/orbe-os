@@ -2,7 +2,8 @@
 // ~/.config/orbe/shell.json), ou par qs -c orbe ipc call welcome open.
 // Dans la session live, il propose d'abord d'installer Orbe OS.
 // Étapes : bienvenue, apparence, météo, applications, raccourcis. Tout se fait au clavier :
-// Entrée pour continuer (en live, à la première étape : installer), Échap pour revenir,
+// Entrée pour continuer (en live, à la première étape : installer), Échap pour revenir (et pour
+// fermer, à la première étape),
 // Tab pour passer d'un choix à l'autre.
 
 import Quickshell
@@ -67,7 +68,7 @@ Scope {
         const pkgs = apps.filter(a => a.checked).flatMap(a => a.pkgs);
         if (pkgs.length === 0)
             return;
-        Quickshell.execDetached(["foot", "-H", "-T", "Installation des applications", "sudo", "pacman", "-S", "--needed", ...pkgs]);
+        Quickshell.execDetached(["foot", "-H", "-T", "Installation des applications", "sudo", "pacman", "-Syu", "--needed", ...pkgs]);
     }
 
     function toggleApp(index) {
@@ -176,7 +177,11 @@ Scope {
                         else
                             root.next();
                     } else if (event.key === Qt.Key_Escape) {
-                        root.back();
+                        // Échap revient en arrière ; à la première étape, ferme l'assistant.
+                        if (root.step === 0)
+                            root.finish();
+                        else
+                            root.back();
                     } else if (event.key === Qt.Key_Tab || event.key === Qt.Key_Down || event.key === Qt.Key_Right) {
                         root.focusIndex++;
                     } else if (event.key === Qt.Key_Backtab || event.key === Qt.Key_Up || event.key === Qt.Key_Left) {

@@ -4,3 +4,7 @@ heroic-games-launcher-bin
 # Decky Loader et CSS Loader : thème Steam Orbe en mode jeu (binaires officiels, GitHub)
 decky-loader-bin
 decky-plugin-css-loader
+# Manettes : règles udev (8BitDo, Nintendo, PlayStation...) et pilote xpadneo des manettes Xbox en
+# Bluetooth (DKMS : compilé pour le noyau, d'où les en-têtes)
+game-devices-udev
+xpadneo-dkms linux-headers

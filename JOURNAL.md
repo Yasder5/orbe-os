@@ -41,7 +41,7 @@ Tenu à jour à chaque étape : ce qui est fait, ce qui reste, les décisions et
 - **Direction « SteamOS nouvelle génération »** (Yass) : mode jeu plein écran pour la manette, optimisations de jeu, interface soignée. Proposition détaillée et choix à valider dans `docs/mode-jeu.md`.
 
 ### 2026-11-18
-- **Sauvegarde GitHub** : dépôt privé `Yasder5/orbe-os` créé par Yass, historique rebasé sur son commit initial (sa `LICENSE` MIT est gardée), poussé avec son accord.
+- **Sauvegarde GitHub** : dépôt `Yasder5/orbe-os` créé par Yass (prévu privé ; GitHub l'indique **public** le 2026-11-19), historique rebasé sur son commit initial (sa `LICENSE` MIT est gardée), poussé avec son accord.
 - **Orbe Shell, organisation** : jetons dans `Theme.qml` seulement, réglages utilisateur dans `~/.config/orbe/shell.json` (rechargés à chaud), services en singletons, commandes IPC pour les raccourcis. Détails et pièges dans `docs/shell.md`.
 - **Lanceur rattaché à la barre** : il sort de derrière la barre (comme les autres panneaux), plutôt qu'au centre de l'écran. Préfixes `>` commande, `=` calcul, `:` émoji (noms Unicode + mots-clés français), `/` actions, `~` fichiers. Classement par usage, gardé dans l'état de Quickshell.
 - **Terminal stylé, avancé depuis l'étape 5** (demande de Yass) : fish par défaut, invite Starship Orbe, fastfetch avec l'orbe en ASCII au premier terminal de la session, eza (icônes et colonne git), bat (thème ANSI, donc la palette du terminal), btop au thème Orbe, police de symboles Nerd Font en secours.
@@ -72,6 +72,23 @@ Tenu à jour à chaque étape : ce qui est fait, ce qui reste, les décisions et
 
 ### 2026-11-19
 - **ISO rangée dans la branche `iso`** (demande de Yass, son serveur étant en maintenance) : 27 morceaux de 95 Mo au plus (GitHub refuse les fichiers de plus de 100 Mo), sommes SHA-256 et mode d'emploi. Les versions GitHub (« releases ») ne sont pas permises depuis cette session. Le dépôt est **public** : la branche l'est aussi tant qu'il n'est pas passé en privé. Elle ajoute 2,6 Go au dépôt ; à supprimer quand le serveur de Yass reprend (`git push origin --delete iso`), en sachant que GitHub peut garder les objets un moment.
+
+### 2026-11-23 (relecture par un agent, puis corrections et ajouts demandés par Yass)
+Relecture du dépôt par un agent de relecture, points vérifiés dans le code avant correction.
+- **Bogues corrigés** :
+  - la bascule bureau ↔ jeu repartait en boucle avec le réglage « Au démarrage » (erreur dans `orbe-session` : choix relu à chaque bascule) ;
+  - pas de multilib sur le système installé : `/etc/pacman.conf` d'Orbe livré dans le live et copié à l'installation ;
+  - NVIDIA : `orbe-nvidia` installe les bibliothèques 32 bits et le module de chaque noyau (LTS : `nvidia-open-lts`, Zen : DKMS), après une mise à jour complète ; pilote fixé à l'installation ;
+  - mode jeu qui échouait sans rien dire : échec noté, annoncé au retour sur le bureau ; Steam du bureau fermé avant la bascule ;
+  - Réglages Orbe remettait le clavier en AZERTY français : la disposition du système est gardée tant qu'on n'en choisit pas une autre ;
+  - veille trop agressive : 1 h par défaut, page Énergie, et `orbe-suspend-check` refuse la veille pendant une musique, un jeu ou un téléchargement ;
+  - cache de pacman sans limite : `paccache.timer` ;
+  - écrans à 60 Hz alors qu'ils montent à 144 Hz : `highrr` par défaut, tous les modes dans Réglages ;
+  - orbe vivant redessiné à chaque image de l'écran : minuterie à 30 images/s, pause dès qu'une fenêtre est en plein écran sur n'importe quel écran ;
+  - Decky Loader de plusieurs comptes sur le même port : démarré par le mode jeu pour le seul compte qui l'ouvre ;
+  - fichier `.pyc` suivi par git, incohérences du journal.
+- **Ajouts** : rapport de diagnostic (`orbe-diagnostic`, Réglages, À propos), « Ne pas déranger » automatique en plein écran avec un résumé à la sortie, réglages du mode jeu (écran, performances, moteur, Steam en arrière-plan), mode jeu de secours sans gamescope, confirmation avant de fermer les fenêtres, manettes Bluetooth « de confiance », `game-devices-udev` et `xpadneo-dkms` (optionnels), jeux Steam et Heroic dans le lanceur (préfixe `!`), « Redémarrer sous Windows » (menu de session, greeter), captures (Impr., annotation avec satty) et enregistrement (gpu-screen-recorder), `orbe-update` plus sûr (clés d'abord, `.pacnew`, redémarrage conseillé), 37 paquets de dépannage de l'ISO d'Arch retirés.
+- **Non retenu pour l'instant** : espaces de travail rattachés au nom de l'écran (ils dépendent encore de son numéro), noyau gardé avec chaque instantané btrfs (B8), `xone` (micrologiciel sous licence Microsoft), anglais.
 
 ## Mesures
 - **Orbe Shell au repos** (banc d'essai, fond fixe, rendu logiciel) : **0,2 % d'un cœur**, objectif de 2 % tenu. Mémoire 330 Mo, gonflée par le rendu logiciel (llvmpipe). Un orbe animé plein écran rendu par le processeur (VM sans GPU) prend un cœur entier : c'est pourquoi le fond par défaut est fixe ; sur une vraie carte graphique, le shader ne coûte presque rien au processeur (à confirmer sur le PC de Yass).
@@ -125,6 +142,4 @@ quickshell 0.3.2, hyprland 0.57.2, hyprlock 0.9.7, hypridle 0.1.8, greetd 0.10.3
 - Instantanés btrfs : le noyau est sur la partition EFI, hors des instantanés. Démarrer un instantané pris avant une mise à jour du noyau peut échouer (modules d'une autre version) : à documenter ou corriger (copie du noyau dans l'instantané).
 - `xpadneo` (manettes Xbox en Bluetooth) et `game-devices-udev` pas encore empaquetés.
 - Détection NVIDIA du live (`orbe-gpu-setup`) à tester sur le PC de Yass (RTX 3050).
-- Taille de l'ISO : 2,1 Go en compression rapide, à mesurer en compression finale (limite de 2 Go par fichier sur les Releases GitHub).
 - Mode jeu : choix validés le 2026-11-18 (voir `docs/mode-jeu.md`). Rapport sur Orbe Launcher sous Linux : `docs/orbe-launcher-linux.md`.
-- Sauvegarde : Yass crée un dépôt GitHub privé, puis premier `git push` (accord donné le 2026-11-18).

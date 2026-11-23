@@ -13,12 +13,13 @@ hl.bind(mod .. " + D",       hl.dsp.exec_cmd(shell .. "dashboard toggle"), { des
 hl.bind(mod .. " + A",       hl.dsp.exec_cmd(shell .. "quick toggle"),     { description = "Réglages rapides" })
 hl.bind(mod .. " + W",       hl.dsp.exec_cmd(shell .. "wallpaper picker"), { description = "Fond d'écran" })
 hl.bind(mod .. " + L",       hl.dsp.exec_cmd(shell .. "lock lock"),        { description = "Verrouiller" })
--- Mode jeu : Steam Big Picture dans gamescope (les applications ouvertes sont d'abord fermées proprement).
 hl.bind(mod .. " + V",       hl.dsp.exec_cmd(shell .. "launcher open '#'"), { description = "Historique du presse-papiers" })
 -- Aide des raccourcis : Super + Maj + : sur un clavier AZERTY (Maj + : donne /), Super + / en QWERTY.
 hl.bind(mod .. " + SHIFT + slash", hl.dsp.exec_cmd(shell .. "help toggle"), { description = "Aide des raccourcis" })
 hl.bind(mod .. " + slash",         hl.dsp.exec_cmd(shell .. "help toggle"))
-hl.bind(mod .. " + G",       hl.dsp.exec_cmd("orbe-switch-session jeu"),   { description = "Mode jeu" })
+-- Mode jeu : Steam Big Picture dans gamescope. Orbe Shell demande confirmation si des fenêtres
+-- sont ouvertes (elles seront fermées proprement) ; sans le shell, bascule directe.
+hl.bind(mod .. " + G",       hl.dsp.exec_cmd(shell .. "session game || orbe-switch-session jeu"), { description = "Mode jeu" })
 
 -- Applications
 hl.bind(mod .. " + Return", hl.dsp.exec_cmd(terminal))
@@ -40,10 +41,17 @@ hl.bind(mod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
 
 -- Espaces de travail : voir workspaces.lua (propres à chaque écran).
 
--- Capture d'une zone : copiée dans le presse-papiers et enregistrée dans ~/Images/Captures.
-hl.bind(mod .. " + SHIFT + S", hl.dsp.exec_cmd(
-    "mkdir -p ~/Images/Captures && f=~/Images/Captures/$(date +%Y-%m-%d_%H-%M-%S).png && " ..
-    "grim -g \"$(slurp)\" \"$f\" && wl-copy < \"$f\""))
+-- Captures (orbe-capture), copiées et enregistrées dans ~/Images/Captures : Impr. l'écran actif,
+-- Super + Maj + S une zone, Super + Impr. une zone à annoter (satty).
+hl.bind("Print",               hl.dsp.exec_cmd("orbe-capture ecran"),   { description = "Capturer l'écran" })
+hl.bind(mod .. " + SHIFT + S", hl.dsp.exec_cmd("orbe-capture zone"),    { description = "Capturer une zone" })
+hl.bind(mod .. " + Print",     hl.dsp.exec_cmd("orbe-capture annoter"), { description = "Capturer et annoter" })
+
+-- Vidéo (gpu-screen-recorder, encodage par la carte graphique), dans ~/Vidéos/Orbe :
+-- Super + Maj + R démarre ou arrête l'enregistrement, Super + Maj + G garde les 30 dernières
+-- secondes quand la relecture est active (lanceur, /, « Relecture »).
+hl.bind(mod .. " + SHIFT + R", hl.dsp.exec_cmd("orbe-record video"), { description = "Enregistrer l'écran" })
+hl.bind(mod .. " + SHIFT + G", hl.dsp.exec_cmd("orbe-record garder"), { description = "Garder les 30 dernières secondes" })
 
 -- Son, luminosité et lecture, y compris écran verrouillé.
 hl.bind("XF86AudioRaiseVolume",  hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"), { locked = true, repeating = true })

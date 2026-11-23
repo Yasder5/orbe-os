@@ -13,7 +13,7 @@ Scope {
 
     readonly property var sections: [
         { title: "Applications", keys: [
-            ["Super", "Lanceur et ses préfixes > = : / ~ #"],
+            ["Super", "Lanceur et ses préfixes > = : / ~ # !"],
             ["Super + Entrée", "Terminal"], ["Super + E", "Fichiers"], ["Super + V", "Historique du presse-papiers"],
             ["Super + D", "Tableau de bord"], ["Super + A", "Réglages rapides"], ["Super + W", "Fond d'écran"],
             ["Super + G", "Mode jeu"], ["Super + Maj + :", "Cette aide"]
@@ -28,7 +28,9 @@ Scope {
             ["Super + molette", "Espace suivant ou précédent"], ["Trois doigts", "Pareil, au pavé tactile"]
         ] },
         { title: "Système", keys: [
-            ["Super + Maj + S", "Capture d'une zone"], ["Super + L", "Verrouiller"], ["Super + Échap", "Menu de session"],
+            ["Impr.", "Capture de l'écran"], ["Super + Maj + S", "Capture d'une zone"], ["Super + Impr.", "Zone à annoter"],
+            ["Super + Maj + R", "Enregistrer l'écran"], ["Super + Maj + G", "Garder les 30 dernières secondes"],
+            ["Super + L", "Verrouiller"], ["Super + Échap", "Menu de session"],
             ["Super + N", "Notifications"], ["Touches multimédia", "Volume, luminosité, lecture"],
             ["Super + Maj + M", "Quitter la session (secours)"]
         ] }

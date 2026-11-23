@@ -60,7 +60,7 @@ Scope {
             Orb {
                 anchors.fill: parent
                 visible: win.live
-                running: visible && !Theme.reduceMotion && !UPower.onBattery && !win.fullscreenApp
+                running: visible && !Theme.reduceMotion && !UPower.onBattery && !Panels.anyFullscreen
                 maxFps: 30
                 particles: 1100
                 speed: 0.05

@@ -1,8 +1,19 @@
 #!/usr/bin/env bash
-# Lance hypridle avec la configuration de l'utilisateur si elle existe, sinon celle d'Orbe.
+# Lance hypridle : ~/.config/hypr/hypridle.conf (réglage à la main) s'il existe, sinon celui écrit
+# par Réglages Orbe (page Énergie, ~/.config/orbe/hypridle.conf), sinon celui d'Orbe OS.
 # Rien dans la session live (pas de verrouillage ni de mise en veille pendant un essai).
+# « orbe-idle --relancer » redémarre hypridle après un changement de réglage.
 [[ -d /run/archiso ]] && exit 0
-if [[ -e "${XDG_CONFIG_HOME:-$HOME/.config}/hypr/hypridle.conf" ]]; then
+if [[ ${1:-} == --relancer ]]; then
+  for pid in $(pgrep -u "$UID" -x hypridle); do kill "$pid"; done
+  sleep 0.3
+  setsid -f "$0" >/dev/null 2>&1
+  exit 0
+fi
+config=${XDG_CONFIG_HOME:-$HOME/.config}
+if [[ -e $config/hypr/hypridle.conf ]]; then
   exec hypridle
+elif [[ -e $config/orbe/hypridle.conf ]]; then
+  exec hypridle -c "$config/orbe/hypridle.conf"
 fi
 exec hypridle -c /usr/share/orbe/hypr/hypridle.conf

@@ -30,13 +30,17 @@ depends=(
   'greetd' 'cage'
   # Réglages Orbe : liste des mises à jour (checkupdates), réseau avancé ; presse-papiers
   'pacman-contrib' 'cliphist'
+  # Captures annotées, enregistrement vidéo par la carte graphique, jeux dans le lanceur
+  'satty' 'gpu-screen-recorder' 'python'
 )
 install=orbe-desktop.install
 # Modules Hyprland (orbe.lua charge les autres) et fichiers personnels copiés dans /etc/skel.
 source=(orbe.lua environment.lua look.lua input.lua binds.lua workspaces.lua rules.lua autostart.lua
         hyprland.lua foot.ini btop.conf heroic-store.json orbe-first-login orbe-idle hypridle.conf hyprtoolkit.conf orbe-greeter
-        orbe-update orbe-autologin orbe-add-user orbe-reglages.desktop)
-sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+        orbe-update orbe-autologin orbe-add-user orbe-reglages.desktop
+        orbe-check-session orbe-diagnostic orbe-suspend-check orbe-windows orbe-windows-scan.service
+        org.orbe.windows.policy orbe-record orbe-steam-fond orbe-capture orbe-games)
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
 
 package() {
   local f
@@ -72,10 +76,14 @@ package() {
   install -Dm755 "$srcdir/orbe-idle" "$pkgdir/usr/bin/orbe-idle"
   install -Dm755 "$srcdir/orbe-greeter" "$pkgdir/usr/bin/orbe-greeter"
   local tool
-  for tool in orbe-update orbe-autologin orbe-add-user; do
+  for tool in orbe-update orbe-autologin orbe-add-user orbe-check-session orbe-diagnostic \
+              orbe-suspend-check orbe-windows orbe-record orbe-steam-fond orbe-capture orbe-games; do
     install -Dm755 "$srcdir/$tool" "$pkgdir/usr/bin/$tool"
   done
   install -Dm644 "$srcdir/orbe-reglages.desktop" "$pkgdir/usr/share/applications/orbe-reglages.desktop"
+  # Redémarrer sous Windows : entrée trouvée à chaque démarrage, grub-reboot sans mot de passe.
+  install -Dm644 "$srcdir/orbe-windows-scan.service" "$pkgdir/usr/lib/systemd/system/orbe-windows-scan.service"
+  install -Dm644 "$srcdir/org.orbe.windows.policy" "$pkgdir/usr/share/polkit-1/actions/org.orbe.windows.policy"
   install -Dm644 "$srcdir/hypridle.conf" "$pkgdir/usr/share/orbe/hypr/hypridle.conf"
 
   # Entrées masquées du lanceur : outils en ligne de commande et doublons. Ce dossier passe

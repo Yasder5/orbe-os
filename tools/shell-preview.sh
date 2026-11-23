@@ -34,7 +34,7 @@ while (( $# )); do
   shift
 done
 
-preview_image=orbe-shell-preview:4
+preview_image=orbe-shell-preview:5
 docker_args=(--privileged -v orbe-pacman-cache:/var/cache/pacman/pkg)
 if [[ -n "${HTTPS_PROXY:-}${https_proxy:-}" ]]; then
   docker_args+=(--network host -e HTTPS_PROXY="${HTTPS_PROXY:-$https_proxy}" -e https_proxy="${https_proxy:-$HTTPS_PROXY}")
@@ -56,7 +56,7 @@ if ! docker image inspect "$preview_image" >/dev/null 2>&1; then
     fi
     echo "Server = https://geo.mirror.pkgbuild.com/\$repo/os/\$arch" > /etc/pacman.d/mirrorlist
     pacman-key --init >/dev/null 2>&1; pacman-key --populate archlinux >/dev/null 2>&1
-    pacman -Syu --noconfirm --needed sway quickshell grim wtype qt6-svg qt6-5compat mesa ttf-jetbrains-mono noto-fonts noto-fonts-emoji libnotify foot htop hicolor-icon-theme adwaita-icon-theme fish starship fastfetch eza bat btop ttf-nerd-fonts-symbols-mono git qt6-shadertools cava playerctl >/dev/null')
+    pacman -Syu --noconfirm --needed sway quickshell grim wtype qt6-svg qt6-5compat mesa ttf-jetbrains-mono noto-fonts noto-fonts-emoji libnotify foot htop hicolor-icon-theme adwaita-icon-theme fish starship fastfetch eza bat btop ttf-nerd-fonts-symbols-mono git qt6-shadertools cava playerctl python >/dev/null')
   docker start -a "$cid"
   docker commit "$cid" "$preview_image" >/dev/null
   docker rm "$cid" >/dev/null

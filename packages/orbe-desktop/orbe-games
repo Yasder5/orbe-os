@@ -1,0 +1,94 @@
+#!/usr/bin/env python3
+"""Jeux installés (Steam, Heroic) pour le lanceur d'Orbe Shell, en JSON sur la sortie standard.
+
+Chaque jeu : {"name", "source" (Steam, Epic, GOG), "launch" (URI à ouvrir), "cover" (chemin
+d'une jaquette locale ou "")}. Lit seulement des fichiers locaux, ne contacte aucun serveur.
+"""
+import glob
+import json
+import os
+import re
+import sys
+
+HOME = os.path.expanduser("~")
+STEAM_ROOTS = [os.path.join(HOME, ".local/share/Steam"), os.path.join(HOME, ".steam/steam")]
+HEROIC = os.path.join(os.environ.get("XDG_CONFIG_HOME", os.path.join(HOME, ".config")), "heroic")
+# Outils de Steam qui ne sont pas des jeux.
+NOT_GAMES = re.compile(r"^(Proton|Steam Linux Runtime|Steamworks Common|SteamVR)", re.I)
+
+
+def vdf_values(text, key):
+    """Valeurs d'une clé dans un fichier VDF/ACF de Steam (format « "clé" "valeur" »)."""
+    return re.findall(r'"%s"\s+"([^"]*)"' % re.escape(key), text, re.I)
+
+
+def steam_cover(root, appid):
+    cache = os.path.join(root, "appcache/librarycache")
+    for pattern in (f"{appid}_library_600x900.jpg", f"{appid}/library_600x900.jpg",
+                    f"{appid}/*/library_600x900.jpg", f"{appid}/library_capsule.jpg",
+                    f"{appid}/*/library_capsule.jpg", f"{appid}_header.jpg", f"{appid}/header.jpg"):
+        found = glob.glob(os.path.join(cache, pattern))
+        if found:
+            return found[0]
+    return ""
+
+
+def steam_games():
+    games, seen = [], set()
+    for root in STEAM_ROOTS:
+        lib_file = os.path.join(root, "steamapps/libraryfolders.vdf")
+        if not os.path.isfile(lib_file):
+            continue
+        try:
+            libs = vdf_values(open(lib_file, encoding="utf-8", errors="replace").read(), "path")
+        except OSError:
+            libs = []
+        for lib in set(libs + [root]):
+            for acf in glob.glob(os.path.join(lib, "steamapps/appmanifest_*.acf")):
+                try:
+                    text = open(acf, encoding="utf-8", errors="replace").read()
+                except OSError:
+                    continue
+                appid = (vdf_values(text, "appid") or [""])[0]
+                name = (vdf_values(text, "name") or [""])[0]
+                flags = int((vdf_values(text, "StateFlags") or ["0"])[0] or 0)
+                if not appid or appid in seen or not name or NOT_GAMES.match(name) or not flags & 4:
+                    continue
+                seen.add(appid)
+                games.append({"name": name, "source": "Steam", "launch": f"steam://rungameid/{appid}",
+                              "cover": steam_cover(root, appid)})
+        break
+    return games
+
+
+def heroic_games():
+    games = []
+    sources = [
+        ("Epic", os.path.join(HEROIC, "legendaryConfig/legendary/installed.json"), "legendary"),
+        ("GOG", os.path.join(HEROIC, "gog_store/installed.json"), "gog"),
+    ]
+    for label, path, runner in sources:
+        try:
+            data = json.load(open(path, encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        items = data.get("installed", []) if isinstance(data, dict) and "installed" in data else (
+            data.values() if isinstance(data, dict) else data)
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+            app = item.get("app_name") or item.get("appName")
+            name = item.get("title") or item.get("name") or app
+            if app and name:
+                games.append({"name": name, "source": label, "launch": f"heroic://launch/{runner}/{app}", "cover": ""})
+    return games
+
+
+def main():
+    games = steam_games() + heroic_games()
+    games.sort(key=lambda g: g["name"].lower())
+    json.dump(games, sys.stdout, ensure_ascii=False)
+
+
+if __name__ == "__main__":
+    main()

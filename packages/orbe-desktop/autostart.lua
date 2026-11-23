@@ -10,4 +10,8 @@ hl.on("hyprland.start", function()
     -- Historique du presse-papiers (Super + V) : texte et images.
     hl.exec_cmd("wl-paste --type text --watch cliphist store")
     hl.exec_cmd("wl-paste --type image --watch cliphist store")
+    -- Steam en arrière-plan (manette sur le bureau) si le réglage est actif, puis vérifications
+    -- (mode jeu arrêté, pilote NVIDIA) annoncées par une notification.
+    hl.exec_cmd("orbe-steam-fond")
+    hl.exec_cmd("orbe-check-session")
 end)

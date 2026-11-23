@@ -13,7 +13,7 @@ url="https://github.com/Yasder5/orbe-os"
 license=('MIT')
 depends=(
   'steam' 'gamescope' 'mangohud' 'lib32-mangohud' 'gamemode' 'lib32-gamemode'
-  'zram-generator' 'orbe-themes' 'libnotify'
+  'zram-generator' 'orbe-themes' 'libnotify' 'power-profiles-daemon' 'polkit'
 )
 optdepends=(
   'decky-loader: greffons de Steam, nécessaire au thème Steam Orbe'
@@ -26,16 +26,20 @@ provides=('steamos-session-select')
 source=(orbe-session orbe-game-session orbe-switch-session orbe-steam-setup orbe.desktop
         steamos-session-select steamos-update steamos-select-branch
         jupiter-biosupdate steamos-set-timezone
-        sysctl-orbe-jeu.conf zram-generator.conf ntsync.conf 70-orbe-ntsync.rules MangoHud.conf)
-sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP'
-            'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+        sysctl-orbe-jeu.conf zram-generator.conf ntsync.conf 70-orbe-ntsync.rules MangoHud.conf
+        orbe-nvidia jeu-secours.lua 50-orbe-decky.rules)
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
 
 package() {
   local f
-  for f in orbe-session orbe-game-session orbe-switch-session orbe-steam-setup; do
+  for f in orbe-session orbe-game-session orbe-switch-session orbe-steam-setup orbe-nvidia; do
     install -Dm755 "$srcdir/$f" "$pkgdir/usr/bin/$f"
   done
   install -Dm644 "$srcdir/orbe.desktop" "$pkgdir/usr/share/wayland-sessions/orbe.desktop"
+  # Mode jeu de secours (Steam en plein écran dans Hyprland, sans gamescope).
+  install -Dm644 "$srcdir/jeu-secours.lua" "$pkgdir/usr/share/orbe/hypr/jeu-secours.lua"
+  # Decky Loader démarré par chaque compte en mode jeu, sans mot de passe.
+  install -Dm644 "$srcdir/50-orbe-decky.rules" "$pkgdir/usr/share/polkit-1/rules.d/50-orbe-decky.rules"
 
   # Commandes que Steam appelle quand il est lancé avec -steamos3 (Revenir au bureau, mises à jour).
   for f in steamos-session-select steamos-update steamos-select-branch jupiter-biosupdate steamos-set-timezone; do

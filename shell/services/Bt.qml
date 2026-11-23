@@ -3,6 +3,7 @@ pragma Singleton
 import Quickshell
 import Quickshell.Bluetooth
 import QtQuick
+import QtQml.Models
 
 // Bluetooth (BlueZ) : adaptateur par défaut et appareils connus.
 Singleton {
@@ -23,5 +24,19 @@ Singleton {
     function scan(on) {
         if (adapter && adapter.enabled)
             adapter.discovering = on;
+    }
+
+    // Appareils appairés marqués « de confiance » : une manette ou un casque se reconnecte
+    // alors tout seul (bouton Xbox ou PS, allumage du casque).
+    Instantiator {
+        model: root.devices
+
+        QtObject {
+            required property var modelData
+            readonly property bool paired: modelData.paired
+
+            onPairedChanged: if (paired && !modelData.trusted) modelData.trusted = true
+            Component.onCompleted: if (paired && !modelData.trusted) modelData.trusted = true
+        }
     }
 }

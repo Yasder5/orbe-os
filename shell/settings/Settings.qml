@@ -20,6 +20,7 @@ Scope {
         { id: "reseau", label: "Réseau", icon: "wifi" },
         { id: "bluetooth", label: "Bluetooth", icon: "bluetooth" },
         { id: "jeu", label: "Mode jeu", icon: "gamepad" },
+        { id: "energie", label: "Énergie", icon: "leaf" },
         { id: "comptes", label: "Comptes", icon: "lock" },
         { id: "maj", label: "Mises à jour", icon: "restart" },
         { id: "apropos", label: "À propos", icon: "cpu" }

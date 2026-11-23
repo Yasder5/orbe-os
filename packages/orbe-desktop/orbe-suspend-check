@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Appelé par hypridle avant la mise en veille automatique : réussit (code 0) seulement si rien
+# ne doit être interrompu. Refuse pendant :
+#   - une lecture audio ou vidéo (playerctl) ;
+#   - un jeu lancé par Steam ou Heroic, ou GameMode actif ;
+#   - un téléchargement (plus de 200 Ko/s reçus sur 5 secondes, mises à jour Steam comprises).
+set -u
+if command -v playerctl >/dev/null && playerctl -a status 2>/dev/null | grep -qx Playing; then
+  echo "Lecture en cours : pas de mise en veille."; exit 1
+fi
+if pgrep -f 'SteamLaunch AppId=|heroic.*--launch|legendary launch' >/dev/null; then
+  echo "Jeu en cours : pas de mise en veille."; exit 1
+fi
+if command -v gamemoded >/dev/null && gamemoded -s 2>/dev/null | grep -q 'is active'; then
+  echo "GameMode actif : pas de mise en veille."; exit 1
+fi
+rx() { awk -F'[: ]+' 'NR > 2 && $2 != "lo" { s += $3 } END { print s + 0 }' /proc/net/dev; }
+a=$(rx); sleep 5; b=$(rx)
+if (( (b - a) / 5 > 200 * 1024 )); then
+  echo "Téléchargement en cours : pas de mise en veille."; exit 1
+fi
+exit 0

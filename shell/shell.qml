@@ -25,6 +25,7 @@ ShellRoot {
     Center {}
     Osd {}
     SessionMenu {}
+    GameConfirm {}
     Picker {}
     QuickSettings {}
     Dashboard {}

@@ -1,40 +1,48 @@
 #!/bin/bash
-# Session Orbe OS, lancée par greetd : ouvre la dernière session utilisée (bureau ou mode jeu)
-# et passe de l'une à l'autre quand orbe-switch-session le demande.
-#   ~/.local/state/orbe/session : « bureau » ou « jeu », la session à ouvrir
-#   ~/.local/state/orbe/switch  : présent quand la session qui se termine a demandé une bascule
-# Argument facultatif (« bureau » ou « jeu », choisi dans le greeter) : session à ouvrir, retenue
-# pour la prochaine fois.
+# Session Orbe OS, lancée par greetd : ouvre le bureau ou le mode jeu, puis passe de l'un à
+# l'autre quand orbe-switch-session le demande.
+#   ~/.local/state/orbe/session     : « bureau » ou « jeu », la dernière session demandée
+#   ~/.local/state/orbe/switch      : présent quand la session qui se termine a demandé une bascule
+#   ~/.local/state/orbe/jeu-echecs  : une ligne par mode jeu arrêté sans demande (date, code, durée)
+#   ~/.config/orbe/demarrage        : « bureau » ou « jeu » pour toujours ouvrir celle-ci (Réglages Orbe)
+# Argument facultatif (« bureau » ou « jeu », choisi dans le greeter) : session à ouvrir.
 state=${XDG_STATE_HOME:-$HOME/.local/state}/orbe
 mkdir -p "$state"
 export ORBE_SESSION=1
+
 case ${1:-} in
   bureau|jeu) echo "$1" > "$state/session" ;;
 esac
-
 next=$(cat "$state/session" 2>/dev/null)
-# Choix fait dans Réglages Orbe : toujours le bureau, ou toujours le mode jeu (sinon la dernière).
+# Choix fait dans Réglages Orbe, lu une seule fois, à l'ouverture : les bascules demandées
+# ensuite (Super + G, « Revenir au bureau » dans Steam) sont toujours suivies.
 start=$(cat "${XDG_CONFIG_HOME:-$HOME/.config}/orbe/demarrage" 2>/dev/null)
-[[ -z ${1:-} && ( $start == bureau || $start == jeu ) ]] && next=$start
+if [[ -z ${1:-} && ( $start == bureau || $start == jeu ) ]]; then
+  next=$start
+fi
+
 while :; do
   rm -f "$state/switch"
-  if [[ $next == jeu ]] && command -v gamescope >/dev/null && command -v steam >/dev/null; then
+  if [[ $next == jeu ]] && command -v steam >/dev/null; then
+    t0=$(date +%s)
     orbe-game-session
-  else
+    rc=$?
+    if [[ -f $state/switch ]]; then
+      rm -f "$state/jeu-echecs"
+      next=$(cat "$state/session" 2>/dev/null)
+      continue
+    fi
+    # Arrêt sans demande (gamescope ou Steam a planté, pas de réseau au premier lancement...) :
+    # noté pour le bureau, qui l'affiche (orbe-check-session), puis retour au bureau sans
+    # changer la session enregistrée. Deux échecs rapprochés font passer au mode de secours.
+    printf '%s %s %s\n' "$(date +%s)" "$rc" "$(( $(date +%s) - t0 ))" >> "$state/jeu-echecs"
     next=bureau
-    start-hyprland
-  fi
-  if [[ -f $state/switch ]]; then
-    next=$(cat "$state/session" 2>/dev/null)
-# Choix fait dans Réglages Orbe : toujours le bureau, ou toujours le mode jeu (sinon la dernière).
-start=$(cat "${XDG_CONFIG_HOME:-$HOME/.config}/orbe/demarrage" 2>/dev/null)
-[[ -z ${1:-} && ( $start == bureau || $start == jeu ) ]] && next=$start
     continue
   fi
-  # Steam s'est fermé sans demander de bascule (plantage, quitter) : retour au bureau,
-  # sans changer la session enregistrée.
-  if [[ $next == jeu ]]; then
-    next=bureau
+  next=bureau
+  start-hyprland
+  if [[ -f $state/switch ]]; then
+    next=$(cat "$state/session" 2>/dev/null)
     continue
   fi
   break

@@ -1,0 +1,46 @@
+#!/bin/bash
+# Pilote NVIDIA complet sur un système Orbe OS installé, en root :
+#   - bibliothèques 32 bits (lib32-nvidia-utils), pour Steam et Proton ;
+#   - module du noyau pour chaque noyau installé : nvidia-open (linux), nvidia-open-lts
+#     (linux-lts), nvidia-open-dkms et les en-têtes pour les autres (linux-zen...).
+# Usage : orbe-nvidia            mise à jour complète du système puis installation (Réglages Orbe)
+#         orbe-nvidia --sans-maj installation seule, base déjà à jour (installateur Calamares)
+# Ne fait rien sans carte NVIDIA. Les versions doivent toutes suivre celle de nvidia-utils :
+# c'est pourquoi l'installation se fait sur un système entièrement mis à jour.
+set -u
+nvidia=0
+for dev in /sys/bus/pci/devices/*; do
+  [[ $(cat "$dev/vendor" 2>/dev/null) == 0x10de ]] || continue
+  case $(cat "$dev/class" 2>/dev/null) in 0x0300*|0x0302*) nvidia=1 ;; esac
+done
+(( nvidia )) || { echo "Pas de carte NVIDIA : rien à faire."; exit 0; }
+[[ $EUID -eq 0 ]] || { echo "À lancer en root (sudo orbe-nvidia)." >&2; exit 1; }
+
+kernels=()
+for base in /usr/lib/modules/*/pkgbase; do
+  [[ -f $base ]] && kernels+=("$(<"$base")")
+done
+pkgs=(lib32-nvidia-utils)
+# Noyaux linux et linux-lts seuls : modules précompilés. Un autre noyau (linux-zen...) :
+# nvidia-open-dkms, qui compile pour tous les noyaux et remplace les modules précompilés
+# (ils sont en conflit), avec les en-têtes de chaque noyau.
+dkms=0
+for k in "${kernels[@]}"; do [[ $k == linux || $k == linux-lts ]] || dkms=1; done
+if (( dkms )); then
+  pkgs+=(nvidia-open-dkms)
+  for k in "${kernels[@]}"; do pkgs+=("$k-headers"); done
+else
+  for k in "${kernels[@]}"; do
+    [[ $k == linux ]] && pkgs+=(nvidia-open)
+    [[ $k == linux-lts ]] && pkgs+=(nvidia-open-lts)
+  done
+fi
+mapfile -t pkgs < <(printf '%s\n' "${pkgs[@]}" | sed '/^$/d' | sort -u)
+echo "Paquets NVIDIA : ${pkgs[*]}"
+
+# --ask=4 : accepte de remplacer nvidia-open par nvidia-open-dkms (paquets en conflit).
+if [[ ${1:-} == --sans-maj ]]; then
+  pacman -S --needed --noconfirm --ask=4 "${pkgs[@]}"
+else
+  pacman -Syu --needed --ask=4 "${pkgs[@]}"
+fi

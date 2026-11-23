@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Steam en arrière-plan sur le bureau (Réglages Orbe, Mode jeu) : la manette sert de souris et
+# de clavier (profil « Bureau » de Steam Input) et le bouton Guide ouvre Big Picture.
+# Lancé par autostart.lua ; ne fait rien si le réglage est coupé (ORBE_STEAM_FOND dans jeu.conf).
+ORBE_STEAM_FOND=0
+conf=${XDG_CONFIG_HOME:-$HOME/.config}/orbe/jeu.conf
+# shellcheck source=/dev/null
+[[ -f $conf ]] && . "$conf"
+[[ $ORBE_STEAM_FOND == 1 ]] || exit 0
+command -v steam >/dev/null || exit 0
+pgrep -u "$UID" -x steam >/dev/null && exit 0
+exec steam -silent

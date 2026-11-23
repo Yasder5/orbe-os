@@ -65,6 +65,16 @@ Column {
     Column {
         width: parent.width
 
+        SettingRow {
+            title: "Rapport de diagnostic"
+            subtitle: "Rassemble matériel, pilotes, erreurs et journaux dans ~/orbe-rapport-….tar.gz, à envoyer pour un dépannage. Aucun mot de passe."
+            OButton {
+                text: "Créer un rapport"
+                accent: true
+                onClicked: Quickshell.execDetached(["foot", "-T", "Rapport Orbe OS", "orbe-diagnostic"])
+            }
+        }
+
         Repeater {
             model: [
                 ["Nom du PC", "host"], ["Processeur", "cpu"], ["Carte graphique", "gpu"],

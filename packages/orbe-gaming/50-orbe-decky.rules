@@ -1,0 +1,12 @@
+// Mode jeu d'Orbe OS : chaque compte de la session active peut démarrer ou arrêter Decky Loader
+// (decky-loader@COMPTE.service, thème Steam Orbe) sans mot de passe.
+polkit.addRule(function(action, subject) {
+    if (action.id === "org.freedesktop.systemd1.manage-units" &&
+        subject.local && subject.active) {
+        var unit = action.lookup("unit") || "";
+        var verb = action.lookup("verb") || "";
+        if (unit.indexOf("decky-loader@") === 0 && (verb === "start" || verb === "stop" || verb === "restart")) {
+            return polkit.Result.YES;
+        }
+    }
+});

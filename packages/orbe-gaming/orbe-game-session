@@ -1,11 +1,52 @@
 #!/bin/bash
 # Mode jeu d'Orbe OS : Steam en mode Big Picture dans gamescope, le compositeur de SteamOS.
 # Lancé par orbe-session. « Revenir au bureau » dans Steam appelle steamos-session-select.
+#
+# Réglages (Réglages Orbe, Mode jeu), dans ~/.config/orbe/jeu.conf :
+#   ORBE_JEU_ECRAN=DP-1        écran utilisé par gamescope (vide : le premier)
+#   ORBE_JEU_PERF=1            profil d'énergie « performances » pendant le mode jeu
+#   ORBE_JEU_MOTEUR=secours    Steam en plein écran dans Hyprland, sans gamescope
+# Sans réglage « secours », le mode de secours est aussi choisi après deux échecs de suite
+# en moins de 10 minutes (ligne « date code durée » dans ~/.local/state/orbe/jeu-echecs).
 state=${XDG_STATE_HOME:-$HOME/.local/state}/orbe
 mkdir -p "$state"
+ORBE_JEU_ECRAN="" ORBE_JEU_PERF=1 ORBE_JEU_MOTEUR=gamescope
+# shellcheck source=/dev/null
+[[ -f ${XDG_CONFIG_HOME:-$HOME/.config}/orbe/jeu.conf ]] && . "${XDG_CONFIG_HOME:-$HOME/.config}/orbe/jeu.conf"
 
-# Decky Loader, CSS Loader et thème Orbe dans ~/homebrew.
+exec > "$state/jeu.log" 2>&1
+echo "Mode jeu : $(date '+%F %T'), moteur demandé : $ORBE_JEU_MOTEUR"
+
+# Deux échecs dans les 10 dernières minutes : mode de secours, pour ne pas rester sans mode jeu.
+if [[ $ORBE_JEU_MOTEUR != secours && -f $state/jeu-echecs ]]; then
+  recent=$(awk -v now="$(date +%s)" 'now - $1 < 600' "$state/jeu-echecs" | wc -l)
+  if (( recent >= 2 )); then
+    echo "Deux échecs récents de gamescope : mode de secours."
+    ORBE_JEU_MOTEUR=secours
+  fi
+fi
+command -v gamescope >/dev/null || ORBE_JEU_MOTEUR=secours
+
+# Decky Loader (thème Steam Orbe) pour ce compte, autorisé par une règle polkit d'Orbe OS ;
+# les instances des autres comptes sont arrêtées (elles écoutent le même port).
+for unit in $(systemctl list-units --plain --no-legend 'decky-loader@*' 2>/dev/null | awk '{print $1}'); do
+  [[ $unit == "decky-loader@$USER.service" ]] || systemctl stop "$unit" 2>/dev/null
+done
+systemctl start "decky-loader@$USER.service" 2>/dev/null || echo "Decky Loader indisponible."
+
+# CSS Loader et thème Orbe dans ~/homebrew.
 orbe-steam-setup || true
+
+# Profil d'énergie « performances » le temps de la session, rendu ensuite.
+perf=()
+if [[ $ORBE_JEU_PERF == 1 ]] && command -v powerprofilesctl >/dev/null; then
+  perf=(powerprofilesctl launch -p performance -r "Mode jeu" --)
+fi
+
+if [[ $ORBE_JEU_MOTEUR == secours ]]; then
+  echo "Moteur : Hyprland (secours)."
+  exec "${perf[@]}" start-hyprland -- --config /usr/share/orbe/hypr/jeu-secours.lua
+fi
 
 # Clavier : même disposition que la console et le bureau.
 if [[ -z ${XKB_DEFAULT_LAYOUT:-} ]]; then
@@ -40,7 +81,11 @@ echo no_display > "$MANGOHUD_CONFIGFILE"
 trap 'rm -f "$MANGOHUD_CONFIGFILE"' EXIT
 
 gamescope_args=(--steam --mangoapp --xwayland-count 2 --adaptive-sync)
+[[ -n $ORBE_JEU_ECRAN ]] && gamescope_args+=(--prefer-output "$ORBE_JEU_ECRAN")
 steam_args=(-gamepadui -steamos3 -steampal)
 
-# Journal de la dernière partie, pour le dépannage.
-gamescope "${gamescope_args[@]}" -- steam "${steam_args[@]}" > "$state/jeu.log" 2>&1
+echo "Moteur : gamescope ${gamescope_args[*]}"
+"${perf[@]}" gamescope "${gamescope_args[@]}" -- steam "${steam_args[@]}"
+rc=$?
+echo "Fin du mode jeu : code $rc"
+exit $rc

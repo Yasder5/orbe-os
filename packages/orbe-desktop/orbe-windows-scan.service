@@ -1,0 +1,10 @@
+[Unit]
+Description=Orbe OS : cherche Windows dans le menu de démarrage
+After=local-fs.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/orbe-windows --scan
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# Captures d'écran, copiées dans le presse-papiers et enregistrées dans ~/Images/Captures.
+#   orbe-capture ecran     écran actif entier (Impr.)
+#   orbe-capture zone      zone choisie à la souris (Super + Maj + S)
+#   orbe-capture annoter   zone choisie, ouverte dans satty pour l'annoter (Super + Impr.)
+set -u
+dir=$HOME/Images/Captures
+mkdir -p "$dir"
+f=$dir/$(date +%Y-%m-%d_%H-%M-%S).png
+case ${1:-zone} in
+  ecran)
+    monitor=$(hyprctl -j monitors 2>/dev/null | python3 -c 'import json, sys; print(next(m["name"] for m in json.load(sys.stdin) if m.get("focused")))' 2>/dev/null)
+    grim ${monitor:+-o "$monitor"} "$f" || exit 1 ;;
+  zone)
+    area=$(slurp) || exit 0
+    grim -g "$area" "$f" || exit 1 ;;
+  annoter)
+    area=$(slurp) || exit 0
+    grim -g "$area" - | satty --filename - --output-filename "$f" --copy-command wl-copy --early-exit
+    exit 0 ;;
+  *) echo "Usage : orbe-capture ecran|zone|annoter" >&2; exit 2 ;;
+esac
+wl-copy < "$f"
+notify-send -a Orbe -i "$f" "Capture enregistrée" "Copiée, et dans ~/Images/Captures" 2>/dev/null
+exit 0

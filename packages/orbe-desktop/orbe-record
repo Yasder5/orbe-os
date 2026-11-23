@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+# Enregistrement de l'écran avec gpu-screen-recorder (encodage par la carte graphique : NVENC,
+# VA-API), vidéos dans ~/Vidéos/Orbe.
+#   orbe-record video    démarre ou arrête l'enregistrement (Super + Maj + R)
+#   orbe-record replay   active ou coupe la relecture : les 30 dernières secondes en mémoire
+#   orbe-record garder   enregistre les 30 dernières secondes (Super + Maj + G, relecture active)
+# Orbe Shell affiche un indicateur fixe dans la barre pendant l'enregistrement ou la relecture.
+set -u
+dir=$HOME/Vidéos/Orbe
+run=${XDG_RUNTIME_DIR:-/tmp}/orbe-record
+mkdir -p "$dir" "$run"
+note() { notify-send -a Orbe -i media-record "$1" "$2" 2>/dev/null; }
+shell() { qs -c orbe ipc call record state "$1" >/dev/null 2>&1; }
+alive() { [[ -f $run/$1.pid ]] && kill -0 "$(cat "$run/$1.pid")" 2>/dev/null; }
+# Écran qui a le focus (nom Hyprland, ex. DP-1), sinon le premier.
+monitor=$(hyprctl -j monitors 2>/dev/null | python3 -c 'import json, sys; print(next(m["name"] for m in json.load(sys.stdin) if m.get("focused")))' 2>/dev/null)
+common=(-w "${monitor:-screen}" -f 60 -a default_output -k auto -c mp4 -fallback-cpu-encoding yes)
+
+case ${1:-} in
+  video)
+    if alive video; then
+      kill -INT "$(cat "$run/video.pid")"; rm -f "$run/video.pid"
+      note "Enregistrement terminé" "Vidéo dans $dir"
+    else
+      file=$dir/Orbe_$(date +%Y-%m-%d_%H-%M-%S).mp4
+      gpu-screen-recorder "${common[@]}" -o "$file" >"$run/video.log" 2>&1 &
+      echo $! > "$run/video.pid"
+      sleep 1
+      alive video && note "Enregistrement en cours" "Super + Maj + R pour arrêter." \
+                  || note "Enregistrement impossible" "Journal : $run/video.log"
+    fi ;;
+  replay)
+    if alive replay; then
+      kill -INT "$(cat "$run/replay.pid")"; rm -f "$run/replay.pid"
+      note "Relecture coupée" ""
+    else
+      gpu-screen-recorder "${common[@]}" -r 30 -replay-storage ram -o "$dir" >"$run/replay.log" 2>&1 &
+      echo $! > "$run/replay.pid"
+      sleep 1
+      alive replay && note "Relecture active" "Super + Maj + G garde les 30 dernières secondes." \
+                   || note "Relecture impossible" "Journal : $run/replay.log"
+    fi ;;
+  garder)
+    if alive replay; then
+      kill -USR1 "$(cat "$run/replay.pid")"
+      note "Moment gardé" "Les 30 dernières secondes sont dans $dir"
+    else
+      note "Relecture inactive" "Active-la d'abord (lanceur, /, « Relecture »)."
+    fi ;;
+  *) echo "Usage : orbe-record video|replay|garder" >&2; exit 2 ;;
+esac
+if alive video; then shell video; elif alive replay; then shell replay; else shell off; fi

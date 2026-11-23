@@ -1,9 +1,11 @@
 -- Apparence : palette, rayons et animations Orbe (docs/PROMPT.md, section 1).
 -- accent #d3fd50, line #262624, fond #0a0a0a, ombre 0 18px 40px rgba(0,0,0,.55).
 
+-- Fréquence la plus haute de chaque écran (beaucoup d'écrans 144 Hz annoncent 60 Hz comme mode
+-- préféré). Réglages Orbe, Écrans, permet d'en choisir un autre.
 hl.monitor({
     output   = "",
-    mode     = "preferred",
+    mode     = "highrr",
     position = "auto",
     scale    = "auto",
 })

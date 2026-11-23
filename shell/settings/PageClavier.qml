@@ -13,15 +13,16 @@ Column {
 
     SettingRow {
         title: "Disposition du clavier"
+        subtitle: Reglages.kbLayout ? "Choisie ici" : "Celle du système (" + Reglages.systemLayout + "), choisie à l'installation"
         OChoice {
             model: [
-                { id: "fr", label: "Français" }, { id: "be", label: "Belge" }, { id: "ch", label: "Suisse" },
-                { id: "ca", label: "Canadien" }, { id: "us", label: "Anglais (US)" }
+                { id: "", label: "Système" }, { id: "fr", label: "Français" }, { id: "be", label: "Belge" },
+                { id: "ch", label: "Suisse" }, { id: "ca", label: "Canadien" }, { id: "us", label: "Anglais (US)" }
             ]
             current: Reglages.kbLayout
             onChosen: id => {
                 Reglages.kbLayout = id;
-                Reglages.kbVariant = id === "ch" ? "fr" : id === "ca" ? "fr" : "";
+                Reglages.kbVariant = id === "ch" || id === "ca" ? "fr" : "";
                 Reglages.apply();
             }
         }

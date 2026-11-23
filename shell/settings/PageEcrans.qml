@@ -34,14 +34,40 @@ Column {
                 bottomPadding: Theme.space2
             }
             SettingRow {
+                id: modeRow
+
+                property bool expanded: false
+
                 title: "Définition et fréquence"
                 subtitle: "Actuellement " + screenBlock.modelData.mode.replace("@", " à ") + " Hz"
-                OChoice {
-                    // Les quatre premiers modes proposés par l'écran (les plus grands, fréquence la plus haute d'abord).
-                    model: [{ id: "preferred", label: "Auto" }].concat(
-                        [...new Set(screenBlock.modelData.modes)].slice(0, 4).map(m => ({ id: m, label: m.replace(/\.\d+$/, "").replace("@", " · ") + " Hz" })))
-                    current: (Reglages.monitors[screenBlock.modelData.name] || {}).mode || "preferred"
-                    onChosen: id => Reglages.setMonitor(screenBlock.modelData.name, "mode", id)
+                OButton {
+                    text: modeRow.expanded ? "Fermer" : "Choisir"
+                    onClicked: modeRow.expanded = !modeRow.expanded
+                }
+            }
+            // Tous les modes de l'écran, fréquence la plus haute d'abord pour chaque définition.
+            Column {
+                visible: modeRow.expanded
+                width: parent.width
+
+                Repeater {
+                    model: ["highrr", "preferred"].concat([...new Set(screenBlock.modelData.modes)].sort((a, b) => {
+                        const [ra, fa] = a.split("@"), [rb, fb] = b.split("@");
+                        const pa = ra.split("x").reduce((x, y) => x * y), pb = rb.split("x").reduce((x, y) => x * y);
+                        return pb - pa || parseFloat(fb) - parseFloat(fa);
+                    }))
+
+                    ListRow {
+                        required property string modelData
+
+                        width: parent.width
+                        icon: "apps"
+                        title: modelData === "highrr" ? "Automatique : fréquence la plus haute"
+                             : modelData === "preferred" ? "Automatique : mode conseillé par l'écran"
+                             : modelData.replace(/\.\d+$/, "").replace("@", " à ") + " Hz"
+                        selected: ((Reglages.monitors[screenBlock.modelData.name] || {}).mode || "highrr") === modelData
+                        onClicked: Reglages.setMonitor(screenBlock.modelData.name, "mode", modelData)
+                    }
                 }
             }
             SettingRow {

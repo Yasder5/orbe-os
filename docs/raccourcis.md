@@ -10,12 +10,12 @@ Source : `packages/orbe-desktop/binds.lua`.
 |---|---|
 | Super + Entrée | Terminal |
 | Super + E | Fichiers |
-| Super (seul) | Lanceur d'applications : `>` commande, `=` calcul, `:` émoji, `/` actions, `~` fichiers, `#` presse-papiers |
+| Super (seul) | Lanceur d'applications : `>` commande, `=` calcul, `:` émoji, `/` actions, `~` fichiers, `#` presse-papiers, `!` jeux (Steam, Heroic) ; les jeux sortent aussi dans la recherche normale |
 | Super + V | Historique du presse-papiers |
 | Super + D | Tableau de bord : heure, météo, calendrier, système, média |
 | Super + A | Réglages rapides : Wi-Fi, Bluetooth, son, mode nuit, énergie |
 | Super + W | Fond d'écran |
-| Super + G | Mode jeu : Steam Big Picture en plein écran (les fenêtres ouvertes sont d'abord fermées proprement) |
+| Super + G | Mode jeu : Steam Big Picture en plein écran (confirmation si des fenêtres sont ouvertes ; elles sont fermées proprement) |
 | Super + Maj + : | Aide des raccourcis (Super + / sur un clavier QWERTY) |
 
 ## Fenêtres
@@ -43,7 +43,11 @@ Source : `packages/orbe-desktop/binds.lua`.
 
 | Raccourci | Action |
 |---|---|
-| Super + Maj + S | Capturer une zone (presse-papiers et ~/Images/Captures) |
+| Impr. | Capturer l'écran actif (presse-papiers et ~/Images/Captures) |
+| Super + Maj + S | Capturer une zone |
+| Super + Impr. | Capturer une zone et l'annoter (satty) |
+| Super + Maj + R | Enregistrer l'écran, ou arrêter (vidéos dans ~/Vidéos/Orbe) |
+| Super + Maj + G | Garder les 30 dernières secondes (relecture activée depuis le lanceur, `/` puis « Relecture ») |
 | Super + L | Verrouiller |
 | Super + Échap | Menu de session (verrouiller, veille, redémarrer, éteindre) |
 | Super + N | Centre de notifications |

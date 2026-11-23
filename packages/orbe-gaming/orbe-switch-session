@@ -14,8 +14,8 @@ if [[ -z ${ORBE_SESSION:-} ]]; then
   note "Changement de session impossible" "Cette session n'a pas été ouverte par Orbe OS (orbe-session)."
   exit 1
 fi
-if [[ $mode == jeu ]] && ! { command -v gamescope && command -v steam; } >/dev/null; then
-  note "Mode jeu indisponible" "Installe les paquets steam et gamescope."
+if [[ $mode == jeu ]] && ! command -v steam >/dev/null; then
+  note "Mode jeu indisponible" "Installe le paquet steam."
   exit 1
 fi
 
@@ -23,6 +23,16 @@ mkdir -p "$state"
 previous=$(cat "$state/session" 2>/dev/null || echo bureau)
 echo "$mode" > "$state/session"
 : > "$state/switch"
+
+# Steam ouvert sur le bureau : fermé proprement d'abord, sinon il se réduit dans la zone de
+# notifications au lieu de se fermer et gêne le Steam du mode jeu.
+if [[ -n ${HYPRLAND_INSTANCE_SIGNATURE:-} ]] && pgrep -u "$UID" -x steam >/dev/null; then
+  steam -shutdown >/dev/null 2>&1 &
+  for _ in $(seq 30); do
+    pgrep -u "$UID" -x steam >/dev/null || break
+    sleep 0.5
+  done
+fi
 
 if [[ -n ${HYPRLAND_INSTANCE_SIGNATURE:-} ]]; then
   # Ferme les applications proprement (elles peuvent proposer d'enregistrer), puis quitte Hyprland.

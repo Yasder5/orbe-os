@@ -2,3 +2,4 @@ out/
 reference/
 .env
 *.qcow2
+__pycache__/

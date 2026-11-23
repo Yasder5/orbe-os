@@ -21,11 +21,11 @@
    - retire la configuration de la session live (compte `orbe`, sudo sans mot de passe, services de l'ISO, journal en mémoire) ;
    - remet le noyau dans `/boot` (archiso le retire de l'image) ;
    - greetd : écran de connexion Orbe, ouverture automatique si elle a été cochée ;
-   - Decky Loader activé pour le nouveau compte (thème Steam) ;
+   - dépôt multilib actif (`/etc/pacman.conf` d'Orbe), nettoyage du cache de pacman chaque semaine (`paccache.timer`) ;
    - btrfs : configuration snapper `root` (instantanés avant et après chaque mise à jour grâce à snap-pac, 12 gardés au plus) et `grub-btrfsd` (instantanés au menu de démarrage) ;
    - clés de pacman, compte root verrouillé, installateur désinstallé.
 4. initramfs (hooks calculés par Calamares, dont `plymouth` et `encrypt`), thème Plymouth `orbe`, services (NetworkManager, Bluetooth, greetd, détection du GPU...).
-5. Carte NVIDIA : `lib32-nvidia-utils` installé si Internet répond (sinon : `sudo pacman -S lib32-nvidia-utils` plus tard).
+5. Avec Internet : mise à jour complète (`pacman -Syu`), options choisies (noyaux), puis carte NVIDIA : `orbe-nvidia` installe `lib32-nvidia-utils` et le module de chaque noyau. Sans Internet, le premier démarrage le propose (Réglages Orbe, Mode jeu). Dans tous les cas, le pilote NVIDIA est fixé : modules dans l'initramfs, nouveau exclu, services de veille NVIDIA actifs.
 6. GRUB avec le thème Orbe (`orbe-grub-theme`), entrée EFI « orbe ».
 
 ### Chiffrement
