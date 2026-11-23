@@ -96,6 +96,8 @@ Relecture du dépôt par un agent de relecture, points vérifiés dans le code a
   - page Mode jeu, page Énergie, jeux Steam dans le lanceur (préfixe `!` et recherche « elden », bibliothèque factice, Proton exclu).
 - **Trouvé par ces tests et corrigé** : `powerprofilesctl` plantait faute de `python-gobject` et empêchait gamescope de démarrer ; le greffon CSS Loader ne pouvait pas être copié par le compte (dossier de Decky à root) ; la notification d'échec partait avant que le shell écoute.
 - **Pas vérifié** : enregistrement vidéo (pas d'encodeur matériel dans la VM), Redémarrer sous Windows (pas de Windows), veille, NVIDIA, Steam en arrière-plan, manettes Bluetooth.
+- **Fonds « constellation »** (demande de Yass, d'après les fausses jaquettes de la démo) : Nébuleuse, Circuit, Forêt, Orbital, Atlas, générés par `wallpapers/generate.py` en 3840x2160, aux couleurs d'Orbe (fond noir, étoiles blanc cassé et citron, polygone citron avec halo). Vérifiés au banc d'essai : sélecteur et fond appliqué. Le banc d'essai gagne `--pre` (commande avant Quickshell).
+- **Constaté au banc d'essai, pas encore compris** : modifier `~/.config/orbe/shell.json` à la main pendant que le shell tourne ne change pas le fond (le fichier est bien modifié). Les changements faits depuis le shell ou les Réglages ne passent pas par là. À revérifier dans la VM avant de chercher plus loin.
 - **Non retenu pour l'instant** : espaces de travail rattachés au nom de l'écran (ils dépendent encore de son numéro), noyau gardé avec chaque instantané btrfs (B8), `xone` (micrologiciel sous licence Microsoft), anglais.
 
 ## Mesures

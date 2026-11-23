@@ -11,7 +11,7 @@ Scope {
     id: root
 
     readonly property string userDir: Quickshell.env("HOME") + "/Images/Fonds d'écran"
-    readonly property var names: ({ "orbe": "Orbe", "orbe-centre": "Orbe au centre", "grille": "Grille", "halo": "Halo" })
+    readonly property var names: ({ "orbe": "Orbe", "orbe-centre": "Orbe au centre", "grille": "Grille", "halo": "Halo", "nebuleuse": "Nébuleuse", "circuit": "Circuit", "foret": "Forêt", "orbital": "Orbital", "atlas": "Atlas" })
     readonly property var items: {
         const list = [{ path: "orbe-vivant", name: "Orbe vivant", live: true }];
         for (const model of [systemFolder, userFolder]) {

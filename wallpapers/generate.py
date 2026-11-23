@@ -87,9 +87,75 @@ def halo():
     return vignette(img, 0.4)
 
 
+def constellation(seed, sides, cx=0.68, cy=0.48, size=0.30, twist=0.0):
+    """Fond « constellation », tiré des fausses jaquettes du mode jeu : une forme géométrique au
+    trait citron (polygone irrégulier, doublé d'un trait plus fin), poussière d'étoiles blanc
+    cassé et citron, halos citron très doux. Composition à droite : la barre et les fenêtres
+    gardent la gauche lisible."""
+    rnd = np.random.default_rng(seed)
+    img = base()
+    sc = 4  # halos calculés en quart de définition puis agrandis
+    glow = Image.new("RGBA", (W // sc, H // sc), (0, 0, 0, 0))
+    g = ImageDraw.Draw(glow)
+    for _ in range(10):
+        x = rnd.normal(cx, 0.16) * W / sc
+        y = rnd.normal(cy, 0.2) * H / sc
+        r = rnd.uniform(60, 220)
+        g.ellipse([x - r, y - r, x + r, y + r], fill=ACCENT + (int(rnd.uniform(10, 26)),))
+    glow = glow.filter(ImageFilter.GaussianBlur(70)).resize((W, H), Image.BICUBIC)
+    img.alpha_composite(glow)
+
+    d = ImageDraw.Draw(img)
+    # Poussière d'étoiles, plus dense autour de la forme.
+    for _ in range(1400):
+        if rnd.random() < 0.6:
+            x, y = rnd.normal(cx, 0.2) * W, rnd.normal(cy, 0.26) * H
+        else:
+            x, y = rnd.uniform(0, W), rnd.uniform(0, H)
+        r = rnd.choice([1.5, 2, 2.5, 3, 4.5], p=[0.35, 0.3, 0.2, 0.1, 0.05])
+        accent = rnd.random() < 0.18
+        col = (ACCENT if accent else TEXT) + (int(rnd.uniform(70, 230)),)
+        d.ellipse([x - r, y - r, x + r, y + r], fill=col)
+
+    # Forme : sommets sur un cercle, rayon irrégulier, tournée de « twist ».
+    R = size * H
+    pts = []
+    for i in range(sides):
+        a = twist + i * 2 * np.pi / sides
+        rr = R * rnd.uniform(0.65, 1.05)
+        pts.append((cx * W + np.cos(a) * rr, cy * H + np.sin(a) * rr))
+    line = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    ld = ImageDraw.Draw(line)
+    ld.line(pts + [pts[0]], fill=ACCENT + (255,), width=7, joint="curve")
+    # Second trait, décalé et plus fin, comme sur les jaquettes.
+    off = [(x + R * 0.06, y + R * 0.05) for x, y in pts[1:] + pts[:1]]
+    ld.line(off[: max(2, sides // 2 + 1)], fill=ACCENT + (140,), width=3, joint="curve")
+    halo_line = line.resize((W // sc, H // sc)).filter(ImageFilter.GaussianBlur(10)).resize((W, H), Image.BICUBIC)
+    img.alpha_composite(halo_line)
+    img.alpha_composite(line)
+    # Sommets marqués d'un point citron.
+    for x, y in pts:
+        d.ellipse([x - 9, y - 9, x + 9, y + 9], fill=ACCENT + (255,))
+    return vignette(img, 0.45)
+
+
+CONSTELLATIONS = (
+    ("nebuleuse", dict(seed=10, sides=6, twist=0.3)),
+    ("circuit", dict(seed=20, sides=4, twist=0.9, size=0.34)),
+    ("foret", dict(seed=30, sides=3, twist=-0.4, size=0.36)),
+    ("orbital", dict(seed=40, sides=5, twist=1.2)),
+    ("atlas", dict(seed=80, sides=7, twist=0.1, cy=0.52)),
+)
+
+
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
-    for name, make in (("orbe", orbe), ("orbe-centre", orbe_centre), ("grille", grille), ("halo", halo)):
+    makers = [("orbe", orbe), ("orbe-centre", orbe_centre), ("grille", grille), ("halo", halo)]
+    makers += [(name, (lambda kw=kw: constellation(**kw))) for name, kw in CONSTELLATIONS]
+    only = set(sys.argv[1:])
+    for name, make in makers:
+        if only and name not in only:
+            continue
         path = OUT / f"{name}.png"
         make().convert("RGB").save(path, optimize=True)
         print(f"{path.relative_to(ROOT)} : {path.stat().st_size // 1024} Ko")

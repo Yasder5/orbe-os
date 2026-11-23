@@ -7,6 +7,7 @@
 #   --wait N         secondes avant la capture (défaut : 6)
 #   --ipc "CIBLE FONCTION [ARGS]"  appel IPC Quickshell avant la capture, option répétable
 #   --run "COMMANDE" commande lancée avant la capture (ex. notify-send), option répétable
+#   --pre "COMMANDE" commande lancée avant Quickshell (ex. écrire ~/.config/orbe/shell.json), option répétable
 #   --type "TEXTE"   texte tapé au clavier (wtype) avant la capture, option répétable
 #   --name NOM       nom de la capture : out/captures/shell-NOM.png (défaut : apercu)
 #   --res 1920x1080  définition de l'écran virtuel
@@ -18,17 +19,19 @@ set -euo pipefail
 ROOT=$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)
 wait_s=6 name=apercu res=1920x1080 entry="-c orbe" perf=0
 steps=""
+pre=""
 while (( $# )); do
   case "$1" in
     --wait) wait_s=$2; shift ;;
     --ipc) read -ra words <<< "$2"; steps+="qs -c orbe ipc call $(printf '%q ' "${words[@]}"); sleep 0.8; "; shift ;;
     --run) steps+="$2; sleep 1.5; "; shift ;;
+    --pre) pre+="$2; "; shift ;;
     --type) steps+="wtype -d 60 $(printf '%q' "$2"); sleep 1; "; shift ;;
     --name) name=$2; shift ;;
     --res) res=$2; shift ;;
     --greeter) entry="-p /etc/xdg/quickshell/orbe/greeter.qml" ;;
     --perf) perf=$2; shift ;;
-    -h|--help) sed -n '2,16p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help) sed -n '2,17p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "Option inconnue : $1" >&2; exit 2 ;;
   esac
   shift
@@ -71,7 +74,7 @@ docker run --rm "${docker_args[@]}" \
   -v "$ROOT/packages:/orbe/packages:ro" \
   -v "$ROOT/wallpapers:/orbe/wallpapers:ro" \
   -v "$ROOT/out/captures:/out" \
-  -e RES="$res" -e WAIT="$wait_s" -e NAME="$name" -e STEPS="$steps" -e ENTRY="$entry" -e PERF="$perf" -e HOST_UID="$(id -u)" \
+  -e RES="$res" -e WAIT="$wait_s" -e NAME="$name" -e STEPS="$steps" -e PRE="$pre" -e ENTRY="$entry" -e PERF="$perf" -e HOST_UID="$(id -u)" \
   "$preview_image" dbus-run-session -- bash -c '
     bash /orbe/tools/build-shaders.sh /etc/xdg/quickshell/orbe/shaders
     # Fichiers des paquets orbe-themes et orbe-desktop, pris directement dans le dépôt.
@@ -94,6 +97,7 @@ docker run --rm "${docker_args[@]}" \
     for _ in $(seq 50); do ls "$XDG_RUNTIME_DIR" | grep -q "^wayland-[0-9]*$" && break; sleep 0.1; done
     export WAYLAND_DISPLAY=$(ls "$XDG_RUNTIME_DIR" | grep -m1 "^wayland-[0-9]*$")
     # Rendu OpenGL sur le processeur (llvmpipe), comme dans une VM sans accélération.
+    eval "$PRE"
     LIBGL_ALWAYS_SOFTWARE=1 qs $ENTRY > "/out/shell-$NAME.log" 2>&1 &
     sleep "$WAIT"
     eval "$STEPS"
