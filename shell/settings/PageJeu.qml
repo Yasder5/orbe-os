@@ -16,7 +16,7 @@ Column {
     // Carte NVIDIA et bibliothèques 32 bits (Steam, Proton).
     Process {
         running: true
-        command: ["sh", "-c", "grep -lqx 0x10de /sys/bus/pci/devices/*/vendor 2>/dev/null && grep -qE '^0x030[02]' $(dirname $(grep -lx 0x10de /sys/bus/pci/devices/*/vendor))/class 2>/dev/null && echo nvidia; pacman -Q lib32-nvidia-utils >/dev/null 2>&1 && echo lib32"]
+        command: ["sh", "-c", "for d in /sys/bus/pci/devices/*; do [ \"$(cat $d/vendor)\" = 0x10de ] && grep -qE '^0x030[02]' $d/class && echo nvidia; done; pacman -Q lib32-nvidia-utils >/dev/null 2>&1 && echo lib32"]
         stdout: StdioCollector {
             onStreamFinished: {
                 page.nvidia = text.indexOf("nvidia") >= 0;

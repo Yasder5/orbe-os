@@ -1,14 +1,9 @@
 #!/bin/bash
-# Prépare Steam pour le mode jeu : CSS Loader et thème Orbe dans le dossier de Decky Loader.
+# Prépare Steam pour le mode jeu : thème Orbe dans le dossier de Decky Loader. Le greffon CSS
+# Loader, lui, est installé par Decky (dossier plugins à root, voir decky-loader-prepare).
 # Le thème est mis à jour à chaque version d'Orbe OS ; les choix faits dans CSS Loader sont gardés.
 hb=$HOME/homebrew
-mkdir -p "$hb/plugins" "$hb/themes"
-
-plugin=/usr/share/orbe/decky/plugins/SDH-CssLoader
-if [[ -d $plugin ]] && ! cmp -s "$plugin/package.json" "$hb/plugins/SDH-CssLoader/package.json"; then
-  rm -rf "$hb/plugins/SDH-CssLoader"
-  cp -r "$plugin" "$hb/plugins/"
-fi
+mkdir -p "$hb/themes"
 
 theme=/usr/share/orbe/steam/Orbe
 if [[ -d $theme ]]; then

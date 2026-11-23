@@ -5,7 +5,7 @@
 
 pkgname=decky-loader-bin
 pkgver=3.3.1
-pkgrel=1
+pkgrel=2
 pkgdesc="Decky Loader, greffons pour l'interface manette de Steam (binaire officiel)"
 arch=('x86_64')
 url="https://github.com/SteamDeckHomebrew/decky-loader"

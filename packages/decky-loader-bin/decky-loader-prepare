@@ -6,9 +6,17 @@ user=$1
 home=$(getent passwd "$user" | cut -d: -f6)
 group=$(id -gn "$user")
 [ -n "$home" ] && [ -d "$home" ] || exit 0
-for d in "$home/homebrew" "$home/homebrew/plugins" "$home/homebrew/themes" "$home/homebrew/settings" "$home/homebrew/data" "$home/homebrew/logs"; do
+for d in "$home/homebrew" "$home/homebrew/themes" "$home/homebrew/settings" "$home/homebrew/data" "$home/homebrew/logs"; do
   install -d -o "$user" -g "$group" "$d"
 done
+# Greffons : dossier à root, comme sur le Steam Deck. CSS Loader fourni par Orbe OS
+# (paquet decky-plugin-css-loader) y est copié, et remis à jour avec le paquet.
+install -d "$home/homebrew/plugins"
+plugin=/usr/share/orbe/decky/plugins/SDH-CssLoader
+if [ -d "$plugin" ] && ! cmp -s "$plugin/package.json" "$home/homebrew/plugins/SDH-CssLoader/package.json"; then
+  rm -rf "$home/homebrew/plugins/SDH-CssLoader"
+  cp -r "$plugin" "$home/homebrew/plugins/"
+fi
 # Steam n'accepte Decky que si le débogage distant de son interface est autorisé.
 steam="$home/.local/share/Steam"
 install -d -o "$user" -g "$group" "$home/.local" "$home/.local/share" "$steam"

@@ -13,7 +13,7 @@ url="https://github.com/Yasder5/orbe-os"
 license=('MIT')
 depends=(
   'steam' 'gamescope' 'mangohud' 'lib32-mangohud' 'gamemode' 'lib32-gamemode'
-  'zram-generator' 'orbe-themes' 'libnotify' 'power-profiles-daemon' 'polkit'
+  'zram-generator' 'orbe-themes' 'libnotify' 'power-profiles-daemon' 'python-gobject' 'polkit'
 )
 optdepends=(
   'decky-loader: greffons de Steam, nécessaire au thème Steam Orbe'

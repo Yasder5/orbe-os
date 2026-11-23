@@ -38,8 +38,9 @@ systemctl start "decky-loader@$USER.service" 2>/dev/null || echo "Decky Loader i
 orbe-steam-setup || true
 
 # Profil d'énergie « performances » le temps de la session, rendu ensuite.
+# Seulement si powerprofilesctl fonctionne vraiment (il lui faut python-gobject et le démon).
 perf=()
-if [[ $ORBE_JEU_PERF == 1 ]] && command -v powerprofilesctl >/dev/null; then
+if [[ $ORBE_JEU_PERF == 1 ]] && powerprofilesctl get >/dev/null 2>&1; then
   perf=(powerprofilesctl launch -p performance -r "Mode jeu" --)
 fi
 

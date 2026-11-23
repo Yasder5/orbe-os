@@ -4,7 +4,13 @@
 #   - une carte NVIDIA tourne sur le pilote libre nouveau, ou sans ses bibliothèques 32 bits.
 # Lancé par autostart.lua, après le démarrage du shell.
 set -u
-sleep 6
+# Attend le serveur de notifications d'Orbe Shell (jusqu'à 4 min : le shell peut être lent à
+# démarrer sur une machine lente), sinon la notification serait perdue.
+for _ in $(seq 120); do
+  busctl --user list 2>/dev/null | grep -q '^org.freedesktop.Notifications ' && break
+  sleep 2
+done
+sleep 2
 state=${XDG_STATE_HOME:-$HOME/.local/state}/orbe
 seen=$state/jeu-echecs-vus
 
