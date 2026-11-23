@@ -47,8 +47,13 @@ end
 
 # fastfetch avec le logo Orbe, sauf si l'utilisateur a sa propre configuration.
 function fastfetch --wraps fastfetch
+    # Copie aux couleurs choisies dans Réglages Orbe (écrite par orbe-accent), sinon celle d'Orbe.
+    set -l recoloree ~/.config/orbe/couleurs/fastfetch.jsonc
+    set -q XDG_CONFIG_HOME; and set recoloree $XDG_CONFIG_HOME/orbe/couleurs/fastfetch.jsonc
     if test -e ~/.config/fastfetch/config.jsonc
         command fastfetch $argv
+    else if test -r $recoloree
+        command fastfetch --config $recoloree $argv
     else
         command fastfetch --config /usr/share/orbe/fastfetch/config.jsonc $argv
     end

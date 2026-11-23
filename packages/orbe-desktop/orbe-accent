@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Couleur d'accent d'Orbe hors du shell : bordure de la fenêtre active (Hyprland), applications
-# GTK et Qt, fenêtres hyprtoolkit, terminal foot, fish, Starship et btop.
+# GTK et Qt, icônes de dossiers, fenêtres hyprtoolkit, terminal foot, fish, Starship, fastfetch et btop.
 # Lancé par Orbe Shell au démarrage de la session et quand la couleur change (Réglages, Apparence).
 #
 # Usage : orbe-accent [citron|menthe|ciel|lavande|rose|ambre]
@@ -24,7 +24,13 @@ declare -A couleurs=(
 nom=${1:-citron}
 [[ -n ${couleurs[$nom]:-} ]] || { echo "orbe-accent : couleur inconnue « $nom » (citron, menthe, ciel, lavande, rose ou ambre)" >&2; exit 1; }
 read -r acc survol appui <<< "${couleurs[$nom]}"
-rgb="$((16#${acc:0:2})), $((16#${acc:2:2})), $((16#${acc:4:2}))"
+r=$((16#${acc:0:2})) g=$((16#${acc:2:2})) b=$((16#${acc:4:2}))
+rgb="$r, $g, $b"
+
+# Couleur assombrie (pourcentage), pour le dos et le pictogramme des dossiers.
+sombre() {
+  printf '%02x%02x%02x' $((r * $1 / 100)) $((g * $1 / 100)) $((b * $1 / 100))
+}
 
 config=${XDG_CONFIG_HOME:-$HOME/.config}
 dir=$config/orbe/couleurs
@@ -44,11 +50,12 @@ ecrire() {
   mv "$tmp" "$1"
 }
 
-# Remplace le citron par la couleur choisie (accent, survol, appui, et rgba(211, 253, 80, …)).
+# Remplace le citron par la couleur choisie (accent, survol, appui, rgba(211, 253, 80, …) et
+# la forme 211;253;80 des séquences de couleur du terminal).
 # Les couleurs ANSI du terminal (regularN, brightN) gardent leur sens : le vert reste vert.
 recolorer() {
   sed -E -e "/^(regular|bright)[0-9]=/b" \
-    -e "s/d3fd50/$acc/gI; s/e1ff80/$survol/gI; s/bde83a/$appui/gI; s/211, *253, *80/$rgb/g" "$1"
+    -e "s/d3fd50/$acc/gI; s/e1ff80/$survol/gI; s/bde83a/$appui/gI; s/211, *253, *80/$rgb/g; s/211;253;80/$r;$g;$b/g" "$1"
 }
 
 # Chemin du fichier à utiliser : celui d'Orbe pour le citron, sinon sa copie recolorée.
@@ -107,6 +114,41 @@ else
   grep '^set -g fish_' /usr/share/fish/vendor_conf.d/orbe.fish 2>/dev/null | grep -i d3fd50 \
     | sed "s/d3fd50/$acc/gI" | ecrire "$dir/couleurs.fish"
   copie /usr/share/orbe/starship.toml starship.toml >/dev/null
+fi
+
+# fastfetch : lu par la fonction fastfetch de orbe.fish quand la copie existe.
+copie /usr/share/orbe/fastfetch/config.jsonc fastfetch.jsonc >/dev/null
+
+# Icônes : les dossiers d'Orbe recolorés dans un thème « Orbe-Couleur » qui hérite d'Orbe.
+# Refait seulement si la couleur ou le thème d'Orbe ont changé.
+icones=${XDG_DATA_HOME:-$HOME/.local/share}/icons/Orbe-Couleur
+if [[ $nom == citron || ! -f /usr/share/icons/Orbe/index.theme ]]; then
+  rm -rf "$icones"
+  theme_icones=Orbe
+else
+  theme_icones=Orbe-Couleur
+  marque="$acc $(stat -c %Y /usr/share/icons/Orbe/index.theme)"
+  if [[ $(cat "$icones/.orbe-accent" 2>/dev/null) != "$marque" ]]; then
+    rm -rf "$icones"
+    mkdir -p "$icones"
+    cp -a /usr/share/icons/Orbe/[0-9]*x[0-9]* "$icones/"
+    find "$icones" -type f -name '*.svg' -exec sed -i \
+      -e "s/#d3fd50/#$acc/gI; s/#a3c93a/#$(sombre 77)/gI; s/#2a3510/#$(sombre 20)/gI" {} +
+    sed -e 's/^Name=Orbe$/Name=Orbe-Couleur/' -e 's/^Inherits=/Inherits=Orbe,/' \
+      /usr/share/icons/Orbe/index.theme > "$icones/index.theme"
+    printf '%s\n' "$marque" > "$icones/.orbe-accent"
+  fi
+fi
+for v in 3 4; do
+  modifier "$config/gtk-$v.0/settings.ini" "s#^gtk-icon-theme-name=(Orbe|Orbe-Couleur)\$#gtk-icon-theme-name=$theme_icones#"
+done
+modifier "$config/qt6ct/qt6ct.conf" "s#^icon_theme=(Orbe|Orbe-Couleur)\$#icon_theme=$theme_icones#"
+# Applications GTK 4 (réglages lus par le portail) : seulement si l'icône est encore celle d'Orbe.
+if command -v gsettings >/dev/null; then
+  actuel=$(gsettings get org.gnome.desktop.interface icon-theme 2>/dev/null)
+  if [[ ($actuel == "'Orbe'" || $actuel == "'Orbe-Couleur'") && $actuel != "'$theme_icones'" ]]; then
+    gsettings set org.gnome.desktop.interface icon-theme "$theme_icones"
+  fi
 fi
 
 # btop : thème « orbe », ou sa copie « orbe-couleur » dans ~/.config/btop/themes.

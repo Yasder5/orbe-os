@@ -129,13 +129,26 @@ Singleton {
     }
 
     FileView {
+        id: reglagesFile
+
         path: root.dir + "/reglages.json"
         watchChanges: true
+        // Un fichier absent au lancement n'est pas surveillé : une fois qu'il est créé, on relance
+        // la surveillance, sinon ses modifications faites à la main ne seraient plus suivies.
+        property Timer rearm: Timer {
+            interval: 1000
+            onTriggered: {
+                reglagesFile.watchChanges = false;
+                reglagesFile.watchChanges = true;
+            }
+        }
         onFileChanged: reload()
         onAdapterUpdated: writeAdapter()
         onLoadFailed: error => {
-            if (error === FileViewError.FileNotFound)
+            if (error === FileViewError.FileNotFound) {
                 writeAdapter();
+                rearm.start();
+            }
         }
 
         JsonAdapter {
