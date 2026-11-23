@@ -36,15 +36,10 @@ Scope {
             // Hors de l'espace « orbe-* » : pas de flou derrière le fond d'écran.
             WlrLayershell.namespace: "wallpaper-orbe"
 
-            Image {
-                id: image
-
+            Fond {
                 anchors.fill: parent
                 visible: !win.live
-                source: win.live || !Config.wallpaper ? "" : "file://" + Config.wallpaper
-                fillMode: Image.PreserveAspectCrop
-                asynchronous: true
-                // Décodée à la taille de l'écran : une image 4K ne coûte pas plus de mémoire qu'il ne faut.
+                path: win.live ? "" : Config.wallpaper
                 sourceSize: Qt.size(win.width, win.height)
                 opacity: status === Image.Ready ? 1 : 0
 

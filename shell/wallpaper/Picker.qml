@@ -121,14 +121,11 @@ Scope {
                             radius: Theme.radiusM
                         }
 
-                        Image {
+                        Fond {
                             anchors.fill: parent
                             anchors.margins: 1
                             visible: !tile.modelData.live
-                            source: tile.modelData.live ? "" : "file://" + tile.modelData.path
-                            sourceSize: Qt.size(width, height)
-                            fillMode: Image.PreserveAspectCrop
-                            asynchronous: true
+                            path: tile.modelData.live ? "" : tile.modelData.path
                         }
 
                         Orb {

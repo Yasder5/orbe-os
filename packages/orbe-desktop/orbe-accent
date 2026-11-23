@@ -1,0 +1,124 @@
+#!/usr/bin/env bash
+# Couleur d'accent d'Orbe hors du shell : bordure de la fenêtre active (Hyprland), applications
+# GTK et Qt, fenêtres hyprtoolkit, terminal foot, fish, Starship et btop.
+# Lancé par Orbe Shell au démarrage de la session et quand la couleur change (Réglages, Apparence).
+#
+# Usage : orbe-accent [citron|menthe|ciel|lavande|rose|ambre]
+#
+# Citron (par défaut) : les fichiers d'Orbe sont utilisés tels quels. Autre couleur : une copie
+# recolorée est écrite dans ~/.config/orbe/couleurs/ et les réglages de l'utilisateur y renvoient.
+# Les copies sont refaites à chaque lancement, pour suivre les mises à jour des thèmes.
+# Les lignes que l'utilisateur a changées lui-même ne sont pas touchées.
+# Même liste de couleurs que shell/Theme.qml (accent, survol, appui).
+set -u
+
+declare -A couleurs=(
+  [citron]="d3fd50 e1ff80 bde83a"
+  [menthe]="5cf0b0 95f5cc 53d89e"
+  [ciel]="70c4ff a2d9ff 65b0e6"
+  [lavande]="b8a6ff d1c5ff a695e6"
+  [rose]="ff8cc6 ffb4da e67eb2"
+  [ambre]="ffbf47 ffd587 e6ac40"
+)
+
+nom=${1:-citron}
+[[ -n ${couleurs[$nom]:-} ]] || { echo "orbe-accent : couleur inconnue « $nom » (citron, menthe, ciel, lavande, rose ou ambre)" >&2; exit 1; }
+read -r acc survol appui <<< "${couleurs[$nom]}"
+rgb="$((16#${acc:0:2})), $((16#${acc:2:2})), $((16#${acc:4:2}))"
+
+config=${XDG_CONFIG_HOME:-$HOME/.config}
+dir=$config/orbe/couleurs
+mkdir -p "$config/orbe"
+
+# Écrit l'entrée standard dans un fichier, seulement si le contenu change (0 : écrit).
+ecrire() {
+  local tmp
+  tmp=$(mktemp) || return 1
+  cat > "$tmp"
+  if [[ -f "$1" && $(sha256sum < "$tmp") == "$(sha256sum < "$1")" ]]; then
+    rm -f "$tmp"
+    return 1
+  fi
+  mkdir -p "$(dirname "$1")"
+  chmod 644 "$tmp"
+  mv "$tmp" "$1"
+}
+
+# Remplace le citron par la couleur choisie (accent, survol, appui, et rgba(211, 253, 80, …)).
+# Les couleurs ANSI du terminal (regularN, brightN) gardent leur sens : le vert reste vert.
+recolorer() {
+  sed -E -e "/^(regular|bright)[0-9]=/b" \
+    -e "s/d3fd50/$acc/gI; s/e1ff80/$survol/gI; s/bde83a/$appui/gI; s/211, *253, *80/$rgb/g" "$1"
+}
+
+# Chemin du fichier à utiliser : celui d'Orbe pour le citron, sinon sa copie recolorée.
+copie() {
+  local source=$1 cible=$dir/$2
+  if [[ $nom == citron || ! -r $source ]]; then
+    rm -f "$cible"
+    printf '%s' "$source"
+    return
+  fi
+  recolorer "$source" | ecrire "$cible"
+  printf '%s' "$cible"
+}
+
+# Applique une expression sed à un fichier de l'utilisateur, s'il existe.
+modifier() {
+  [[ -f "$1" ]] || return 1
+  sed -E "$2" "$1" | ecrire "$1"
+}
+
+# Hyprland : bordure de la fenêtre active (chargé par orbe.lua après les réglages d'Orbe).
+if ecrire "$config/orbe/couleurs.lua" <<EOF
+-- Généré par orbe-accent (Réglages Orbe, Apparence) : couleur « $nom ».
+hl.config({ general = { col = { active_border = "rgb($acc)" } } })
+EOF
+then
+  [[ -n ${HYPRLAND_INSTANCE_SIGNATURE:-} ]] && hyprctl reload >/dev/null 2>&1
+fi
+
+# GTK 3 et 4 : ~/.config/gtk-N.0/gtk.css importe les couleurs Orbe ou leur copie.
+for v in 3 4; do
+  cible=$(copie "/usr/share/orbe/gtk/gtk$v.css" "gtk$v.css")
+  modifier "$config/gtk-$v.0/gtk.css" \
+    "s#url\(\"file://(/usr/share/orbe/gtk|$dir)/gtk$v\.css\"\)#url(\"file://$cible\")#"
+done
+
+# Qt (qt6ct) : palette et feuille de style.
+palette=$(copie /usr/share/orbe/qt6ct/orbe-colors.conf orbe-colors.conf)
+style=$(copie /usr/share/orbe/qt6ct/orbe.qss orbe.qss)
+modifier "$config/qt6ct/qt6ct.conf" \
+  "s#^color_scheme_path=(/usr/share/orbe/qt6ct|$dir)/orbe-colors\.conf\$#color_scheme_path=$palette#;
+   s#^stylesheets=(/usr/share/orbe/qt6ct|$dir)/orbe\.qss\$#stylesheets=$style#"
+
+# Terminal foot : palette Orbe incluse par ~/.config/foot/foot.ini.
+cible=$(copie /usr/share/orbe/foot/orbe.ini foot-orbe.ini)
+modifier "$config/foot/foot.ini" "s#^include=(/usr/share/orbe/foot/orbe\.ini|$dir/foot-orbe\.ini)\$#include=$cible#"
+
+# Fenêtres hyprtoolkit (hyprshutdown, dialogues de Hyprland), si l'accent est encore une couleur d'Orbe.
+connues=$(for c in "${couleurs[@]}"; do printf '%s|' "${c%% *}"; done)
+modifier "$config/hypr/hyprtoolkit.conf" "s#^accent = 0x[Ff]{2}(${connues%|})\$#accent = 0xFF${acc^^}#I"
+
+# fish et Starship : lus par /usr/share/fish/vendor_conf.d/orbe.fish quand ils existent.
+if [[ $nom == citron ]]; then
+  rm -f "$dir/couleurs.fish" "$dir/starship.toml"
+else
+  grep '^set -g fish_' /usr/share/fish/vendor_conf.d/orbe.fish 2>/dev/null | grep -i d3fd50 \
+    | sed "s/d3fd50/$acc/gI" | ecrire "$dir/couleurs.fish"
+  copie /usr/share/orbe/starship.toml starship.toml >/dev/null
+fi
+
+# btop : thème « orbe », ou sa copie « orbe-couleur » dans ~/.config/btop/themes.
+if [[ $nom == citron ]]; then
+  rm -f "$config/btop/themes/orbe-couleur.theme"
+  theme=orbe
+elif [[ -r /usr/share/btop/themes/orbe.theme ]]; then
+  recolorer /usr/share/btop/themes/orbe.theme | ecrire "$config/btop/themes/orbe-couleur.theme"
+  theme=orbe-couleur
+else
+  theme=orbe
+fi
+modifier "$config/btop/btop.conf" "s#^color_theme = \"(orbe|orbe-couleur)\"\$#color_theme = \"$theme\"#"
+
+exit 0

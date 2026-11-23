@@ -24,6 +24,8 @@ Singleton {
     property alias nightTemperature: json.nightTemperature
     property alias sounds: json.sounds
     property alias welcomeDone: json.welcomeDone
+    // Couleur d'accent (Theme.accents) : « citron » par défaut.
+    property alias accent: json.accent
 
     FileView {
         id: file
@@ -52,6 +54,7 @@ Singleton {
             property int nightTemperature: 4500
             property bool sounds: true
             property bool welcomeDone: false
+            property string accent: "citron"
         }
     }
 }

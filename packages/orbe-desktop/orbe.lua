@@ -22,4 +22,6 @@ pcall(require, "/run/orbe/hypr-hardware")
 local home = os.getenv("HOME")
 if home then
     pcall(require, home .. "/.config/orbe/hyprland")
+    -- Couleur d'accent choisie dans Réglages Orbe (Apparence), écrite par orbe-accent.
+    pcall(require, home .. "/.config/orbe/couleurs")
 end

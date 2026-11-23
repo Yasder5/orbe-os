@@ -27,6 +27,12 @@ set -g fish_pager_color_description 8f8f8a
 set -g fish_pager_color_progress 0a0a0a --background=d3fd50
 set -g fish_pager_color_selected_background --background=262624
 
+# Couleur d'accent choisie dans Réglages Orbe (Apparence) : copie recolorée des lignes ci-dessus,
+# écrite par orbe-accent. Absente pour le citron.
+set -l orbe_couleurs ~/.config/orbe/couleurs
+set -q XDG_CONFIG_HOME; and set orbe_couleurs $XDG_CONFIG_HOME/orbe/couleurs
+test -r $orbe_couleurs/couleurs.fish; and source $orbe_couleurs/couleurs.fish
+
 # ls et eza : couleurs ANSI, donc celles de la palette du terminal.
 set -gx LS_COLORS "di=1;34:ln=36:so=35:pi=33:ex=1;32:bd=33;1:cd=33;1:su=30;41:sg=30;43:tw=30;42:ow=34;42:or=31:mi=31:*.tar=35:*.zip=35:*.zst=35:*.gz=35:*.xz=35:*.7z=35:*.iso=35:*.png=95:*.jpg=95:*.webp=95:*.mp4=95:*.mkv=95:*.mp3=96:*.flac=96:*.md=37:*.pdf=33"
 set -gx EZA_COLORS "da=90:uu=37:gu=37:sn=37:sb=90"
@@ -68,6 +74,7 @@ end
 if type -q starship
     if not test -e ~/.config/starship.toml
         set -gx STARSHIP_CONFIG /usr/share/orbe/starship.toml
+        test -r $orbe_couleurs/starship.toml; and set -gx STARSHIP_CONFIG $orbe_couleurs/starship.toml
     end
     starship init fish | source
 end

@@ -36,5 +36,5 @@ ShellRoot {
 
     // Les services qui répondent aux raccourcis par IPC, ou qui appliquent un réglage au
     // démarrage, doivent exister dès le lancement.
-    Component.onCompleted: [Brightness.available, Keyboard.capsLock, Notifs.count, Panels.launcherOpen, Night.enabled, Weather.city, Reglages.kbLayout]
+    Component.onCompleted: [Brightness.available, Keyboard.capsLock, Notifs.count, Panels.launcherOpen, Night.enabled, Weather.city, Reglages.kbLayout, Accent.current]
 }

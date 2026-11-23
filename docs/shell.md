@@ -7,12 +7,12 @@ Orbe Shell est une configuration Quickshell (QML, Qt 6) nommée `orbe`, install�
 | Fichier ou dossier | Rôle |
 |---|---|
 | `shell.qml` | point d'entrée : instancie chaque module |
-| `Theme.qml` | **seul endroit** où sont écrits couleurs, polices, rayons, durées et espacements |
+| `Theme.qml` | **seul endroit** où sont écrits couleurs, polices, rayons, durées et espacements ; liste des couleurs d'accent (`accents`) |
 | `Config.qml` | réglages de l'utilisateur, `~/.config/orbe/shell.json`, rechargés à chaud |
 | `Panels.qml` | ce qui est ouvert à l'écran (lanceur, menu de session, centre) et ses points d'entrée IPC |
 | `Icons.qml` | icônes Orbe monolignes (tracés SVG sur une grille de 24 px) |
 | `services/` | données du système : son (PipeWire), luminosité, verrouillage majuscules, notifications, applications, actions de session (dont le mode jeu), sons système |
-| `components/` | éléments réutilisables : icône, texte, anneau de focus, bouton de panneau, orbe animé, logo |
+| `components/` | éléments réutilisables : icône, texte, anneau de focus, bouton de panneau, orbe animé, logo, image de fond recolorée (`Fond.qml`), choix de couleur (`AccentChoice.qml`) |
 | `bar/` | barre, verticale à gauche ou horizontale en haut |
 | `launcher/` | lanceur d'applications et ses préfixes, liste d'émojis générée par `tools/gen-emojis.py` |
 | `notifications/` | bulles et centre de notifications |
@@ -26,12 +26,12 @@ Orbe Shell est une configuration Quickshell (QML, Qt 6) nommée `orbe`, install�
 | `welcome/` | assistant de bienvenue du premier lancement (et proposition d'installer, en live) |
 | `help/` | aide des raccourcis clavier |
 | `greeter/`, `greeter.qml` | écran de connexion de greetd (`orbe-greeter` lance `qs -p .../greeter.qml` dans cage) |
-| `shaders/` | orbe de particules en shader (`orb.frag`, compilé en `.qsb` par `tools/build-shaders.sh`) |
+| `shaders/` | orbe de particules (`orb.frag`) et recoloration des fonds d'Orbe (`recolor.frag`), compilés en `.qsb` par `tools/build-shaders.sh` |
 | `scripts/` | mesures système du tableau de bord |
 
 ## Réglages (`~/.config/orbe/shell.json`)
 
-Créé au premier lancement. Toute modification est appliquée sans redémarrer le shell. `wallpaper` accepte un chemin d'image ou `orbe-vivant` (orbe animé). `sounds` coupe ou rétablit les sons système (notification, volume).
+Créé au premier lancement. Toute modification est appliquée sans redémarrer le shell. `wallpaper` accepte un chemin d'image ou `orbe-vivant` (orbe animé). `accent` vaut `citron` (par défaut), `menthe`, `ciel`, `lavande`, `rose` ou `ambre`. `sounds` coupe ou rétablit les sons système (notification, volume).
 
 ```json
 {
@@ -43,9 +43,18 @@ Créé au premier lancement. Toute modification est appliquée sans redémarrer 
   "weatherCity": "Paris",
   "nightLight": false,
   "nightTemperature": 4500,
-  "sounds": true
+  "sounds": true,
+  "accent": "citron"
 }
 ```
+
+## Couleur d'accent
+
+Choisie dans Réglages, Apparence, ou à l'accueil. Toutes les variantes gardent au moins 9:1 de contraste avec le fond et avec le texte noir posé dessus.
+
+- **Shell** : `Theme.accent` suit `Config.accent` ; les fonds fournis par Orbe (`/usr/share/backgrounds/orbe`) sont recolorés à l'affichage par `shaders/recolor.frag` (le citron devient la couleur choisie, le noir et les étoiles blanches ne bougent pas). Les images de l'utilisateur ne sont pas touchées.
+- **Hors du shell** : `services/Accent.qml` lance `orbe-accent NOM` au démarrage et à chaque changement. Le script écrit `~/.config/orbe/couleurs.lua` (bordure de la fenêtre active, chargé par `orbe.lua`, puis `hyprctl reload`) et des copies recolorées des thèmes dans `~/.config/orbe/couleurs/` : GTK 3 et 4, Qt (qt6ct), foot, fish, Starship, btop ; les réglages de l'utilisateur y renvoient. Avec le citron, ils renvoient aux fichiers d'Orbe et les copies sont effacées. Les couleurs ANSI du terminal (le vert reste vert) et les lignes changées par l'utilisateur ne sont pas touchées.
+- **Restent en citron** : écran de connexion, démarrage (Plymouth, GRUB), installateur, thème Steam, Heroic et MangoHud. Les applications GTK et Qt déjà ouvertes prennent la couleur à leur prochain lancement.
 
 ## Commandes IPC
 

@@ -273,7 +273,7 @@ Scope {
                                 width: parent.width * 0.8
                                 text: root.live
                                     ? "Tu utilises la version live : rien n'est installé sur ce PC. Essaie le bureau et le mode jeu, puis installe Orbe OS quand tu veux."
-                                    : "Quelques réglages pour commencer : fond d'écran, barre, météo et applications. Tout se change ensuite dans les réglages."
+                                    : "Quelques réglages pour commencer : couleur, fond d'écran, barre, météo et applications. Tout se change ensuite dans les réglages."
                                 color: Theme.muted
                                 font.pixelSize: Theme.textL
                                 wrapMode: Text.WordWrap
@@ -281,18 +281,82 @@ Scope {
                             }
                         }
 
-                        // Apparence : fond d'écran et position de la barre
+                        // Apparence : couleur d'accent, fond d'écran et position de la barre
                         Column {
                             visible: root.step === 1
                             width: parent.width
                             spacing: Theme.space3
 
+                            // Couleur et barre côte à côte, puis les fonds d'écran.
+                            Row {
+                                width: parent.width
+                                spacing: Theme.space6
+
+                                Column {
+                                    spacing: Theme.space3
+
+                                    OText {
+                                        text: "Couleur"
+                                        font.pixelSize: Theme.textL
+                                        font.weight: Font.DemiBold
+                                    }
+                                    AccentChoice {}
+                                }
+                                Column {
+                                    spacing: Theme.space3
+
+                                    OText {
+                                        text: "Barre"
+                                        font.pixelSize: Theme.textL
+                                        font.weight: Font.DemiBold
+                                    }
+                                    Row {
+                                        spacing: Theme.space3
+
+                                        Repeater {
+                                            model: [{ id: "left", label: "À gauche" }, { id: "top", label: "En haut" }]
+
+                                            Rectangle {
+                                                id: barChoice
+
+                                                required property var modelData
+                                                readonly property bool selected: Config.barPosition === modelData.id
+
+                                                width: 180
+                                                height: 44
+                                                radius: Theme.radiusM
+                                                color: selected ? Theme.accent : Theme.surface2
+                                                border.width: selected ? 0 : 1
+                                                border.color: Theme.line
+
+                                                OText {
+                                                    anchors.centerIn: parent
+                                                    text: barChoice.modelData.label
+                                                    color: barChoice.selected ? Theme.textOnAccent : Theme.text
+                                                }
+                                                MouseArea {
+                                                    anchors.fill: parent
+                                                    cursorShape: Qt.PointingHandCursor
+                                                    onClicked: Config.barPosition = barChoice.modelData.id
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            Item {
+                                width: 1
+                                height: Theme.space3
+                            }
                             OText {
                                 text: "Fond d'écran"
                                 font.pixelSize: Theme.textL
                                 font.weight: Font.DemiBold
                             }
-                            Row {
+                            // Deux rangées de six au plus : la liste des fonds grandit sans déborder.
+                            Flow {
+                                width: parent.width
                                 spacing: Theme.space3
 
                                 Repeater {
@@ -304,22 +368,20 @@ Scope {
                                         required property string modelData
                                         readonly property bool selected: Config.wallpaper === modelData
 
-                                        width: 132
-                                        height: 74
+                                        width: Math.floor((parent.width - Theme.space3 * 5) / 6)
+                                        height: Math.round(width * 9 / 16)
                                         radius: Theme.radiusM
                                         color: Theme.bg
                                         border.width: selected ? 2 : 1
                                         border.color: selected ? Theme.accent : Theme.line
                                         clip: true
 
-                                        Image {
+                                        Fond {
                                             anchors.fill: parent
                                             anchors.margins: 2
                                             visible: thumb.modelData !== "orbe-vivant"
-                                            source: visible ? "file://" + thumb.modelData : ""
-                                            sourceSize: Qt.size(264, 148)
-                                            fillMode: Image.PreserveAspectCrop
-                                            asynchronous: true
+                                            path: visible ? thumb.modelData : ""
+                                            sourceSize: Qt.size(width * 2, height * 2)
                                         }
                                         OText {
                                             anchors.centerIn: parent
@@ -337,47 +399,6 @@ Scope {
                                 }
                             }
 
-                            Item {
-                                width: 1
-                                height: Theme.space3
-                            }
-                            OText {
-                                text: "Barre"
-                                font.pixelSize: Theme.textL
-                                font.weight: Font.DemiBold
-                            }
-                            Row {
-                                spacing: Theme.space3
-
-                                Repeater {
-                                    model: [{ id: "left", label: "À gauche" }, { id: "top", label: "En haut" }]
-
-                                    Rectangle {
-                                        id: barChoice
-
-                                        required property var modelData
-                                        readonly property bool selected: Config.barPosition === modelData.id
-
-                                        width: 180
-                                        height: 44
-                                        radius: Theme.radiusM
-                                        color: selected ? Theme.accent : Theme.surface2
-                                        border.width: selected ? 0 : 1
-                                        border.color: Theme.line
-
-                                        OText {
-                                            anchors.centerIn: parent
-                                            text: barChoice.modelData.label
-                                            color: barChoice.selected ? Theme.textOnAccent : Theme.text
-                                        }
-                                        MouseArea {
-                                            anchors.fill: parent
-                                            cursorShape: Qt.PointingHandCursor
-                                            onClicked: Config.barPosition = barChoice.modelData.id
-                                        }
-                                    }
-                                }
-                            }
                         }
 
                         // Météo

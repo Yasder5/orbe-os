@@ -12,6 +12,9 @@ Canvas {
     renderStrategy: Canvas.Cooperative
     onWidthChanged: requestPaint()
     onHeightChanged: requestPaint()
+    // Redessiné quand la couleur d'accent change (Réglages, Apparence).
+    readonly property color accentColor: Theme.accent
+    onAccentColorChanged: requestPaint()
 
     onPaint: {
         const ctx = getContext("2d");

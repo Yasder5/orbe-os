@@ -8,9 +8,14 @@ Column {
 
     PageTitle {
         title: "Apparence"
-        subtitle: "Barre, fond d'écran, animations et sons. Tout s'applique tout de suite."
+        subtitle: "Couleur, barre, fond d'écran, animations et sons. Tout s'applique tout de suite."
     }
 
+    SettingRow {
+        title: "Couleur d'accent"
+        subtitle: Theme.accentSet.label + (Theme.accentId === "citron" ? " (par défaut)" : "") + ". Suivie par les fonds d'Orbe, les fenêtres, les applications et le terminal."
+        AccentChoice {}
+    }
     SettingRow {
         title: "Position de la barre"
         OChoice {

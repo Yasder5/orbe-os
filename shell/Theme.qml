@@ -17,13 +17,29 @@ Singleton {
     readonly property color line2: "#3a3a37"
     readonly property color text: "#f5f5f0"
     readonly property color muted: "#8f8f8a"
-    readonly property color accent: "#d3fd50"
-    readonly property color accentHover: "#e1ff80"
-    readonly property color accentActive: "#bde83a"
+    // Couleur d'accent : citron par défaut, ou une variante choisie dans les réglages
+    // (Config.accent). Même liste dans packages/orbe-desktop/orbe-accent, qui l'applique aux
+    // fenêtres, aux applications GTK et Qt et au terminal. Toutes gardent un contraste
+    // d'au moins 9:1 avec le fond et avec le texte noir posé dessus.
+    readonly property var accents: [
+        { id: "citron", label: "Citron", accent: "#d3fd50", hover: "#e1ff80", active: "#bde83a" },
+        { id: "menthe", label: "Menthe", accent: "#5cf0b0", hover: "#95f5cc", active: "#53d89e" },
+        { id: "ciel", label: "Ciel", accent: "#70c4ff", hover: "#a2d9ff", active: "#65b0e6" },
+        { id: "lavande", label: "Lavande", accent: "#b8a6ff", hover: "#d1c5ff", active: "#a695e6" },
+        { id: "rose", label: "Rose", accent: "#ff8cc6", hover: "#ffb4da", active: "#e67eb2" },
+        { id: "ambre", label: "Ambre", accent: "#ffbf47", hover: "#ffd587", active: "#e6ac40" }
+    ]
+    readonly property var accentSet: accents.find(a => a.id === Config.accent) ?? accents[0]
+    readonly property string accentId: accentSet.id
+    // Couleur d'origine des fonds d'écran d'Orbe, recolorés dans la variante choisie.
+    readonly property color wallpaperAccent: accents[0].accent
+    readonly property color accent: accentSet.accent
+    readonly property color accentHover: accentSet.hover
+    readonly property color accentActive: accentSet.active
     readonly property color textOnAccent: "#0a0a0a"
     readonly property color danger: "#ff6b5a"
-    readonly property color glow: Qt.rgba(211 / 255, 253 / 255, 80 / 255, 0.16)
-    readonly property color focusGlow: Qt.rgba(211 / 255, 253 / 255, 80 / 255, 0.28)
+    readonly property color glow: Qt.rgba(accent.r, accent.g, accent.b, 0.16)
+    readonly property color focusGlow: Qt.rgba(accent.r, accent.g, accent.b, 0.28)
     readonly property color shadow: Qt.rgba(0, 0, 0, 0.55)
     readonly property color scrim: Qt.rgba(10 / 255, 10 / 255, 10 / 255, 0.82)
     readonly property color panel: Qt.rgba(18 / 255, 18 / 255, 18 / 255, 0.94)

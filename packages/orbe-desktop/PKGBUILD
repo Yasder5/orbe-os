@@ -39,8 +39,8 @@ source=(orbe.lua environment.lua look.lua input.lua binds.lua workspaces.lua rul
         hyprland.lua foot.ini btop.conf heroic-store.json orbe-first-login orbe-idle hypridle.conf hyprtoolkit.conf orbe-greeter
         orbe-update orbe-autologin orbe-add-user orbe-reglages.desktop
         orbe-check-session orbe-diagnostic orbe-suspend-check orbe-windows orbe-windows-scan.service
-        org.orbe.windows.policy orbe-record orbe-steam-fond orbe-capture orbe-games)
-sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+        org.orbe.windows.policy orbe-record orbe-steam-fond orbe-capture orbe-games orbe-accent)
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
 
 package() {
   local f
@@ -77,7 +77,7 @@ package() {
   install -Dm755 "$srcdir/orbe-greeter" "$pkgdir/usr/bin/orbe-greeter"
   local tool
   for tool in orbe-update orbe-autologin orbe-add-user orbe-check-session orbe-diagnostic \
-              orbe-suspend-check orbe-windows orbe-record orbe-steam-fond orbe-capture orbe-games; do
+              orbe-suspend-check orbe-windows orbe-record orbe-steam-fond orbe-capture orbe-games orbe-accent; do
     install -Dm755 "$srcdir/$tool" "$pkgdir/usr/bin/$tool"
   done
   install -Dm644 "$srcdir/orbe-reglages.desktop" "$pkgdir/usr/share/applications/orbe-reglages.desktop"
