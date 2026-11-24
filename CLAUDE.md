@@ -22,3 +22,14 @@ Tu reprends le projet Orbe OS sur le PC gamer de Yass. Aucun code n'a encore ét
 - Demande avant toute décision lourde (compositeur, toolkit, chargeur d'amorçage, abandon d'un composant).
 - Ne copie pas de code de Caelestia : la réécriture est volontaire. Lis-le seulement pour comprendre l'ergonomie.
 - Copie dans `themes/` et `LICENSES/` les ressources de `reference/` que tu retiens, avec leur licence. `reference/` ne doit pas être livré tel quel dans le dépôt final.
+
+## Publication sur le Forgejo de Yass (session cloud)
+- Yass a accordé le push de `main` vers `origin` (GitHub) **et** `forgejo` à la fin de chaque lot validé. Jamais de `push --force` (refusé de toute façon sur `main`).
+- Il faut que la session tourne dans l'environnement cloud **`orbe-os`** : lui seul a l'accès réseau au serveur, la variable `ORBE_FORGEJO` (adresse du serveur) et le jeton du compte `orbe-bot`, ajouté par le proxy. Si `ORBE_FORGEJO` est vide, la session est dans un autre environnement : le dire à Yass, ne pas chercher l'adresse ailleurs. Ne pas écrire cette adresse dans le dépôt, qui est public sur GitHub.
+- Remote, à ajouter dans chaque nouveau clone :
+  ```bash
+  git remote add forgejo "$ORBE_FORGEJO/orbe/orbe-os.git"
+  ```
+- Push : `GIT_TERMINAL_PROMPT=0 git push forgejo main`. L'avertissement « push negotiation failed » est sans conséquence.
+- ISO : construire avec `./build.sh` (compression finale), vérifier qu'elle démarre en VM, puis `tools/publier-iso.sh` (registre « generic », organisation `orbe`, paquet `orbe-os`, version = date de l'ISO). Une version déjà publiée renvoie 409 : en publier une nouvelle plutôt que remplacer.
+- Un 401 ou 403 veut dire que le jeton manque ou a été révoqué : Yass le ressaisit avec le formulaire sécurisé (`request_credential`, hôte du serveur, type basic, compte `orbe-bot`). Jamais de jeton dans le chat ni dans un fichier.
